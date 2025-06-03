@@ -44,7 +44,7 @@ async function loadMenu() {
         const menu = await response.json();
         
         // Limpiar todos los contenedores de menú
-        ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].forEach(dia => {
+        ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'].forEach(dia => {
             const container = document.getElementById(`menu-${dia}`);
             if (container) {
                 const menuDia = menu.find(m => m.dia.toLowerCase() === dia);
@@ -58,16 +58,16 @@ async function loadMenu() {
                         </div>
                     `;
                 } else {
-                    container.innerHTML = 'No hay menú disponible';
+                    container.innerHTML = '<p class="no-menu">No hay menú disponible</p>';
                 }
             }
         });
     } catch (error) {
         console.error('Error al cargar el menú:', error);
-        ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].forEach(dia => {
+        ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'].forEach(dia => {
             const container = document.getElementById(`menu-${dia}`);
             if (container) {
-                container.innerHTML = 'Error al cargar el menú';
+                container.innerHTML = '<p class="error-menu">Error al cargar el menú</p>';
             }
         });
     }
