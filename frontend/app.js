@@ -3,6 +3,30 @@ const API_URL = 'http://localhost:3000';
 const WEATHER_API_KEY = 'TU_API_KEY'; // Reemplazar con tu API key de OpenWeather
 const WEATHER_CITY = 'Tandil'; // Ciudad de UNICEN
 
+// Función para actualizar la hora y fecha
+function updateDateTime() {
+    const now = new Date();
+    const timeElement = document.getElementById('current-time');
+    const dateElement = document.getElementById('current-date');
+    
+    // Formatear hora
+    const timeOptions = { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+    };
+    timeElement.textContent = now.toLocaleTimeString('es-AR', timeOptions);
+    
+    // Formatear fecha
+    const dateOptions = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    };
+    dateElement.textContent = now.toLocaleDateString('es-AR', dateOptions);
+}
+
 // Funciones de utilidad
 const formatDate = (date) => {
     return new Date(date).toLocaleDateString('es-AR', {
@@ -67,13 +91,15 @@ async function loadWeather() {
         const weatherContent = document.getElementById('weather-content');
         weatherContent.innerHTML = `
             <div class="weather-info">
-                <h3>${data.main.temp}°C</h3>
+                <h3>${Math.round(data.main.temp)}°C</h3>
                 <p>${data.weather[0].description}</p>
                 <p>Humedad: ${data.main.humidity}%</p>
             </div>
         `;
     } catch (error) {
         console.error('Error al cargar el clima:', error);
+        const weatherContent = document.getElementById('weather-content');
+        weatherContent.innerHTML = '<p>No se pudo cargar el clima</p>';
     }
 }
 
@@ -109,6 +135,9 @@ function startCarousel() {
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
+    updateDateTime(); // Actualizar hora y fecha inmediatamente
+    setInterval(updateDateTime, 1000); // Actualizar cada segundo
+    
     loadMenu();
     loadMessages();
     loadWeather();
