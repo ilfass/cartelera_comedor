@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Pizarra Digital UNICEN</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <h1>Panel de Administración</h1>
+        
+        <!-- Formulario de Menú -->
+        <section class="admin-section">
+            <h2>Agregar Menú</h2>
+            <form id="menu-form">
+                <div class="form-group">
+                    <label for="menu-fecha">Fecha:</label>
+                    <input type="date" id="menu-fecha" required>
+                </div>
+                <div class="form-group">
+                    <label for="menu-plato">Plato:</label>
+                    <input type="text" id="menu-plato" required>
+                </div>
+                <div class="form-group">
+                    <label for="menu-tipo">Tipo:</label>
+                    <select id="menu-tipo" required>
+                        <option value="general">General</option>
+                        <option value="vegetariano">Vegetariano</option>
+                    </select>
+                </div>
+                <button type="submit">Agregar Menú</button>
+            </form>
+        </section>
+
+        <!-- Formulario de Mensajes -->
+        <section class="admin-section">
+            <h2>Agregar Mensaje</h2>
+            <form id="message-form">
+                <div class="form-group">
+                    <label for="message-contenido">Mensaje:</label>
+                    <textarea id="message-contenido" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="message-fecha">Fecha:</label>
+                    <input type="date" id="message-fecha" required>
+                </div>
+                <button type="submit">Agregar Mensaje</button>
+            </form>
+        </section>
+
+        <!-- Formulario de Carrusel -->
+        <section class="admin-section">
+            <h2>Agregar Imagen al Carrusel</h2>
+            <form id="carousel-form">
+                <div class="form-group">
+                    <label for="carousel-url">URL de la Imagen:</label>
+                    <input type="url" id="carousel-url" required>
+                </div>
+                <div class="form-group">
+                    <label for="carousel-alt">Texto Alternativo:</label>
+                    <input type="text" id="carousel-alt" required>
+                </div>
+                <button type="submit">Agregar Imagen</button>
+            </form>
+        </section>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html> 
