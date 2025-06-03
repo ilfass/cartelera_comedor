@@ -4,6 +4,10 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 const basicAuth = require('express-basic-auth');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const multer = require('multer');
+const fs = require('fs');
 
 const app = express();
 const port = 3000;
@@ -19,6 +23,27 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+// Configuración de JWT
+const JWT_SECRET = 'tu_clave_secreta_muy_segura'; // En producción, usar una variable de entorno
+
+// Middleware de autenticación
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Token no proporcionado' });
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({ message: 'Token inválido' });
+        }
+        req.user = user;
+        next();
+    });
+};
+
 // Conexión a la base de datos
 const db = new sqlite3.Database('database.sqlite', (err) => {
     if (err) {
@@ -27,6 +52,13 @@ const db = new sqlite3.Database('database.sqlite', (err) => {
         console.log('Conexión exitosa con la base de datos SQLite');
         // Crear tablas si no existen
         db.serialize(() => {
+            // Tabla de usuarios administradores
+            db.run(`CREATE TABLE IF NOT EXISTS usuarios (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL
+            )`);
+
             // Tabla de menú
             db.run(`DROP TABLE IF EXISTS menu`);
             db.run(`CREATE TABLE menu (
@@ -42,17 +74,45 @@ const db = new sqlite3.Database('database.sqlite', (err) => {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 titulo TEXT NOT NULL,
                 contenido TEXT NOT NULL,
-                fecha TEXT NOT NULL,
-                destacado INTEGER DEFAULT 0
+                fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+                destacado BOOLEAN DEFAULT 0
             )`);
 
             // Tabla de imágenes
             db.run(`CREATE TABLE IF NOT EXISTS imagenes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                titulo TEXT NOT NULL,
                 url TEXT NOT NULL,
-                titulo TEXT,
-                descripcion TEXT
+                fecha DATETIME DEFAULT CURRENT_TIMESTAMP
             )`);
+
+            // Crear usuario administrador por defecto si no existe
+            const defaultAdmin = {
+                username: 'admin',
+                password: 'admin123' // En producción, usar una contraseña más segura
+            };
+
+            db.get('SELECT * FROM usuarios WHERE username = ?', [defaultAdmin.username], (err, row) => {
+                if (err) {
+                    console.error('Error al verificar usuario admin:', err);
+                } else if (!row) {
+                    bcrypt.hash(defaultAdmin.password, 10, (err, hash) => {
+                        if (err) {
+                            console.error('Error al hashear contraseña:', err);
+                        } else {
+                            db.run('INSERT INTO usuarios (username, password) VALUES (?, ?)',
+                                [defaultAdmin.username, hash],
+                                (err) => {
+                                    if (err) {
+                                        console.error('Error al crear usuario admin:', err);
+                                    } else {
+                                        console.log('Usuario administrador creado');
+                                    }
+                                });
+                        }
+                    });
+                }
+            });
         });
     }
 });
@@ -73,16 +133,16 @@ app.get('/api/menu', (req, res) => {
     });
 });
 
-app.post('/api/menu', auth, (req, res) => {
+app.post('/api/menu', authenticateToken, (req, res) => {
     const { dia, menu_general, menu_vegetariano } = req.body;
-    db.run('INSERT INTO menu (dia, menu_general, menu_vegetariano) VALUES (?, ?, ?)',
+    db.run('INSERT OR REPLACE INTO menu (dia, menu_general, menu_vegetariano) VALUES (?, ?, ?)',
         [dia, menu_general, menu_vegetariano],
         function(err) {
             if (err) {
-                res.status(500).json({ error: err.message });
-                return;
+                res.status(500).json({ message: 'Error al guardar el menú' });
+            } else {
+                res.json({ message: 'Menú guardado exitosamente' });
             }
-            res.json({ id: this.lastID });
         });
 });
 
@@ -120,17 +180,16 @@ app.get('/api/mensajes', (req, res) => {
     });
 });
 
-app.post('/api/mensajes', auth, (req, res) => {
+app.post('/api/mensajes', authenticateToken, (req, res) => {
     const { titulo, contenido, destacado } = req.body;
-    const fecha = new Date().toISOString();
-    db.run('INSERT INTO mensajes (titulo, contenido, fecha, destacado) VALUES (?, ?, ?, ?)',
-        [titulo, contenido, fecha, destacado ? 1 : 0],
+    db.run('INSERT INTO mensajes (titulo, contenido, destacado) VALUES (?, ?, ?)',
+        [titulo, contenido, destacado ? 1 : 0],
         function(err) {
             if (err) {
-                res.status(500).json({ error: err.message });
-                return;
+                res.status(500).json({ message: 'Error al guardar el mensaje' });
+            } else {
+                res.json({ message: 'Mensaje guardado exitosamente' });
             }
-            res.json({ id: this.lastID });
         });
 });
 
@@ -147,19 +206,20 @@ app.put('/api/mensajes/:id', auth, (req, res) => {
         });
 });
 
-app.delete('/api/mensajes/:id', auth, (req, res) => {
-    db.run('DELETE FROM mensajes WHERE id = ?', req.params.id, function(err) {
+app.delete('/api/mensajes/:id', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    db.run('DELETE FROM mensajes WHERE id = ?', [id], function(err) {
         if (err) {
-            res.status(500).json({ error: err.message });
-            return;
+            res.status(500).json({ message: 'Error al eliminar el mensaje' });
+        } else {
+            res.json({ message: 'Mensaje eliminado exitosamente' });
         }
-        res.json({ changes: this.changes });
     });
 });
 
 // Rutas para las imágenes
 app.get('/api/imagenes', (req, res) => {
-    db.all('SELECT * FROM imagenes', [], (err, rows) => {
+    db.all('SELECT * FROM imagenes ORDER BY fecha DESC', [], (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -168,16 +228,38 @@ app.get('/api/imagenes', (req, res) => {
     });
 });
 
-app.post('/api/imagenes', auth, (req, res) => {
-    const { url, titulo, descripcion } = req.body;
-    db.run('INSERT INTO imagenes (url, titulo, descripcion) VALUES (?, ?, ?)',
-        [url, titulo, descripcion],
+// Configuración de multer para subida de imágenes
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadDir = 'frontend/uploads';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage: storage });
+
+app.post('/api/imagenes', authenticateToken, upload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: 'No se ha subido ninguna imagen' });
+    }
+
+    const { title } = req.body;
+    const imageUrl = `/uploads/${req.file.filename}`;
+
+    db.run('INSERT INTO imagenes (titulo, url) VALUES (?, ?)',
+        [title, imageUrl],
         function(err) {
             if (err) {
-                res.status(500).json({ error: err.message });
-                return;
+                res.status(500).json({ message: 'Error al guardar la imagen' });
+            } else {
+                res.json({ message: 'Imagen guardada exitosamente', url: imageUrl });
             }
-            res.json({ id: this.lastID });
         });
 });
 
@@ -188,6 +270,33 @@ app.delete('/api/imagenes/:id', auth, (req, res) => {
             return;
         }
         res.json({ changes: this.changes });
+    });
+});
+
+// Rutas de autenticación
+app.post('/api/auth/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    db.get('SELECT * FROM usuarios WHERE username = ?', [username], async (err, user) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error en el servidor' });
+        }
+
+        if (!user) {
+            return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
+        }
+
+        try {
+            const match = await bcrypt.compare(password, user.password);
+            if (!match) {
+                return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
+            }
+
+            const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '24h' });
+            res.json({ token });
+        } catch (error) {
+            res.status(500).json({ message: 'Error en el servidor' });
+        }
     });
 });
 

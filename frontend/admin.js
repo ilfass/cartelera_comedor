@@ -1,5 +1,8 @@
 // Configuración
 const API_URL = 'http://localhost:3000';
+const AUTH_HEADER = {
+    'Authorization': 'Basic ' + btoa('admin:admin123')
+};
 
 // Funciones de utilidad
 function showMessage(message, type) {
@@ -58,7 +61,7 @@ async function saveMenu(event) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + btoa('admin:admin123')
+                ...AUTH_HEADER
             },
             body: JSON.stringify(menuData)
         });
@@ -79,8 +82,9 @@ async function saveMenu(event) {
 async function deleteMenu(id) {
     if (confirm('¿Estás seguro de que deseas eliminar este menú?')) {
         try {
-            const response = await fetch(`/api/menu/${id}`, {
-                method: 'DELETE'
+            const response = await fetch(`${API_URL}/api/menu/${id}`, {
+                method: 'DELETE',
+                headers: AUTH_HEADER
             });
             if (response.ok) {
                 loadMenu();
@@ -94,7 +98,9 @@ async function deleteMenu(id) {
 // Funciones para los mensajes
 async function loadMessages() {
     try {
-        const response = await fetch('/api/mensajes');
+        const response = await fetch(`${API_URL}/api/mensajes`, {
+            headers: AUTH_HEADER
+        });
         const messages = await response.json();
         const messagesTable = document.getElementById('messages-table');
         messagesTable.innerHTML = `
@@ -122,6 +128,7 @@ async function loadMessages() {
         });
     } catch (error) {
         console.error('Error al cargar los mensajes:', error);
+        showMessage('Error al cargar los mensajes', 'error');
     }
 }
 
@@ -136,33 +143,42 @@ async function saveMessage(event) {
     };
 
     try {
-        const response = await fetch('/api/mensajes', {
+        const response = await fetch(`${API_URL}/api/mensajes`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...AUTH_HEADER
             },
             body: JSON.stringify(messageData)
         });
         if (response.ok) {
             form.reset();
             loadMessages();
+            showMessage('Mensaje guardado exitosamente', 'success');
+        } else {
+            const error = await response.json();
+            showMessage(`Error al guardar el mensaje: ${error.error}`, 'error');
         }
     } catch (error) {
         console.error('Error al guardar el mensaje:', error);
+        showMessage('Error al guardar el mensaje', 'error');
     }
 }
 
 async function deleteMessage(id) {
     if (confirm('¿Estás seguro de que deseas eliminar este mensaje?')) {
         try {
-            const response = await fetch(`/api/mensajes/${id}`, {
-                method: 'DELETE'
+            const response = await fetch(`${API_URL}/api/mensajes/${id}`, {
+                method: 'DELETE',
+                headers: AUTH_HEADER
             });
             if (response.ok) {
                 loadMessages();
+                showMessage('Mensaje eliminado exitosamente', 'success');
             }
         } catch (error) {
             console.error('Error al eliminar el mensaje:', error);
+            showMessage('Error al eliminar el mensaje', 'error');
         }
     }
 }
@@ -170,7 +186,9 @@ async function deleteMessage(id) {
 // Funciones para las imágenes
 async function loadImages() {
     try {
-        const response = await fetch('/api/imagenes');
+        const response = await fetch(`${API_URL}/api/imagenes`, {
+            headers: AUTH_HEADER
+        });
         const images = await response.json();
         const imagesTable = document.getElementById('images-table');
         imagesTable.innerHTML = `
@@ -195,6 +213,7 @@ async function loadImages() {
         });
     } catch (error) {
         console.error('Error al cargar las imágenes:', error);
+        showMessage('Error al cargar las imágenes', 'error');
     }
 }
 
@@ -209,33 +228,42 @@ async function saveImage(event) {
     };
 
     try {
-        const response = await fetch('/api/imagenes', {
+        const response = await fetch(`${API_URL}/api/imagenes`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...AUTH_HEADER
             },
             body: JSON.stringify(imageData)
         });
         if (response.ok) {
             form.reset();
             loadImages();
+            showMessage('Imagen guardada exitosamente', 'success');
+        } else {
+            const error = await response.json();
+            showMessage(`Error al guardar la imagen: ${error.error}`, 'error');
         }
     } catch (error) {
         console.error('Error al guardar la imagen:', error);
+        showMessage('Error al guardar la imagen', 'error');
     }
 }
 
 async function deleteImage(id) {
     if (confirm('¿Estás seguro de que deseas eliminar esta imagen?')) {
         try {
-            const response = await fetch(`/api/imagenes/${id}`, {
-                method: 'DELETE'
+            const response = await fetch(`${API_URL}/api/imagenes/${id}`, {
+                method: 'DELETE',
+                headers: AUTH_HEADER
             });
             if (response.ok) {
                 loadImages();
+                showMessage('Imagen eliminada exitosamente', 'success');
             }
         } catch (error) {
             console.error('Error al eliminar la imagen:', error);
+            showMessage('Error al eliminar la imagen', 'error');
         }
     }
 }

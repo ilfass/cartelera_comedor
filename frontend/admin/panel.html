@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1a73e8;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar-header {
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .nav-menu {
+            margin-top: 30px;
+        }
+
+        .nav-item {
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .content-header h2 {
+            color: #2c3e50;
+            font-size: 2em;
+        }
+
+        .logout-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+
+        .content-section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e8f0fe;
+            border-radius: 8px;
+            font-size: 1.1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+
+        .submit-button {
+            background-color: #1a73e8;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background-color: #1557b0;
+        }
+
+        .message-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .message-item {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #1a73e8;
+        }
+
+        .message-item h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .message-item p {
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+
+        .message-item small {
+            color: #7f8c8d;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>Panel Admin</h1>
+                <p>Bienvenido</p>
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-item active" data-section="menu">Menú Semanal</div>
+                <div class="nav-item" data-section="messages">Mensajes</div>
+                <div class="nav-item" data-section="images">Imágenes</div>
+            </nav>
+        </div>
+        
+        <div class="main-content">
+            <div class="content-header">
+                <h2>Panel de Administración</h2>
+                <button class="logout-button" onclick="logout()">Cerrar Sesión</button>
+            </div>
+
+            <div id="menu-section" class="content-section">
+                <h3>Gestionar Menú Semanal</h3>
+                <form id="menuForm">
+                    <div class="form-group">
+                        <label for="dia">Día</label>
+                        <select id="dia" name="dia" required>
+                            <option value="Lunes">Lunes</option>
+                            <option value="Martes">Martes</option>
+                            <option value="Miércoles">Miércoles</option>
+                            <option value="Jueves">Jueves</option>
+                            <option value="Viernes">Viernes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="menu_general">Menú General</label>
+                        <textarea id="menu_general" name="menu_general" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="menu_vegetariano">Menú Vegetariano</label>
+                        <textarea id="menu_vegetariano" name="menu_vegetariano" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-button">Guardar Menú</button>
+                </form>
+            </div>
+
+            <div id="messages-section" class="content-section" style="display: none;">
+                <h3>Gestionar Mensajes</h3>
+                <form id="messageForm">
+                    <div class="form-group">
+                        <label for="title">Título</label>
+                        <input type="text" id="title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="content">Contenido</label>
+                        <textarea id="content" name="content" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="highlight" name="highlight">
+                            Mensaje Destacado
+                        </label>
+                    </div>
+                    <button type="submit" class="submit-button">Publicar Mensaje</button>
+                </form>
+                <div class="message-list" id="messageList"></div>
+            </div>
+
+            <div id="images-section" class="content-section" style="display: none;">
+                <h3>Gestionar Imágenes</h3>
+                <form id="imageForm">
+                    <div class="form-group">
+                        <label for="imageTitle">Título</label>
+                        <input type="text" id="imageTitle" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="imageFile">Imagen</label>
+                        <input type="file" id="imageFile" name="image" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="submit-button">Subir Imagen</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar si hay un token guardado
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Configurar el token para todas las peticiones
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+
+            // Manejar el formulario del menú
+            const menuForm = document.getElementById('menuForm');
+            menuForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    dia: document.getElementById('dia').value,
+                    menu_general: document.getElementById('menu_general').value,
+                    menu_vegetariano: document.getElementById('menu_vegetariano').value
+                };
+
+                try {
+                    const response = await fetch('http://localhost:3000/api/menu', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Error al guardar el menú');
+                    }
+
+                    const data = await response.json();
+                    alert('Menú guardado exitosamente');
+                    menuForm.reset();
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error al guardar el menú');
+                }
+            });
+
+            // Función para cerrar sesión
+            window.logout = function() {
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            };
+
+            // Navegación entre secciones
+            const navItems = document.querySelectorAll('.nav-item');
+            const sections = document.querySelectorAll('.content-section');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const section = this.dataset.section;
+                    
+                    // Actualizar navegación
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Mostrar sección correspondiente
+                    sections.forEach(s => {
+                        s.style.display = s.id === `${section}-section` ? 'block' : 'none';
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
