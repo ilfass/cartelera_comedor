@@ -76,33 +76,34 @@ async function loadMenu() {
 // Cargar mensajes destacados
 async function loadMessages() {
     try {
-        const response = await fetch(`${API_URL}/api/messages`);
+        const response = await fetch(`${API_URL}/api/mensajes`);
         const messages = await response.json();
         
         const messagesContent = document.getElementById('messages-content');
         messagesContent.innerHTML = messages.map(message => `
-            <div class="message">
+            <div class="message ${message.destacado ? 'destacado' : ''}">
+                <h3>${message.titulo}</h3>
                 <p>${message.contenido}</p>
                 <small>${formatDate(message.fecha)}</small>
             </div>
         `).join('');
     } catch (error) {
         console.error('Error al cargar los mensajes:', error);
+        const messagesContent = document.getElementById('messages-content');
+        messagesContent.innerHTML = '<p>No se pudieron cargar los mensajes</p>';
     }
 }
 
 // Cargar clima actual
 async function loadWeather() {
     try {
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${WEATHER_CITY}&appid=${WEATHER_API_KEY}&units=metric&lang=es`);
-        const data = await response.json();
-        
+        // Por ahora, mostraremos un mensaje de clima simulado
         const weatherContent = document.getElementById('weather-content');
         weatherContent.innerHTML = `
             <div class="weather-info">
-                <h3>${Math.round(data.main.temp)}°C</h3>
-                <p>${data.weather[0].description}</p>
-                <p>Humedad: ${data.main.humidity}%</p>
+                <h3>--°C</h3>
+                <p>Clima no disponible</p>
+                <p>Humedad: --%</p>
             </div>
         `;
     } catch (error) {
@@ -118,17 +119,22 @@ const slideInterval = 5000; // 5 segundos
 
 async function loadCarousel() {
     try {
-        const response = await fetch(`${API_URL}/api/carousel`);
+        const response = await fetch(`${API_URL}/api/imagenes`);
         const images = await response.json();
         
         const carouselContent = document.getElementById('carousel-content');
-        carouselContent.innerHTML = images.map(image => `
-            <img src="${image.url}" alt="${image.alt}" class="carousel-image">
-        `).join('');
-        
-        startCarousel();
+        if (images.length > 0) {
+            carouselContent.innerHTML = images.map(image => `
+                <img src="${image.url}" alt="${image.titulo || 'Imagen'}" class="carousel-image">
+            `).join('');
+            startCarousel();
+        } else {
+            carouselContent.innerHTML = '<p>No hay imágenes disponibles</p>';
+        }
     } catch (error) {
         console.error('Error al cargar el carrusel:', error);
+        const carouselContent = document.getElementById('carousel-content');
+        carouselContent.innerHTML = '<p>No se pudo cargar el carrusel</p>';
     }
 }
 
