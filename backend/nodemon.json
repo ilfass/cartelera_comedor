@@ -1,0 +1,12 @@
+{
+    "watch": [
+        "../frontend/**/*",
+        "*.js"
+    ],
+    "ext": "js,html,css,json",
+    "ignore": [
+        "node_modules/**",
+        "database.sqlite"
+    ],
+    "exec": "node server.js"
+} 

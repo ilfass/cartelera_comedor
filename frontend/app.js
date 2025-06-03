@@ -41,26 +41,35 @@ const formatDate = (date) => {
 async function loadMenu() {
     try {
         const response = await fetch(`${API_URL}/api/menu`);
-        const data = await response.json();
+        const menu = await response.json();
         
-        const menuGeneralContent = document.getElementById('menu-general-content');
-        const menuVegetarianoContent = document.getElementById('menu-vegetariano-content');
-        
-        menuGeneralContent.innerHTML = data.general.map(menu => `
-            <div class="menu-item">
-                <h4>${formatDate(menu.fecha)}</h4>
-                <p>${menu.plato}</p>
-            </div>
-        `).join('');
-        
-        menuVegetarianoContent.innerHTML = data.vegetariano.map(menu => `
-            <div class="menu-item">
-                <h4>${formatDate(menu.fecha)}</h4>
-                <p>${menu.plato}</p>
-            </div>
-        `).join('');
+        // Limpiar todos los contenedores de menú
+        ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].forEach(dia => {
+            const container = document.getElementById(`menu-${dia}`);
+            if (container) {
+                const menuDia = menu.find(m => m.dia.toLowerCase() === dia);
+                if (menuDia) {
+                    container.innerHTML = `
+                        <div class="menu-item">
+                            <h4>Menú General</h4>
+                            <p>${menuDia.menu_general || 'No disponible'}</p>
+                            <h4>Menú Vegetariano</h4>
+                            <p>${menuDia.menu_vegetariano || 'No disponible'}</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = 'No hay menú disponible';
+                }
+            }
+        });
     } catch (error) {
         console.error('Error al cargar el menú:', error);
+        ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].forEach(dia => {
+            const container = document.getElementById(`menu-${dia}`);
+            if (container) {
+                container.innerHTML = 'Error al cargar el menú';
+            }
+        });
     }
 }
 

@@ -3,70 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - Pizarra Digital UNICEN</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Panel de Administración - Pizarra Digital</title>
     <link rel="stylesheet" href="admin.css">
 </head>
 <body>
     <div class="admin-container">
         <h1>Panel de Administración</h1>
         
-        <!-- Formulario de Menú -->
+        <!-- Sección de Menú -->
         <section class="admin-section">
-            <h2>Agregar Menú</h2>
-            <form id="menu-form">
+            <h2>Gestión de Menú</h2>
+            <form id="menu-form" onsubmit="saveMenu(event)">
                 <div class="form-group">
-                    <label for="menu-fecha">Fecha:</label>
-                    <input type="date" id="menu-fecha" required>
-                </div>
-                <div class="form-group">
-                    <label for="menu-plato">Plato:</label>
-                    <input type="text" id="menu-plato" required>
-                </div>
-                <div class="form-group">
-                    <label for="menu-tipo">Tipo:</label>
-                    <select id="menu-tipo" required>
-                        <option value="general">General</option>
-                        <option value="vegetariano">Vegetariano</option>
+                    <label for="dia">Día:</label>
+                    <select id="dia" name="dia" required>
+                        <option value="Lunes">Lunes</option>
+                        <option value="Martes">Martes</option>
+                        <option value="Miércoles">Miércoles</option>
+                        <option value="Jueves">Jueves</option>
+                        <option value="Viernes">Viernes</option>
                     </select>
                 </div>
-                <button type="submit">Agregar Menú</button>
+                <div class="form-group">
+                    <label for="menu_general">Menú General:</label>
+                    <textarea id="menu_general" name="menu_general" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="menu_vegetariano">Menú Vegetariano:</label>
+                    <textarea id="menu_vegetariano" name="menu_vegetariano" required></textarea>
+                </div>
+                <button type="submit">Guardar Menú</button>
             </form>
+            <div class="table-container">
+                <table id="menu-table">
+                    <!-- Los datos se cargarán dinámicamente -->
+                </table>
+            </div>
         </section>
 
-        <!-- Formulario de Mensajes -->
+        <!-- Sección de Mensajes -->
         <section class="admin-section">
-            <h2>Agregar Mensaje</h2>
-            <form id="message-form">
+            <h2>Gestión de Mensajes</h2>
+            <form id="message-form" onsubmit="saveMessage(event)">
                 <div class="form-group">
-                    <label for="message-contenido">Mensaje:</label>
-                    <textarea id="message-contenido" required></textarea>
+                    <label for="titulo">Título:</label>
+                    <input type="text" id="titulo" name="titulo" required>
                 </div>
                 <div class="form-group">
-                    <label for="message-fecha">Fecha:</label>
-                    <input type="date" id="message-fecha" required>
+                    <label for="contenido">Contenido:</label>
+                    <textarea id="contenido" name="contenido" required></textarea>
                 </div>
-                <button type="submit">Agregar Mensaje</button>
+                <div class="form-group">
+                    <label for="destacado">Destacado:</label>
+                    <input type="checkbox" id="destacado" name="destacado">
+                </div>
+                <button type="submit">Guardar Mensaje</button>
             </form>
+            <div class="table-container">
+                <table id="messages-table">
+                    <!-- Los datos se cargarán dinámicamente -->
+                </table>
+            </div>
         </section>
 
-        <!-- Formulario de Carrusel -->
+        <!-- Sección de Imágenes -->
         <section class="admin-section">
-            <h2>Agregar Imagen al Carrusel</h2>
-            <form id="carousel-form">
+            <h2>Gestión de Imágenes</h2>
+            <form id="image-form" onsubmit="saveImage(event)">
                 <div class="form-group">
-                    <label for="carousel-url">URL de la Imagen:</label>
-                    <input type="url" id="carousel-url" required>
+                    <label for="url">URL de la imagen:</label>
+                    <input type="url" id="url" name="url" required>
                 </div>
                 <div class="form-group">
-                    <label for="carousel-alt">Texto Alternativo:</label>
-                    <input type="text" id="carousel-alt" required>
+                    <label for="titulo">Título:</label>
+                    <input type="text" id="titulo" name="titulo">
                 </div>
-                <button type="submit">Agregar Imagen</button>
+                <div class="form-group">
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion" name="descripcion"></textarea>
+                </div>
+                <button type="submit">Guardar Imagen</button>
             </form>
+            <div class="table-container">
+                <table id="images-table">
+                    <!-- Los datos se cargarán dinámicamente -->
+                </table>
+            </div>
         </section>
     </div>
-
     <script src="admin.js"></script>
 </body>
 </html> 

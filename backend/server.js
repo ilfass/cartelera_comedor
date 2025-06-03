@@ -6,29 +6,18 @@ const path = require('path');
 const basicAuth = require('express-basic-auth');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000;
 
-// Configuración de autenticación
-const adminAuth = basicAuth({
-    users: { 'admin': 'unicen2024' }, // Cambiar estas credenciales en producción
-    challenge: true,
-    realm: 'Pizarra Digital UNICEN'
+// Configuración de autenticación básica para el panel de administración
+const auth = basicAuth({
+    users: { 'admin': 'admin123' },
+    challenge: true
 });
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-
-// Servir archivos estáticos
 app.use(express.static(path.join(__dirname, '../frontend')));
-
-// Proteger rutas de administración
-app.use('/api/admin', adminAuth);
-
-// Ruta específica para el panel de administración
-app.get('/admin', adminAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/admin.html'));
-});
 
 // Conexión a la base de datos
 const db = new sqlite3.Database('database.sqlite', (err) => {
@@ -36,65 +25,46 @@ const db = new sqlite3.Database('database.sqlite', (err) => {
         console.error('Error al conectar con la base de datos:', err);
     } else {
         console.log('Conexión exitosa con la base de datos SQLite');
-        initDatabase();
+        // Crear tablas si no existen
+        db.serialize(() => {
+            // Tabla de menú
+            db.run(`DROP TABLE IF EXISTS menu`);
+            db.run(`CREATE TABLE menu (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                dia TEXT NOT NULL,
+                menu_general TEXT,
+                menu_vegetariano TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`);
+
+            // Tabla de mensajes
+            db.run(`CREATE TABLE IF NOT EXISTS mensajes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                titulo TEXT NOT NULL,
+                contenido TEXT NOT NULL,
+                fecha TEXT NOT NULL,
+                destacado INTEGER DEFAULT 0
+            )`);
+
+            // Tabla de imágenes
+            db.run(`CREATE TABLE IF NOT EXISTS imagenes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                url TEXT NOT NULL,
+                titulo TEXT,
+                descripcion TEXT
+            )`);
+        });
     }
 });
 
-// Inicialización de la base de datos
-function initDatabase() {
-    db.serialize(() => {
-        // Tabla de menús
-        db.run(`CREATE TABLE IF NOT EXISTS menus (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            fecha TEXT NOT NULL,
-            plato TEXT NOT NULL,
-            tipo TEXT NOT NULL
-        )`);
+// Rutas para el panel de administración
+app.get('/admin', auth, (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/admin.html'));
+});
 
-        // Tabla de mensajes
-        db.run(`CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            contenido TEXT NOT NULL,
-            fecha TEXT NOT NULL
-        )`);
-
-        // Tabla de imágenes del carrusel
-        db.run(`CREATE TABLE IF NOT EXISTS carousel (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            url TEXT NOT NULL,
-            alt TEXT
-        )`);
-    });
-}
-
-// Rutas de la API
-
-// Obtener menú semanal
+// Rutas para el menú
 app.get('/api/menu', (req, res) => {
-    const today = new Date();
-    const weekStart = new Date(today.setDate(today.getDate() - today.getDay() + 1));
-    const weekEnd = new Date(today.setDate(today.getDate() + 6));
-
-    db.all(`SELECT * FROM menus WHERE fecha BETWEEN ? AND ?`, 
-        [weekStart.toISOString(), weekEnd.toISOString()],
-        (err, rows) => {
-            if (err) {
-                res.status(500).json({ error: err.message });
-                return;
-            }
-            
-            const menu = {
-                general: rows.filter(row => row.tipo === 'general'),
-                vegetariano: rows.filter(row => row.tipo === 'vegetariano')
-            };
-            
-            res.json(menu);
-        });
-});
-
-// Obtener mensajes destacados
-app.get('/api/messages', (req, res) => {
-    db.all('SELECT * FROM messages ORDER BY fecha DESC', [], (err, rows) => {
+    db.all('SELECT * FROM menu ORDER BY CASE dia WHEN "Lunes" THEN 1 WHEN "Martes" THEN 2 WHEN "Miércoles" THEN 3 WHEN "Jueves" THEN 4 WHEN "Viernes" THEN 5 END', [], (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -103,9 +73,45 @@ app.get('/api/messages', (req, res) => {
     });
 });
 
-// Obtener imágenes del carrusel
-app.get('/api/carousel', (req, res) => {
-    db.all('SELECT * FROM carousel', [], (err, rows) => {
+app.post('/api/menu', auth, (req, res) => {
+    const { dia, menu_general, menu_vegetariano } = req.body;
+    db.run('INSERT INTO menu (dia, menu_general, menu_vegetariano) VALUES (?, ?, ?)',
+        [dia, menu_general, menu_vegetariano],
+        function(err) {
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            res.json({ id: this.lastID });
+        });
+});
+
+app.put('/api/menu/:id', auth, (req, res) => {
+    const { dia, menu_general, menu_vegetariano } = req.body;
+    db.run('UPDATE menu SET dia = ?, menu_general = ?, menu_vegetariano = ? WHERE id = ?',
+        [dia, menu_general, menu_vegetariano, req.params.id],
+        function(err) {
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            res.json({ changes: this.changes });
+        });
+});
+
+app.delete('/api/menu/:id', auth, (req, res) => {
+    db.run('DELETE FROM menu WHERE id = ?', req.params.id, function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({ changes: this.changes });
+    });
+});
+
+// Rutas para los mensajes
+app.get('/api/mensajes', (req, res) => {
+    db.all('SELECT * FROM mensajes ORDER BY fecha DESC', [], (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
@@ -114,13 +120,11 @@ app.get('/api/carousel', (req, res) => {
     });
 });
 
-// Rutas de administración
-
-// Agregar menú
-app.post('/api/admin/menu', (req, res) => {
-    const { fecha, plato, tipo } = req.body;
-    db.run('INSERT INTO menus (fecha, plato, tipo) VALUES (?, ?, ?)',
-        [fecha, plato, tipo],
+app.post('/api/mensajes', auth, (req, res) => {
+    const { titulo, contenido, destacado } = req.body;
+    const fecha = new Date().toISOString();
+    db.run('INSERT INTO mensajes (titulo, contenido, fecha, destacado) VALUES (?, ?, ?, ?)',
+        [titulo, contenido, fecha, destacado ? 1 : 0],
         function(err) {
             if (err) {
                 res.status(500).json({ error: err.message });
@@ -130,11 +134,44 @@ app.post('/api/admin/menu', (req, res) => {
         });
 });
 
-// Agregar mensaje
-app.post('/api/admin/messages', (req, res) => {
-    const { contenido, fecha } = req.body;
-    db.run('INSERT INTO messages (contenido, fecha) VALUES (?, ?)',
-        [contenido, fecha],
+app.put('/api/mensajes/:id', auth, (req, res) => {
+    const { titulo, contenido, destacado } = req.body;
+    db.run('UPDATE mensajes SET titulo = ?, contenido = ?, destacado = ? WHERE id = ?',
+        [titulo, contenido, destacado ? 1 : 0, req.params.id],
+        function(err) {
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            res.json({ changes: this.changes });
+        });
+});
+
+app.delete('/api/mensajes/:id', auth, (req, res) => {
+    db.run('DELETE FROM mensajes WHERE id = ?', req.params.id, function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({ changes: this.changes });
+    });
+});
+
+// Rutas para las imágenes
+app.get('/api/imagenes', (req, res) => {
+    db.all('SELECT * FROM imagenes', [], (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json(rows);
+    });
+});
+
+app.post('/api/imagenes', auth, (req, res) => {
+    const { url, titulo, descripcion } = req.body;
+    db.run('INSERT INTO imagenes (url, titulo, descripcion) VALUES (?, ?, ?)',
+        [url, titulo, descripcion],
         function(err) {
             if (err) {
                 res.status(500).json({ error: err.message });
@@ -144,21 +181,17 @@ app.post('/api/admin/messages', (req, res) => {
         });
 });
 
-// Agregar imagen al carrusel
-app.post('/api/admin/carousel', (req, res) => {
-    const { url, alt } = req.body;
-    db.run('INSERT INTO carousel (url, alt) VALUES (?, ?)',
-        [url, alt],
-        function(err) {
-            if (err) {
-                res.status(500).json({ error: err.message });
-                return;
-            }
-            res.json({ id: this.lastID });
-        });
+app.delete('/api/imagenes/:id', auth, (req, res) => {
+    db.run('DELETE FROM imagenes WHERE id = ?', req.params.id, function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({ changes: this.changes });
+    });
 });
 
-// Iniciar servidor
+// Iniciar el servidor
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
 }); 
