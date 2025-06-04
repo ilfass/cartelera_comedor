@@ -28,17 +28,21 @@ const JWT_SECRET = 'tu_clave_secreta_muy_segura'; // En producción, usar una va
 
 // Middleware de autenticación
 const authenticateToken = (req, res, next) => {
+    console.log('Verificando token de autenticación');
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
+        console.log('No se proporcionó token');
         return res.status(401).json({ message: 'Token no proporcionado' });
     }
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) {
+            console.log('Error al verificar token:', err.message);
             return res.status(403).json({ message: 'Token inválido' });
         }
+        console.log('Token verificado exitosamente para usuario:', user.username);
         req.user = user;
         next();
     });
@@ -70,20 +74,22 @@ const db = new sqlite3.Database('database.sqlite', (err) => {
             )`);
 
             // Tabla de mensajes
-            db.run(`CREATE TABLE IF NOT EXISTS mensajes (
+            db.run(`DROP TABLE IF EXISTS mensajes`);
+            db.run(`CREATE TABLE mensajes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 titulo TEXT NOT NULL,
                 contenido TEXT NOT NULL,
-                fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+                fecha DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
                 destacado BOOLEAN DEFAULT 0
             )`);
 
             // Tabla de imágenes
-            db.run(`CREATE TABLE IF NOT EXISTS imagenes (
+            db.run(`DROP TABLE IF EXISTS imagenes`);
+            db.run(`CREATE TABLE imagenes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 titulo TEXT NOT NULL,
                 url TEXT NOT NULL,
-                fecha DATETIME DEFAULT CURRENT_TIMESTAMP
+                fecha DATETIME NOT NULL DEFAULT (datetime('now', 'localtime'))
             )`);
 
             // Crear usuario administrador por defecto si no existe
@@ -181,11 +187,21 @@ app.get('/api/mensajes', (req, res) => {
 });
 
 app.post('/api/mensajes', authenticateToken, (req, res) => {
+    console.log('Headers recibidos:', req.headers);
+    console.log('Body recibido:', req.body);
     const { titulo, contenido, destacado } = req.body;
-    db.run('INSERT INTO mensajes (titulo, contenido, destacado) VALUES (?, ?, ?)',
-        [titulo, contenido, destacado ? 1 : 0],
+    
+    if (!titulo || !contenido) {
+        console.log('Faltan campos requeridos');
+        return res.status(400).json({ message: 'Faltan campos requeridos' });
+    }
+
+    const fecha = new Date().toISOString();
+    db.run('INSERT INTO mensajes (titulo, contenido, destacado, fecha) VALUES (?, ?, ?, ?)',
+        [titulo, contenido, destacado ? 1 : 0, fecha],
         function(err) {
             if (err) {
+                console.error('Error en la base de datos:', err);
                 res.status(500).json({ message: 'Error al guardar el mensaje' });
             } else {
                 res.json({ message: 'Mensaje guardado exitosamente' });
@@ -231,7 +247,7 @@ app.get('/api/imagenes', (req, res) => {
 // Configuración de multer para subida de imágenes
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadDir = 'frontend/uploads';
+        const uploadDir = path.join(__dirname, '../frontend/uploads');
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
         }
