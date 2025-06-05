@@ -25,31 +25,57 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Configuración de JWT
 const JWT_SECRET = 'tu_clave_secreta_muy_segura'; // En producción, usar una variable de entorno
+const TOKEN_EXPIRATION = '24h'; // Cambiado a 24 horas para pruebas
 
 // Middleware de autenticación
 const authenticateToken = (req, res, next) => {
     console.log('Verificando token de autenticación');
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-        console.log('No se proporcionó token');
-        return res.status(401).json({ message: 'Token no proporcionado' });
+    console.log('Headers recibidos:', req.headers);
+    
+    if (!authHeader) {
+        console.log('No se proporcionó header de autorización');
+        return res.status(401).json({ 
+            code: 'NO_TOKEN',
+            message: 'Token no proporcionado',
+            error: 'NO_TOKEN'
+        });
     }
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) {
-            console.log('Error al verificar token:', err.message);
-            return res.status(403).json({ message: 'Token inválido' });
-        }
-        console.log('Token verificado exitosamente para usuario:', user.username);
-        req.user = user;
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+        console.log('No se encontró token en el header');
+        return res.status(401).json({ 
+            code: 'NO_TOKEN',
+            message: 'Token no proporcionado',
+            error: 'NO_TOKEN'
+        });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        console.log('Token verificado exitosamente para usuario:', decoded.username);
+        req.user = decoded;
         next();
-    });
+    } catch (err) {
+        console.log('Error al verificar token:', err.message);
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({ 
+                code: 'TOKEN_EXPIRED',
+                message: 'Token expirado', 
+                error: 'TOKEN_EXPIRED'
+            });
+        }
+        return res.status(401).json({ 
+            code: 'INVALID_TOKEN',
+            message: 'Token inválido',
+            error: 'INVALID_TOKEN'
+        });
+    }
 };
 
 // Conexión a la base de datos
-const db = new sqlite3.Database('database.sqlite', (err) => {
+const db = new sqlite3.Database(path.join(__dirname, 'database.sqlite'), (err) => {
     if (err) {
         console.error('Error al conectar con la base de datos:', err);
     } else {
@@ -70,6 +96,7 @@ const db = new sqlite3.Database('database.sqlite', (err) => {
                 dia TEXT NOT NULL,
                 menu_general TEXT,
                 menu_vegetariano TEXT,
+                menu_celiaco TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )`);
 
@@ -139,23 +166,39 @@ app.get('/api/menu', (req, res) => {
     });
 });
 
+// Función para quitar tildes y pasar a minúsculas
+function normalizarDia(str) {
+    return str
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+}
+
 app.post('/api/menu', authenticateToken, (req, res) => {
-    const { dia, menu_general, menu_vegetariano } = req.body;
-    db.run('INSERT OR REPLACE INTO menu (dia, menu_general, menu_vegetariano) VALUES (?, ?, ?)',
-        [dia, menu_general, menu_vegetariano],
+    console.log('Body completo recibido:', req.body);
+    let { dia, menu_general, menu_vegetariano, menu_celiaco } = req.body;
+    console.log('Datos extraídos:', { dia, menu_general, menu_vegetariano, menu_celiaco });
+    dia = normalizarDia(dia);
+    console.log('Día normalizado:', dia);
+    console.log('Valores a insertar:', [dia, menu_general, menu_vegetariano, menu_celiaco]);
+    db.run('INSERT OR REPLACE INTO menu (dia, menu_general, menu_vegetariano, menu_celiaco) VALUES (?, ?, ?, ?)',
+        [dia, menu_general, menu_vegetariano, menu_celiaco],
         function(err) {
             if (err) {
+                console.error('Error al guardar el menú:', err);
                 res.status(500).json({ message: 'Error al guardar el menú' });
             } else {
+                console.log('Menú guardado exitosamente');
                 res.json({ message: 'Menú guardado exitosamente' });
             }
         });
 });
 
 app.put('/api/menu/:id', auth, (req, res) => {
-    const { dia, menu_general, menu_vegetariano } = req.body;
-    db.run('UPDATE menu SET dia = ?, menu_general = ?, menu_vegetariano = ? WHERE id = ?',
-        [dia, menu_general, menu_vegetariano, req.params.id],
+    let { dia, menu_general, menu_vegetariano, menu_celiaco } = req.body;
+    dia = normalizarDia(dia);
+    db.run('UPDATE menu SET dia = ?, menu_general = ?, menu_vegetariano = ?, menu_celiaco = ? WHERE id = ?',
+        [dia, menu_general, menu_vegetariano, menu_celiaco, req.params.id],
         function(err) {
             if (err) {
                 res.status(500).json({ error: err.message });
@@ -172,6 +215,54 @@ app.delete('/api/menu/:id', auth, (req, res) => {
             return;
         }
         res.json({ changes: this.changes });
+    });
+});
+
+// Ruta para eliminar un menú por día
+app.delete('/api/menu/:dia', authenticateToken, (req, res) => {
+    console.log('Intentando eliminar menú para el día:', req.params.dia);
+    console.log('Usuario autenticado:', req.user);
+    
+    const dia = normalizarDia(req.params.dia);
+    console.log('Día normalizado:', dia);
+    
+    // Verificar si el menú existe
+    db.get('SELECT * FROM menu WHERE dia = ?', [dia], (err, row) => {
+        if (err) {
+            console.error('Error al verificar menú:', err);
+            return res.status(500).json({ 
+                code: 'DB_ERROR',
+                message: 'Error al verificar el menú',
+                error: err.message
+            });
+        }
+
+        if (!row) {
+            console.log('No se encontró menú para el día:', dia);
+            return res.status(404).json({ 
+                code: 'NOT_FOUND',
+                message: 'No se encontró un menú para el día especificado'
+            });
+        }
+
+        // Si existe, procedemos a eliminarlo
+        db.run('DELETE FROM menu WHERE dia = ?', [dia], function(err) {
+            if (err) {
+                console.error('Error al eliminar menú:', err);
+                return res.status(500).json({ 
+                    code: 'DB_ERROR',
+                    message: 'Error al eliminar el menú',
+                    error: err.message
+                });
+            }
+            
+            console.log('Menú eliminado exitosamente para el día:', dia);
+            res.json({ 
+                code: 'SUCCESS',
+                message: 'Menú eliminado exitosamente',
+                changes: this.changes
+            });
+        });
     });
 });
 
@@ -196,9 +287,8 @@ app.post('/api/mensajes', authenticateToken, (req, res) => {
         return res.status(400).json({ message: 'Faltan campos requeridos' });
     }
 
-    const fecha = new Date().toISOString();
-    db.run('INSERT INTO mensajes (titulo, contenido, destacado, fecha) VALUES (?, ?, ?, ?)',
-        [titulo, contenido, destacado ? 1 : 0, fecha],
+    db.run('INSERT INTO mensajes (titulo, contenido, destacado) VALUES (?, ?, ?)',
+        [titulo, contenido, destacado ? 1 : 0],
         function(err) {
             if (err) {
                 console.error('Error en la base de datos:', err);
@@ -223,13 +313,16 @@ app.put('/api/mensajes/:id', auth, (req, res) => {
 });
 
 app.delete('/api/mensajes/:id', authenticateToken, (req, res) => {
-    const { id } = req.params;
-    db.run('DELETE FROM mensajes WHERE id = ?', [id], function(err) {
+    db.run('DELETE FROM mensajes WHERE id = ?', [req.params.id], function(err) {
         if (err) {
-            res.status(500).json({ message: 'Error al eliminar el mensaje' });
-        } else {
-            res.json({ message: 'Mensaje eliminado exitosamente' });
+            res.status(500).json({ error: err.message });
+            return;
         }
+        if (this.changes === 0) {
+            res.status(404).json({ message: 'Mensaje no encontrado' });
+            return;
+        }
+        res.json({ message: 'Mensaje eliminado exitosamente' });
     });
 });
 
@@ -279,38 +372,70 @@ app.post('/api/imagenes', authenticateToken, upload.single('image'), (req, res) 
         });
 });
 
-app.delete('/api/imagenes/:id', auth, (req, res) => {
-    db.run('DELETE FROM imagenes WHERE id = ?', req.params.id, function(err) {
+app.delete('/api/imagenes/:id', authenticateToken, (req, res) => {
+    // Primero obtenemos la información de la imagen para eliminar el archivo
+    db.get('SELECT url FROM imagenes WHERE id = ?', [req.params.id], (err, row) => {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
         }
-        res.json({ changes: this.changes });
+        if (!row) {
+            res.status(404).json({ message: 'Imagen no encontrada' });
+            return;
+        }
+
+        // Eliminamos el archivo físico
+        const filePath = path.join(__dirname, 'uploads', path.basename(row.url));
+        fs.unlink(filePath, (err) => {
+            if (err && err.code !== 'ENOENT') {
+                console.error('Error al eliminar el archivo:', err);
+            }
+
+            // Eliminamos el registro de la base de datos
+            db.run('DELETE FROM imagenes WHERE id = ?', [req.params.id], function(err) {
+                if (err) {
+                    res.status(500).json({ error: err.message });
+                    return;
+                }
+                res.json({ message: 'Imagen eliminada exitosamente' });
+            });
+        });
     });
 });
 
 // Rutas de autenticación
 app.post('/api/auth/login', async (req, res) => {
+    console.log('Intento de login recibido');
     const { username, password } = req.body;
+    console.log('Credenciales recibidas:', { username });
 
     db.get('SELECT * FROM usuarios WHERE username = ?', [username], async (err, user) => {
         if (err) {
+            console.error('Error en la base de datos:', err);
             return res.status(500).json({ message: 'Error en el servidor' });
         }
 
         if (!user) {
+            console.log('Usuario no encontrado:', username);
             return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
         }
 
         try {
             const match = await bcrypt.compare(password, user.password);
             if (!match) {
+                console.log('Contraseña incorrecta para usuario:', username);
                 return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
             }
 
-            const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '24h' });
+            const token = jwt.sign(
+                { id: user.id, username: user.username }, 
+                JWT_SECRET, 
+                { expiresIn: TOKEN_EXPIRATION }
+            );
+            console.log('Token generado exitosamente para usuario:', username);
             res.json({ token });
         } catch (error) {
+            console.error('Error al generar token:', error);
             res.status(500).json({ message: 'Error en el servidor' });
         }
     });

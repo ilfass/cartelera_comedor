@@ -1,0 +1,123 @@
+/* Variables CSS Windows claro */
+:root {
+    --main-bg: #f3f6fd;
+    --main-bg-rgba: 243,246,253;
+    --main-text: #222b45;
+    --accent1: #ffffff;
+    --accent2: #e5eaf5;
+    --border-color: #d1d9e6;
+    --shadow-color: rgba(0,0,0,0.07);
+    --blue-windows: #2563eb;
+}
+
+/* Estilos base */
+body {
+    background: var(--main-bg);
+    color: var(--main-text);
+}
+
+/* Header */
+.admin-header {
+    background: var(--accent1);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px var(--shadow-color);
+    color: var(--main-text);
+}
+
+/* Contenedor principal */
+.admin-container, .admin-section {
+    background: var(--accent1);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+/* Secciones */
+.section-title {
+    background: var(--accent2);
+    color: var(--blue-windows);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Formularios */
+.form-group label {
+    color: var(--main-text);
+}
+
+.form-control {
+    background: var(--accent2);
+    color: var(--main-text);
+    border: 1px solid var(--border-color);
+}
+
+.form-control:focus {
+    background: var(--accent1);
+    border-color: var(--blue-windows);
+}
+
+/* Tablas */
+.table {
+    background: var(--accent1);
+    border: 1px solid var(--border-color);
+}
+
+.table th {
+    background: var(--accent2);
+    color: var(--blue-windows);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table td {
+    border-bottom: 1px solid var(--border-color);
+    color: var(--main-text);
+}
+
+/* Botones */
+.btn {
+    background: var(--blue-windows);
+    color: #fff;
+    border: 1px solid var(--blue-windows);
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.btn:hover {
+    background: #1743a2;
+    border-color: #1743a2;
+}
+
+.btn-primary {
+    background: var(--blue-windows);
+}
+
+.btn-primary:hover {
+    background: #1743a2;
+}
+
+/* Mensajes de alerta */
+.alert {
+    background: var(--accent2);
+    color: var(--main-text);
+    border: 1px solid var(--border-color);
+}
+
+/* Modal */
+.modal-content {
+    background: var(--accent1);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.modal-header {
+    background: var(--accent2);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--blue-windows);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+}
+
+/* Imágenes */
+.img-preview {
+    border: 1px solid var(--border-color);
+    background: var(--accent2);
+} 

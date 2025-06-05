@@ -16,6 +16,7 @@
             font-family: 'Roboto', Arial, sans-serif;
             background-color: #f8f9fa;
             min-height: 100vh;
+            font-size: 16px;
         }
 
         .admin-container {
@@ -37,7 +38,7 @@
         }
 
         .sidebar-header h1 {
-            font-size: 1.5em;
+            font-size: 2em;
             margin-bottom: 10px;
         }
 
@@ -75,7 +76,7 @@
 
         .content-header h2 {
             color: #2c3e50;
-            font-size: 2em;
+            font-size: 2.5em;
         }
 
         .logout-button {
@@ -104,23 +105,45 @@
             margin-bottom: 20px;
         }
 
-        .form-group label {
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .menu-day {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e8f0fe;
+        }
+
+        .menu-day h4 {
+            color: #1a73e8;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+
+        .menu-day label {
             display: block;
             margin-bottom: 8px;
             color: #2c3e50;
-            font-size: 1.1em;
+            font-size: 1em;
         }
 
-        .form-group input, .form-group textarea {
+        .menu-day textarea {
             width: 100%;
-            padding: 12px;
+            padding: 8px;
             border: 2px solid #e8f0fe;
             border-radius: 8px;
-            font-size: 1.1em;
-            transition: border-color 0.3s ease;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            resize: vertical;
         }
 
-        .form-group input:focus, .form-group textarea:focus {
+        .menu-day textarea:focus {
             outline: none;
             border-color: #1a73e8;
         }
@@ -128,10 +151,10 @@
         .submit-button {
             background-color: #1a73e8;
             color: white;
-            padding: 12px 25px;
+            padding: 15px 30px;
             border: none;
             border-radius: 8px;
-            font-size: 1.1em;
+            font-size: 1.3em;
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
@@ -169,15 +192,39 @@
         .delete-button {
             background-color: #dc3545;
             color: white;
-            padding: 8px 15px;
+            padding: 10px 20px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            font-size: 1.1em;
         }
 
         .delete-button:hover {
             background-color: #c82333;
+        }
+
+        .table-container {
+            margin-top: 20px;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-container th, .table-container td {
+            padding: 15px;
+            text-align: left;
+            font-size: 1.2em;
+        }
+
+        .table-container th {
+            background-color: #f8f9fa;
+        }
+
+        .table-container tr:nth-child(even) {
+            background-color: #f8f9fa;
         }
     </style>
 </head>
@@ -204,26 +251,73 @@
             <div id="menu-section" class="content-section">
                 <h3>Gestionar Menú Semanal</h3>
                 <form id="menuForm">
-                    <div class="form-group">
-                        <label for="dia">Día</label>
-                        <select id="dia" name="dia" required>
-                            <option value="Lunes">Lunes</option>
-                            <option value="Martes">Martes</option>
-                            <option value="Miércoles">Miércoles</option>
-                            <option value="Jueves">Jueves</option>
-                            <option value="Viernes">Viernes</option>
-                        </select>
+                    <div class="menu-grid">
+                        <div class="menu-day">
+                            <h4>Lunes</h4>
+                            <label for="menu_general_lunes">Menú General</label>
+                            <textarea id="menu_general_lunes" name="menu_general_lunes" rows="3" required></textarea>
+                            <label for="menu_vegetariano_lunes">Menú Vegetariano</label>
+                            <textarea id="menu_vegetariano_lunes" name="menu_vegetariano_lunes" rows="3" required></textarea>
+                            <label for="menu_celiaco_lunes">Menú Celíaco</label>
+                            <textarea id="menu_celiaco_lunes" name="menu_celiaco_lunes" rows="3" required></textarea>
+                        </div>
+
+                        <div class="menu-day">
+                            <h4>Martes</h4>
+                            <label for="menu_general_martes">Menú General</label>
+                            <textarea id="menu_general_martes" name="menu_general_martes" rows="3" required></textarea>
+                            <label for="menu_vegetariano_martes">Menú Vegetariano</label>
+                            <textarea id="menu_vegetariano_martes" name="menu_vegetariano_martes" rows="3" required></textarea>
+                            <label for="menu_celiaco_martes">Menú Celíaco</label>
+                            <textarea id="menu_celiaco_martes" name="menu_celiaco_martes" rows="3" required></textarea>
+                        </div>
+
+                        <div class="menu-day">
+                            <h4>Miércoles</h4>
+                            <label for="menu_general_miercoles">Menú General</label>
+                            <textarea id="menu_general_miercoles" name="menu_general_miercoles" rows="3" required></textarea>
+                            <label for="menu_vegetariano_miercoles">Menú Vegetariano</label>
+                            <textarea id="menu_vegetariano_miercoles" name="menu_vegetariano_miercoles" rows="3" required></textarea>
+                            <label for="menu_celiaco_miercoles">Menú Celíaco</label>
+                            <textarea id="menu_celiaco_miercoles" name="menu_celiaco_miercoles" rows="3" required></textarea>
+                        </div>
+
+                        <div class="menu-day">
+                            <h4>Jueves</h4>
+                            <label for="menu_general_jueves">Menú General</label>
+                            <textarea id="menu_general_jueves" name="menu_general_jueves" rows="3" required></textarea>
+                            <label for="menu_vegetariano_jueves">Menú Vegetariano</label>
+                            <textarea id="menu_vegetariano_jueves" name="menu_vegetariano_jueves" rows="3" required></textarea>
+                            <label for="menu_celiaco_jueves">Menú Celíaco</label>
+                            <textarea id="menu_celiaco_jueves" name="menu_celiaco_jueves" rows="3" required></textarea>
+                        </div>
+
+                        <div class="menu-day">
+                            <h4>Viernes</h4>
+                            <label for="menu_general_viernes">Menú General</label>
+                            <textarea id="menu_general_viernes" name="menu_general_viernes" rows="3" required></textarea>
+                            <label for="menu_vegetariano_viernes">Menú Vegetariano</label>
+                            <textarea id="menu_vegetariano_viernes" name="menu_vegetariano_viernes" rows="3" required></textarea>
+                            <label for="menu_celiaco_viernes">Menú Celíaco</label>
+                            <textarea id="menu_celiaco_viernes" name="menu_celiaco_viernes" rows="3" required></textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="menu_general">Menú General</label>
-                        <textarea id="menu_general" name="menu_general" rows="3" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="menu_vegetariano">Menú Vegetariano</label>
-                        <textarea id="menu_vegetariano" name="menu_vegetariano" rows="3" required></textarea>
-                    </div>
-                    <button type="submit" class="submit-button">Guardar Menú</button>
+
+                    <button type="submit" class="submit-button">Guardar Menú Semanal</button>
                 </form>
+                <div class="table-container">
+                    <table id="menu-table">
+                        <thead>
+                            <tr>
+                                <th>Día</th>
+                                <th>Menú General</th>
+                                <th>Menú Vegetariano</th>
+                                <th>Menú Celíaco</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
 
             <div id="messages-section" class="content-section" style="display: none;">
@@ -245,7 +339,19 @@
                     </div>
                     <button type="submit" class="submit-button">Publicar Mensaje</button>
                 </form>
-                <div class="message-list" id="messageList"></div>
+                <div class="table-container">
+                    <table id="messages-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Contenido</th>
+                                <th>Destacado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
 
             <div id="images-section" class="content-section" style="display: none;">
@@ -261,6 +367,18 @@
                     </div>
                     <button type="submit" class="submit-button">Subir Imagen</button>
                 </form>
+                <div class="table-container">
+                    <table id="images-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Imagen</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -285,29 +403,92 @@
             menuForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                const formData = {
-                    dia: document.getElementById('dia').value,
-                    menu_general: document.getElementById('menu_general').value,
-                    menu_vegetariano: document.getElementById('menu_vegetariano').value
-                };
+                const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+                const menus = [];
+
+                for (const dia of dias) {
+                    const menuData = {
+                        dia: dia,
+                        menu_general: document.getElementById(`menu_general_${dia}`).value.trim(),
+                        menu_vegetariano: document.getElementById(`menu_vegetariano_${dia}`).value.trim(),
+                        menu_celiaco: document.getElementById(`menu_celiaco_${dia}`).value.trim()
+                    };
+                    console.log(`Preparando menú para ${dia}:`, menuData);
+                    menus.push(menuData);
+                }
 
                 try {
-                    const response = await fetch('http://localhost:3000/api/menu', {
+                    for (const menu of menus) {
+                        console.log('Enviando menú al servidor:', menu);
+                        const response = await fetch('http://localhost:3000/api/menu', {
+                            method: 'POST',
+                            headers: headers,
+                            body: JSON.stringify(menu)
+                        });
+                        
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            console.error('Error en la respuesta del servidor:', errorData);
+                            throw new Error(`Error al guardar el menú de ${menu.dia}: ${errorData.message || response.statusText}`);
+                        }
+                        
+                        const responseData = await response.json();
+                        console.log('Respuesta del servidor:', responseData);
+                    }
+                    
+                    alert('Menú semanal guardado exitosamente');
+                    await loadMenu(); // Recargar el menú después de guardar
+                } catch (error) {
+                    console.error('Error al guardar:', error);
+                    alert(error.message);
+                }
+            });
+
+            // Manejar el formulario de mensajes
+            const messageForm = document.getElementById('messageForm');
+            messageForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const titulo = document.getElementById('title').value;
+                const contenido = document.getElementById('content').value;
+                const destacado = document.getElementById('highlight').checked;
+                try {
+                    const response = await fetch('http://localhost:3000/api/mensajes', {
                         method: 'POST',
                         headers: headers,
-                        body: JSON.stringify(formData)
+                        body: JSON.stringify({ titulo, contenido, destacado })
                     });
-
-                    if (!response.ok) {
-                        throw new Error('Error al guardar el menú');
+                    if (response.ok) {
+                        alert('Mensaje guardado exitosamente');
+                        messageForm.reset();
+                    } else {
+                        alert('Error al guardar el mensaje');
                     }
-
-                    const data = await response.json();
-                    alert('Menú guardado exitosamente');
-                    menuForm.reset();
                 } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error al guardar el menú');
+                    alert('Error de conexión');
+                }
+            });
+
+            // Manejar el formulario de imágenes
+            const imageForm = document.getElementById('imageForm');
+            imageForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                try {
+                    const response = await fetch('http://localhost:3000/api/imagenes', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+                    if (response.ok) {
+                        alert('Imagen subida exitosamente');
+                        imageForm.reset();
+                    } else {
+                        alert('Error al subir la imagen');
+                    }
+                } catch (error) {
+                    alert('Error de conexión');
                 }
             });
 
@@ -320,21 +501,257 @@
             // Navegación entre secciones
             const navItems = document.querySelectorAll('.nav-item');
             const sections = document.querySelectorAll('.content-section');
-
             navItems.forEach(item => {
                 item.addEventListener('click', function() {
                     const section = this.dataset.section;
-                    
-                    // Actualizar navegación
                     navItems.forEach(nav => nav.classList.remove('active'));
                     this.classList.add('active');
-                    
-                    // Mostrar sección correspondiente
                     sections.forEach(s => {
                         s.style.display = s.id === `${section}-section` ? 'block' : 'none';
                     });
                 });
             });
+
+            // Función para cargar el menú
+            async function loadMenu() {
+                try {
+                    const response = await fetch('http://localhost:3000/api/menu', {
+                        headers: headers
+                    });
+                    const menu = await response.json();
+                    console.log('Menú cargado del servidor:', menu);
+                    
+                    // Limpiar la tabla primero
+                    const tbody = document.querySelector('#menu-table tbody');
+                    tbody.innerHTML = '';
+                    
+                    // Crear un mapa para organizar los menús por día
+                    const menuPorDia = {};
+                    const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+                    
+                    // Inicializar el mapa con días vacíos
+                    dias.forEach(dia => {
+                        menuPorDia[dia] = {
+                            menu_general: 'No disponible',
+                            menu_vegetariano: 'No disponible',
+                            menu_celiaco: 'No disponible'
+                        };
+                    });
+                    
+                    // Llenar el mapa con los datos recibidos
+                    if (Array.isArray(menu)) {
+                        menu.forEach(item => {
+                            if (item && item.dia) {
+                                const dia = item.dia.toLowerCase();
+                                if (menuPorDia[dia]) {
+                                    menuPorDia[dia] = {
+                                        menu_general: item.menu_general || 'No disponible',
+                                        menu_vegetariano: item.menu_vegetariano || 'No disponible',
+                                        menu_celiaco: item.menu_celiaco || 'No disponible'
+                                    };
+                                }
+                            }
+                        });
+                    }
+                    
+                    console.log('Menú organizado por día:', menuPorDia);
+                    
+                    // Llenar el formulario y la tabla
+                    dias.forEach(dia => {
+                        // Llenar el formulario
+                        const generalInput = document.getElementById(`menu_general_${dia}`);
+                        const vegetarianoInput = document.getElementById(`menu_vegetariano_${dia}`);
+                        const celiacoInput = document.getElementById(`menu_celiaco_${dia}`);
+                        
+                        const menuData = menuPorDia[dia];
+                        
+                        if (generalInput) generalInput.value = menuData.menu_general;
+                        if (vegetarianoInput) vegetarianoInput.value = menuData.menu_vegetariano;
+                        if (celiacoInput) celiacoInput.value = menuData.menu_celiaco;
+                        
+                        // Agregar fila a la tabla
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${dia.charAt(0).toUpperCase() + dia.slice(1)}</td>
+                            <td>${menuData.menu_general}</td>
+                            <td>${menuData.menu_vegetariano}</td>
+                            <td>${menuData.menu_celiaco}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar el menú:', error);
+                }
+            }
+
+            // Función para cargar mensajes
+            async function loadMessages() {
+                try {
+                    const response = await fetch('http://localhost:3000/api/mensajes', {
+                        headers: headers
+                    });
+                    const messages = await response.json();
+                    const tbody = document.querySelector('#messages-table tbody');
+                    tbody.innerHTML = '';
+                    messages.forEach(message => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${message.titulo}</td>
+                            <td>${message.contenido}</td>
+                            <td>${message.destacado ? 'Sí' : 'No'}</td>
+                            <td>
+                                <button onclick="deleteMessage(${message.id})" class="delete-button">Eliminar</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar mensajes:', error);
+                }
+            }
+
+            // Función para cargar imágenes
+            async function loadImages() {
+                try {
+                    const response = await fetch('http://localhost:3000/api/imagenes', {
+                        headers: headers
+                    });
+                    const images = await response.json();
+                    const tbody = document.querySelector('#images-table tbody');
+                    tbody.innerHTML = '';
+                    images.forEach(image => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${image.titulo}</td>
+                            <td><img src="${image.url}" alt="${image.titulo}" style="max-width: 100px;"></td>
+                            <td>
+                                <button onclick="deleteImage(${image.id})" class="delete-button">Eliminar</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar imágenes:', error);
+                }
+            }
+
+            // Función para renovar el token
+            async function renovarToken() {
+                try {
+                    console.log('Intentando renovar token...');
+                    const response = await fetch('http://localhost:3000/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: 'admin',
+                            password: 'admin123'
+                        })
+                    });
+
+                    if (!response.ok) {
+                        console.error('Error al renovar token:', response.status);
+                        throw new Error('Error al renovar el token');
+                    }
+
+                    const data = await response.json();
+                    if (!data.token) {
+                        console.error('No se recibió token en la respuesta');
+                        throw new Error('No se recibió un token válido');
+                    }
+
+                    console.log('Token renovado exitosamente');
+                    localStorage.setItem('token', data.token);
+                    return data.token;
+                } catch (error) {
+                    console.error('Error en renovarToken:', error);
+                    throw error;
+                }
+            }
+
+            // Función para eliminar mensaje
+            window.deleteMessage = async function(id) {
+                if (confirm('¿Estás seguro de que deseas eliminar este mensaje?')) {
+                    try {
+                        let token = await obtenerTokenValido();
+                        let response = await fetch(`http://localhost:3000/api/mensajes/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (response.status === 401) {
+                            const data = await response.json();
+                            if (data.expired) {
+                                token = await renovarToken();
+                                response = await fetch(`http://localhost:3000/api/mensajes/${id}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Authorization': `Bearer ${token}`,
+                                        'Content-Type': 'application/json'
+                                    }
+                                });
+                            }
+                        }
+
+                        if (!response.ok) {
+                            throw new Error(`Error al eliminar el mensaje: ${response.statusText}`);
+                        }
+
+                        alert('Mensaje eliminado exitosamente');
+                        loadMessages();
+                    } catch (error) {
+                        await manejarErrorAutenticacion(error);
+                    }
+                }
+            };
+
+            // Función para eliminar imagen
+            window.deleteImage = async function(id) {
+                if (confirm('¿Estás seguro de que deseas eliminar esta imagen?')) {
+                    try {
+                        let token = await obtenerTokenValido();
+                        let response = await fetch(`http://localhost:3000/api/imagenes/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (response.status === 401) {
+                            const data = await response.json();
+                            if (data.expired) {
+                                token = await renovarToken();
+                                response = await fetch(`http://localhost:3000/api/imagenes/${id}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Authorization': `Bearer ${token}`,
+                                        'Content-Type': 'application/json'
+                                    }
+                                });
+                            }
+                        }
+
+                        if (!response.ok) {
+                            throw new Error(`Error al eliminar la imagen: ${response.statusText}`);
+                        }
+
+                        alert('Imagen eliminada exitosamente');
+                        loadImages();
+                    } catch (error) {
+                        await manejarErrorAutenticacion(error);
+                    }
+                }
+            };
+
+            // Cargar datos iniciales
+            loadMenu();
+            loadMessages();
+            loadImages();
         });
     </script>
 </body>

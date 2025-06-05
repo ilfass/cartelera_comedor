@@ -55,14 +55,18 @@ const formatDate = (date) => {
 async function loadMenu() {
     try {
         const response = await fetch(`${API_URL}/api/menu`);
+        if (!response.ok) {
+            throw new Error('Error al cargar el menú');
+        }
         const menu = await response.json();
+        console.log('Menú cargado:', menu);
         
         // Obtener el día actual en español
-        const diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+        const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
         const diaActual = diasSemana[new Date().getDay()];
         
         // Limpiar todos los contenedores de menú
-        ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'].forEach(dia => {
+        ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].forEach(dia => {
             const container = document.getElementById(`menu-${dia}`);
             const menuDay = container.parentElement;
             
@@ -83,6 +87,8 @@ async function loadMenu() {
                             <p>${menuDia.menu_general || 'No disponible'}</p>
                             <h4>Menú Vegetariano</h4>
                             <p>${menuDia.menu_vegetariano || 'No disponible'}</p>
+                            <h4>Menú Celíaco</h4>
+                            <p>${menuDia.menu_celiaco || 'No disponible'}</p>
                         </div>
                     `;
                 } else {
@@ -92,7 +98,7 @@ async function loadMenu() {
         });
     } catch (error) {
         console.error('Error al cargar el menú:', error);
-        ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'].forEach(dia => {
+        ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].forEach(dia => {
             const container = document.getElementById(`menu-${dia}`);
             if (container) {
                 container.innerHTML = '<p class="error-menu">Error al cargar el menú</p>';
@@ -214,7 +220,7 @@ function startCarousel() {
 }
 
 function updateMenuTomorrowTitle() {
-    const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    const dias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
     const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
     const hoy = new Date();
     let manana = new Date(hoy);
@@ -236,24 +242,41 @@ function updateMenuTomorrowTitle() {
 async function loadMenuTomorrow() {
     try {
         const response = await fetch(`${API_URL}/api/menu`);
+        if (!response.ok) {
+            throw new Error('Error al cargar el menú');
+        }
         const menu = await response.json();
-        const diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+        console.log('Menú cargado para mañana:', menu);
+        
+        const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
         const hoy = new Date();
         let manana = new Date(hoy);
         manana.setDate(hoy.getDate() + 1);
+        
         // Si es viernes, mostrar lunes siguiente
         if (hoy.getDay() === 5) {
             manana.setDate(hoy.getDate() + 3);
         } else if (hoy.getDay() === 6) {
             manana.setDate(hoy.getDate() + 2);
         }
+        
         const diaNombre = diasSemana[manana.getDay()];
         const menuDia = menu.find(m => m.dia.toLowerCase() === diaNombre);
-        document.getElementById('menu-tomorrow-general').textContent = menuDia ? (menuDia.menu_general || 'No disponible') : 'No disponible';
-        document.getElementById('menu-tomorrow-vegetariano').textContent = menuDia ? (menuDia.menu_vegetariano || 'No disponible') : 'No disponible';
+        
+        if (menuDia) {
+            document.getElementById('menu-tomorrow-general').textContent = menuDia.menu_general || 'No disponible';
+            document.getElementById('menu-tomorrow-vegetariano').textContent = menuDia.menu_vegetariano || 'No disponible';
+            document.getElementById('menu-tomorrow-celiaco').textContent = menuDia.menu_celiaco || 'No disponible';
+        } else {
+            document.getElementById('menu-tomorrow-general').textContent = 'No disponible';
+            document.getElementById('menu-tomorrow-vegetariano').textContent = 'No disponible';
+            document.getElementById('menu-tomorrow-celiaco').textContent = 'No disponible';
+        }
     } catch (error) {
+        console.error('Error al cargar el menú de mañana:', error);
         document.getElementById('menu-tomorrow-general').textContent = 'No disponible';
         document.getElementById('menu-tomorrow-vegetariano').textContent = 'No disponible';
+        document.getElementById('menu-tomorrow-celiaco').textContent = 'No disponible';
     }
 }
 
@@ -324,12 +347,17 @@ function showMixedSlide() {
     }
 }
 
-// Mostrar tabla de menú semanal compacto debajo del menú de mañana
+// Mostrar tabla de menú semanal compacto
 async function renderMenuWeekTable() {
     try {
         const response = await fetch(`${API_URL}/api/menu`);
+        if (!response.ok) {
+            throw new Error('Error al cargar el menú');
+        }
         const menu = await response.json();
-        const diasSemana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'];
+        console.log('Menú cargado para la tabla:', menu);
+        
+        const diasSemana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
         const hoy = new Date();
         const diaActual = diasSemana[hoy.getDay() - 1];
         
@@ -352,7 +380,7 @@ async function renderMenuWeekTable() {
         
         // Encabezado con días
         html += '<tr>';
-        html += '<th style="width: 10%; text-align: center; font-size: 2rem; background: linear-gradient(45deg, #2d5a27, #3a7d32, #51cb93);">Tipo</th>'; // Columna para emojis
+        html += '<th style="width: 10%; text-align: center; font-size: 2rem; background: linear-gradient(45deg, #2d5a27, #3a7d32, #51cb93);">Tipo</th>';
         diasAMostrar.forEach(dia => {
             const esHoy = dia === diaActual;
             html += `<th class="${esHoy ? 'menu-week-cell-dia-hoy' : ''}">${esHoy ? 'HOY' : dia.charAt(0).toUpperCase() + dia.slice(1)}</th>`;
@@ -361,27 +389,41 @@ async function renderMenuWeekTable() {
         
         // Fila de menú general
         html += '<tr class="menu-general-row">';
-        html += '<td style="text-align: center; font-size: 5rem; padding: 15px; text-shadow: 2px 2px 7px rgb(0 0 0); border-right: 4px solid #dc2626;">🍽️</td>'; // Emoji para menú general con borde rojo
+        html += '<td style="text-align: center; font-size: 5rem; padding: 15px; text-shadow: 2px 2px 7px rgb(0 0 0); border-right: 4px solid #dc2626;">🍽️</td>';
         diasAMostrar.forEach(dia => {
             const menuDia = menu.find(m => m.dia.toLowerCase() === dia);
             const esHoy = dia === diaActual;
-            html += `<td class="${esHoy ? 'current-day' : ''}">${menuDia ? (menuDia.menu_general || 'No disponible') : 'No disponible'}</td>`;
+            const menuGeneral = menuDia && menuDia.menu_general ? menuDia.menu_general : 'No disponible';
+            html += `<td class="${esHoy ? 'current-day' : ''}">${menuGeneral}</td>`;
         });
         html += '</tr>';
         
         // Fila de menú vegetariano
         html += '<tr class="menu-vegetariano-row">';
-        html += '<td style="text-align: center; font-size: 5rem; padding: 15px; text-shadow: 2px 2px 7px rgb(0 0 0); border-right: 4px solid #3b82f6;">🥗</td>'; // Emoji para menú vegetariano con borde azul
+        html += '<td style="text-align: center; font-size: 5rem; padding: 15px; text-shadow: 2px 2px 7px rgb(0 0 0); border-right: 4px solid #3b82f6;">🥗</td>';
         diasAMostrar.forEach(dia => {
             const menuDia = menu.find(m => m.dia.toLowerCase() === dia);
             const esHoy = dia === diaActual;
-            html += `<td class="${esHoy ? 'current-day' : ''}">${menuDia ? (menuDia.menu_vegetariano || 'No disponible') : 'No disponible'}</td>`;
+            const menuVegetariano = menuDia && menuDia.menu_vegetariano ? menuDia.menu_vegetariano : 'No disponible';
+            html += `<td class="${esHoy ? 'current-day' : ''}">${menuVegetariano}</td>`;
+        });
+        html += '</tr>';
+        
+        // Fila de menú celíaco
+        html += '<tr class="menu-celiaco-row">';
+        html += '<td style="text-align: center; font-size: 5rem; padding: 15px; text-shadow: 2px 2px 7px rgb(0 0 0); border-right: 4px solid #eab308;">🌾</td>';
+        diasAMostrar.forEach(dia => {
+            const menuDia = menu.find(m => m.dia.toLowerCase() === dia);
+            const esHoy = dia === diaActual;
+            const menuCeliaco = menuDia && menuDia.menu_celiaco ? menuDia.menu_celiaco : 'No disponible';
+            html += `<td class="${esHoy ? 'current-day' : ''}">${menuCeliaco}</td>`;
         });
         html += '</tr>';
         
         html += '</table>';
         document.getElementById('menu-week-table').innerHTML = html;
     } catch (error) {
+        console.error('Error al cargar la tabla del menú:', error);
         document.getElementById('menu-week-table').innerHTML = '<p>Error al cargar el menú semanal</p>';
     }
 }

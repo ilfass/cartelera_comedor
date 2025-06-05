@@ -9,8 +9,31 @@ function showMessage(message, type) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}`;
     messageDiv.textContent = message;
-    document.body.insertBefore(messageDiv, document.body.firstChild);
-    setTimeout(() => messageDiv.remove(), 3000);
+    messageDiv.style.position = 'fixed';
+    messageDiv.style.top = '20px';
+    messageDiv.style.right = '20px';
+    messageDiv.style.padding = '15px 25px';
+    messageDiv.style.borderRadius = '5px';
+    messageDiv.style.zIndex = '1000';
+    messageDiv.style.fontSize = '1.2em';
+    messageDiv.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    
+    if (type === 'success') {
+        messageDiv.style.backgroundColor = '#d4edda';
+        messageDiv.style.color = '#155724';
+        messageDiv.style.border = '1px solid #c3e6cb';
+    } else {
+        messageDiv.style.backgroundColor = '#f8d7da';
+        messageDiv.style.color = '#721c24';
+        messageDiv.style.border = '1px solid #f5c6cb';
+    }
+    
+    document.body.appendChild(messageDiv);
+    setTimeout(() => {
+        messageDiv.style.opacity = '0';
+        messageDiv.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => messageDiv.remove(), 500);
+    }, 3000);
 }
 
 // Funciones para el menú
@@ -19,70 +42,78 @@ async function loadMenu() {
         const response = await fetch(`${API_URL}/api/menu`);
         const menu = await response.json();
         const menuTable = document.getElementById('menu-table');
-        menuTable.innerHTML = `
-            <tr>
-                <th>Día</th>
-                <th>Menú General</th>
-                <th>Menú Vegetariano</th>
-                <th>Acciones</th>
-            </tr>
-        `;
+        menuTable.innerHTML = '';
+        
         menu.forEach(item => {
-            menuTable.innerHTML += `
-                <tr>
-                    <td>${item.dia}</td>
-                    <td>${item.menu_general || ''}</td>
-                    <td>${item.menu_vegetariano || ''}</td>
-                    <td>
-                        <button onclick="editMenu(${item.id})">Editar</button>
-                        <button onclick="deleteMenu(${item.id})">Eliminar</button>
-                    </td>
-                </tr>
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.dia}</td>
+                <td>${item.menu_general || 'No disponible'}</td>
+                <td>${item.menu_vegetariano || 'No disponible'}</td>
+                <td>${item.menu_celiaco || 'No disponible'}</td>
+                <td>
+                    <button onclick="editMenu('${item.dia}')" class="btn-edit">Editar</button>
+                    <button onclick="deleteMenu('${item.dia}')" class="btn-delete">Eliminar</button>
+                </td>
             `;
+            menuTable.appendChild(row);
         });
     } catch (error) {
         console.error('Error al cargar el menú:', error);
-        showMessage('Error al cargar el menú', 'error');
+        alert('Error al cargar el menú');
     }
 }
 
 async function saveMenu(event) {
     event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
     const menuData = {
-        dia: formData.get('dia'),
-        menu_general: formData.get('menu_general'),
-        menu_vegetariano: formData.get('menu_vegetariano')
+        dia: document.getElementById('dia').value,
+        menu_general: document.getElementById('menu_general').value,
+        menu_vegetariano: document.getElementById('menu_vegetariano').value,
+        menu_celiaco: document.getElementById('menu-celiaco').value
     };
-
+    
     try {
         const response = await fetch(`${API_URL}/api/menu`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                ...AUTH_HEADER
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(menuData)
         });
+        
         if (response.ok) {
-            form.reset();
+            alert('Menú guardado exitosamente');
             loadMenu();
-            showMessage('Menú guardado exitosamente', 'success');
+            document.getElementById('menu-form').reset();
         } else {
-            const error = await response.json();
-            showMessage(`Error al guardar el menú: ${error.error}`, 'error');
+            throw new Error('Error al guardar el menú');
         }
     } catch (error) {
-        console.error('Error al guardar el menú:', error);
-        showMessage('Error al guardar el menú', 'error');
+        console.error('Error:', error);
+        alert('Error al guardar el menú');
     }
 }
 
-async function deleteMenu(id) {
+function editMenu(dia) {
+    fetch(`${API_URL}/api/menu/${dia}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('dia').value = data.dia;
+            document.getElementById('menu_general').value = data.menu_general || '';
+            document.getElementById('menu_vegetariano').value = data.menu_vegetariano || '';
+            document.getElementById('menu-celiaco').value = data.menu_celiaco || '';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al cargar el menú para editar');
+        });
+}
+
+async function deleteMenu(dia) {
     if (confirm('¿Estás seguro de que deseas eliminar este menú?')) {
         try {
-            const response = await fetch(`${API_URL}/api/menu/${id}`, {
+            const response = await fetch(`${API_URL}/api/menu/${dia}`, {
                 method: 'DELETE',
                 headers: AUTH_HEADER
             });
@@ -99,7 +130,9 @@ async function deleteMenu(id) {
 async function loadMessages() {
     try {
         const response = await fetch(`${API_URL}/api/mensajes`, {
-            headers: AUTH_HEADER
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
         const messages = await response.json();
         const messagesTable = document.getElementById('messages-table');
@@ -120,8 +153,8 @@ async function loadMessages() {
                     <td>${new Date(message.fecha).toLocaleDateString()}</td>
                     <td>${message.destacado ? 'Sí' : 'No'}</td>
                     <td>
-                        <button onclick="editMessage(${message.id})">Editar</button>
-                        <button onclick="deleteMessage(${message.id})">Eliminar</button>
+                        <button onclick="editMessage(${message.id})" class="edit-button">Editar</button>
+                        <button onclick="deleteMessage(${message.id})" class="delete-button">Eliminar</button>
                     </td>
                 </tr>
             `;
@@ -137,9 +170,9 @@ async function saveMessage(event) {
     const form = event.target;
     const formData = new FormData(form);
     const messageData = {
-        titulo: formData.get('titulo'),
-        contenido: formData.get('contenido'),
-        destacado: formData.get('destacado') === 'on'
+        titulo: formData.get('title'),
+        contenido: formData.get('content'),
+        destacado: formData.get('highlight') === 'on'
     };
 
     try {
@@ -147,17 +180,17 @@ async function saveMessage(event) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                ...AUTH_HEADER
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             body: JSON.stringify(messageData)
         });
         if (response.ok) {
             form.reset();
-            loadMessages();
+            await loadMessages();
             showMessage('Mensaje guardado exitosamente', 'success');
         } else {
             const error = await response.json();
-            showMessage(`Error al guardar el mensaje: ${error.error}`, 'error');
+            showMessage(`Error al guardar el mensaje: ${error.message}`, 'error');
         }
     } catch (error) {
         console.error('Error al guardar el mensaje:', error);
@@ -187,26 +220,30 @@ async function deleteMessage(id) {
 async function loadImages() {
     try {
         const response = await fetch(`${API_URL}/api/imagenes`, {
-            headers: AUTH_HEADER
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
         const images = await response.json();
         const imagesTable = document.getElementById('images-table');
         imagesTable.innerHTML = `
             <tr>
-                <th>URL</th>
+                <th>Imagen</th>
                 <th>Título</th>
-                <th>Descripción</th>
                 <th>Acciones</th>
             </tr>
         `;
         images.forEach(image => {
             imagesTable.innerHTML += `
                 <tr>
-                    <td>${image.url}</td>
-                    <td>${image.titulo || ''}</td>
-                    <td>${image.descripcion || ''}</td>
                     <td>
-                        <button onclick="deleteImage(${image.id})">Eliminar</button>
+                        <div class="image-container">
+                            <img src="${image.url}" alt="${image.titulo}" />
+                        </div>
+                    </td>
+                    <td>${image.titulo || ''}</td>
+                    <td>
+                        <button onclick="deleteImage(${image.id})" class="delete-button">Eliminar</button>
                     </td>
                 </tr>
             `;
@@ -271,6 +308,5 @@ async function deleteImage(id) {
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
     loadMenu();
-    loadMessages();
     loadImages();
 }); 
