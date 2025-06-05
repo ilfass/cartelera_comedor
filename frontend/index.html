@@ -3,69 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pizarra Digital - Comedor UNICEN</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>Comedor Universitario UNICEN</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Sección de Clima y Hora -->
-        <section class="top-info-section">
-            <div class="weather-section">
-                <div id="weather-content"></div>
-            </div>
-            <div class="title-section">
-                <h1>Comedor UNICEN</h1>
-            </div>
-            <div class="datetime-container">
-                <div id="current-time"></div>
-                <div id="current-date"></div>
-            </div>
-        </section>
+    <header class="main-header">
+        <div class="header-left">
+            <img src="logo-unicen.png" alt="Logo UNICEN" class="logo-header">
+            <span class="header-title">Comedor Universitario UNICEN</span>
+        </div>
+        <div class="header-right">
+            <span id="current-time"></span> | <span id="current-date"></span>
+        </div>
+    </header>
+    <div class="carousel-container">
+        <!-- Página 1: Menú -->
+        <div class="carousel-page" id="page-menu">
+            <main class="main-content-redesign">
+                <div class="main-left">
+                    <section class="menu-tomorrow-section">
+                        <h2 id="menu-tomorrow-title">PRÓXIMO MENÚ - <span id="menu-tomorrow-dia">DÍA</span> <span id="menu-tomorrow-fecha"></span></h2>
+                        <div class="menu-tomorrow-content">
+                            <div>
+                                <span class="menu-tomorrow-label general">🍽️ General</span>
+                                <div id="menu-tomorrow-general" class="menu-tomorrow-general"></div>
+                            </div>
+                            <div>
+                                <span class="menu-tomorrow-label vegetariano">🥗 Vegetariano</span>
+                                <div id="menu-tomorrow-vegetariano" class="menu-tomorrow-vegetariano"></div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="menu-week-section">
+                        <div id="menu-week-table"></div>
+                    </section>
+                </div>
+            </main>
+        </div>
 
-        <!-- Sección de Menú -->
-        <section class="menu-section">
-            <h2>Menú Semanal</h2>
-            <div class="menu-container">
-                <div class="menu-day">
-                    <h3>Lunes</h3>
-                    <div id="menu-lunes" class="menu-content"></div>
+        <!-- Página 2: Mensajes y Info -->
+        <div class="carousel-page" id="page-info">
+            <main class="main-content-redesign main-content-info-modern">
+                <div class="info-main-column">
+                    <section class="messages-section-redesign">
+                        <div class="messages-title">Mensajes Importantes</div>
+                        <div id="messages-carousel" class="messages-carousel"></div>
+                    </section>
+                    <div class="info-row">
+                        <section class="weather-section-redesign info-card">
+                            <div class="weather-title">Clima Actual</div>
+                            <div id="weather-content"></div>
+                        </section>
+                        <section class="info-section info-card">
+                            <div class="info-title">Información</div>
+                            <div class="info-item"><b>Horario de Atención</b><br>Lunes a Viernes: 9:00 - 18:00</div>
+                            <div class="info-item"><b>Ubicación</b><br>Campus Universitario - Tandil</div>
+                            <div class="info-item"><b>Contacto</b><br>comedor@unicen.edu.ar</div>
+                        </section>
+                    </div>
                 </div>
-                <div class="menu-day">
-                    <h3>Martes</h3>
-                    <div id="menu-martes" class="menu-content"></div>
+                <div class="qr-side-column">
+                    <section class="qr-section info-card">
+                        <div class="qr-title">Escanea para más info</div>
+                        <div class="qr-img-placeholder"></div>
+                    </section>
                 </div>
-                <div class="menu-day">
-                    <h3>Miércoles</h3>
-                    <div id="menu-miércoles" class="menu-content"></div>
-                </div>
-                <div class="menu-day">
-                    <h3>Jueves</h3>
-                    <div id="menu-jueves" class="menu-content"></div>
-                </div>
-                <div class="menu-day">
-                    <h3>Viernes</h3>
-                    <div id="menu-viernes" class="menu-content"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Sección de Mensajes -->
-        <section class="messages-section">
-            <h2>Mensajes Destacados</h2>
-            <div id="messages-content"></div>
-        </section>
-
-        <!-- Carrusel de Imágenes -->
-        <section class="carousel-section">
-            <div class="carousel-container">
-                <div id="carousel-content"></div>
-            </div>
-        </section>
+            </main>
+        </div>
     </div>
-
+    <footer class="main-footer">
+        <div class="footer-left">
+            <b>Comedor Universitario UNICEN</b><br>Campus Universitario - Tandil
+        </div>
+        <div class="footer-center">© 2023 Universidad Nacional del Centro de la Provincia de Buenos Aires</div>
+        <div class="footer-right">
+            <b>Horarios de Atención</b><br>Lunes a Viernes: 9:00 - 18:00
+        </div>
+    </footer>
     <script src="app.js"></script>
 </body>
 </html> 

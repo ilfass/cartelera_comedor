@@ -5,10 +5,16 @@ const WEATHER_CITY = 'Tandil'; // Ciudad de UNICEN
 
 // Intervalos de actualización (en milisegundos)
 const UPDATE_INTERVALS = {
-    MENU: 10000,        // 10 segundos
-    MESSAGES: 10000,    // 10 segundos
-    WEATHER: 300000,    // 5 minutos
+    MENU: 300000,       // 5 minutos
+    MESSAGES: 300000,   // 5 minutos
+    WEATHER: 900000,    // 15 minutos
     DATETIME: 1000      // 1 segundo
+};
+
+// Configuración del carrusel
+const carouselConfig = {
+    transitionTime: 600000, // 10 minutos en milisegundos
+    fadeTime: 1000 // 1 segundo para el efecto de fade
 };
 
 // Función para actualizar la hora y fecha
@@ -195,28 +201,227 @@ async function loadCarousel() {
 }
 
 function startCarousel() {
-    const carouselContent = document.getElementById('carousel-content');
-    const slides = carouselContent.children;
-    
     setInterval(() => {
-        currentSlide = (currentSlide + 1) % slides.length;
-        carouselContent.style.transform = `translateX(-${currentSlide * 100}%)`;
-    }, slideInterval);
+        const currentPage = document.querySelector('.carousel-page.active');
+        const nextPage = currentPage.nextElementSibling || document.querySelector('.carousel-page');
+        
+        currentPage.style.opacity = '0';
+        currentPage.classList.remove('active');
+        
+        nextPage.style.opacity = '1';
+        nextPage.classList.add('active');
+    }, carouselConfig.transitionTime);
+}
+
+function updateMenuTomorrowTitle() {
+    const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const hoy = new Date();
+    let manana = new Date(hoy);
+    manana.setDate(hoy.getDate() + 1);
+    // Si es viernes, mostrar lunes siguiente
+    if (hoy.getDay() === 5) {
+        manana.setDate(hoy.getDate() + 3);
+    } else if (hoy.getDay() === 6) { // Si es sábado, mostrar lunes
+        manana.setDate(hoy.getDate() + 2);
+    }
+    const diaNombre = dias[manana.getDay()];
+    const diaNumero = String(manana.getDate()).padStart(2, '0');
+    const mesNombre = meses[manana.getMonth()];
+    document.getElementById('menu-tomorrow-dia').textContent = diaNombre.charAt(0).toUpperCase() + diaNombre.slice(1);
+    document.getElementById('menu-tomorrow-fecha').textContent = `${diaNumero} de ${mesNombre}`;
+}
+
+// Mostrar menú de mañana en el bloque destacado
+async function loadMenuTomorrow() {
+    try {
+        const response = await fetch(`${API_URL}/api/menu`);
+        const menu = await response.json();
+        const diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+        const hoy = new Date();
+        let manana = new Date(hoy);
+        manana.setDate(hoy.getDate() + 1);
+        // Si es viernes, mostrar lunes siguiente
+        if (hoy.getDay() === 5) {
+            manana.setDate(hoy.getDate() + 3);
+        } else if (hoy.getDay() === 6) {
+            manana.setDate(hoy.getDate() + 2);
+        }
+        const diaNombre = diasSemana[manana.getDay()];
+        const menuDia = menu.find(m => m.dia.toLowerCase() === diaNombre);
+        document.getElementById('menu-tomorrow-general').textContent = menuDia ? (menuDia.menu_general || 'No disponible') : 'No disponible';
+        document.getElementById('menu-tomorrow-vegetariano').textContent = menuDia ? (menuDia.menu_vegetariano || 'No disponible') : 'No disponible';
+    } catch (error) {
+        document.getElementById('menu-tomorrow-general').textContent = 'No disponible';
+        document.getElementById('menu-tomorrow-vegetariano').textContent = 'No disponible';
+    }
+}
+
+// Carrusel de mensajes e imágenes mezclados
+let currentMixedSlide = 0;
+let mixedSlides = [];
+const mixedSlideInterval = 600000; // 10 minutos
+
+async function loadMixedCarousel() {
+    try {
+        // Obtener mensajes
+        const messagesRes = await fetch(`${API_URL}/api/mensajes`);
+        const messages = await messagesRes.json();
+        // Obtener imágenes
+        const imagesRes = await fetch(`${API_URL}/api/imagenes`);
+        const images = await imagesRes.json();
+        // Mezclar ambos
+        mixedSlides = [...messages.map(m => ({type: 'mensaje', ...m})), ...images.map(i => ({type: 'imagen', ...i}))];
+        // Alternar el orden (mensaje, imagen, mensaje, imagen...)
+        mixedSlides.sort((a, b) => (a.type === b.type ? 0 : a.type === 'mensaje' ? -1 : 1));
+        showMixedSlide();
+        if (mixedSlides.length > 1) {
+            setInterval(() => {
+                currentMixedSlide = (currentMixedSlide + 1) % mixedSlides.length;
+                showMixedSlide();
+            }, mixedSlideInterval);
+        }
+    } catch (error) {
+        document.getElementById('messages-carousel').innerHTML = '<p>No se pudo cargar el carrusel</p>';
+    }
+}
+
+function showMixedSlide() {
+    const container = document.getElementById('messages-carousel');
+    if (!mixedSlides.length) {
+        container.innerHTML = '<p style="text-align:center;">No hay mensajes ni imágenes disponibles</p>';
+        return;
+    }
+    const slide = mixedSlides[currentMixedSlide];
+    if (slide.type === 'mensaje') {
+        container.innerHTML = `
+            <div class="message-carousel" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:180px; text-align:center;">
+                <b style="font-size:1.5em;">${slide.titulo}</b><br>
+                <span style="font-size:1.2em;">${slide.contenido}</span>
+            </div>
+        `;
+    } else if (slide.type === 'imagen') {
+        container.innerHTML = `
+            <div class="image-carousel" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:180px;">
+                <img id="carousel-img" src="${slide.url}" alt="${slide.titulo || 'Imagen'}" style="width:100%; height:auto; max-width:100%; max-height:180px; display:block; margin:0 auto; border-radius:8px;">
+                <div style="text-align:center; margin-top:8px; color:#23406e; font-weight:500;">${slide.titulo || ''}</div>
+            </div>
+        `;
+        // Si la imagen no carga, pasar al siguiente slide
+        const img = document.getElementById('carousel-img');
+        if (img) {
+            img.onerror = function() {
+                // Eliminar el slide con imagen rota para no volver a mostrarlo
+                mixedSlides.splice(currentMixedSlide, 1);
+                if (mixedSlides.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;">No hay mensajes ni imágenes disponibles</p>';
+                    return;
+                }
+                if (currentMixedSlide >= mixedSlides.length) currentMixedSlide = 0;
+                showMixedSlide();
+            };
+        }
+    }
+}
+
+// Mostrar tabla de menú semanal compacto debajo del menú de mañana
+async function renderMenuWeekTable() {
+    try {
+        const response = await fetch(`${API_URL}/api/menu`);
+        const menu = await response.json();
+        const diasSemana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'];
+        const hoy = new Date();
+        const diaActual = diasSemana[hoy.getDay() - 1];
+        
+        // Calcular el día de mañana
+        let manana = new Date(hoy);
+        manana.setDate(hoy.getDate() + 1);
+        // Si es viernes, mostrar lunes siguiente
+        if (hoy.getDay() === 5) {
+            manana.setDate(hoy.getDate() + 3);
+        } else if (hoy.getDay() === 6) {
+            manana.setDate(hoy.getDate() + 2);
+        }
+        const diaManana = diasSemana[manana.getDay() - 1];
+        
+        // Filtrar los días para excluir el día de mañana
+        const diasAMostrar = diasSemana.filter(dia => dia !== diaManana);
+        
+        // Construir tabla
+        let html = '<table id="menu-week-table">';
+        
+        // Encabezado con días
+        html += '<tr>';
+        html += '<th style="width: 10%; text-align: center; font-size: 2rem; background: linear-gradient(45deg, #2d5a27, #3a7d32, #51cb93);">Tipo</th>'; // Columna para emojis
+        diasAMostrar.forEach(dia => {
+            const esHoy = dia === diaActual;
+            html += `<th class="${esHoy ? 'menu-week-cell-dia-hoy' : ''}">${esHoy ? 'HOY' : dia.charAt(0).toUpperCase() + dia.slice(1)}</th>`;
+        });
+        html += '</tr>';
+        
+        // Fila de menú general
+        html += '<tr class="menu-general-row">';
+        html += '<td style="text-align: center; font-size: 5rem; padding: 15px; text-shadow: 2px 2px 7px rgb(0 0 0); border-right: 4px solid #dc2626;">🍽️</td>'; // Emoji para menú general con borde rojo
+        diasAMostrar.forEach(dia => {
+            const menuDia = menu.find(m => m.dia.toLowerCase() === dia);
+            const esHoy = dia === diaActual;
+            html += `<td class="${esHoy ? 'current-day' : ''}">${menuDia ? (menuDia.menu_general || 'No disponible') : 'No disponible'}</td>`;
+        });
+        html += '</tr>';
+        
+        // Fila de menú vegetariano
+        html += '<tr class="menu-vegetariano-row">';
+        html += '<td style="text-align: center; font-size: 5rem; padding: 15px; text-shadow: 2px 2px 7px rgb(0 0 0); border-right: 4px solid #3b82f6;">🥗</td>'; // Emoji para menú vegetariano con borde azul
+        diasAMostrar.forEach(dia => {
+            const menuDia = menu.find(m => m.dia.toLowerCase() === dia);
+            const esHoy = dia === diaActual;
+            html += `<td class="${esHoy ? 'current-day' : ''}">${menuDia ? (menuDia.menu_vegetariano || 'No disponible') : 'No disponible'}</td>`;
+        });
+        html += '</tr>';
+        
+        html += '</table>';
+        document.getElementById('menu-week-table').innerHTML = html;
+    } catch (error) {
+        document.getElementById('menu-week-table').innerHTML = '<p>Error al cargar el menú semanal</p>';
+    }
+}
+
+// Carrusel de páginas
+let currentPage = 0;
+const pages = ['page-menu', 'page-info'];
+const PAGE_INTERVAL = 600000; // 10 minutos
+
+function initPageCarousel() {
+    // Mostrar la primera página
+    document.getElementById(pages[0]).classList.add('active');
+    
+    // Cambiar de página cada 10 segundos
+    setInterval(() => {
+        // Ocultar página actual
+        document.getElementById(pages[currentPage]).classList.remove('active');
+        
+        // Avanzar al siguiente índice
+        currentPage = (currentPage + 1) % pages.length;
+        
+        // Mostrar nueva página
+        document.getElementById(pages[currentPage]).classList.add('active');
+    }, PAGE_INTERVAL);
 }
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
-    // Cargar datos iniciales
     updateDateTime();
-    loadMenu();
-    loadMessages();
+    updateMenuTomorrowTitle();
+    loadMenuTomorrow();
+    renderMenuWeekTable();
+    loadMixedCarousel();
     loadWeather();
-    loadCarousel();
+    initPageCarousel(); // Inicializar el carrusel de páginas
     
-    // Configurar intervalos de actualización
     setInterval(updateDateTime, UPDATE_INTERVALS.DATETIME);
-    setInterval(loadMenu, UPDATE_INTERVALS.MENU);
-    setInterval(loadMessages, UPDATE_INTERVALS.MESSAGES);
+    setInterval(loadMenuTomorrow, UPDATE_INTERVALS.MENU);
+    setInterval(renderMenuWeekTable, UPDATE_INTERVALS.MENU);
+    setInterval(loadMixedCarousel, UPDATE_INTERVALS.MESSAGES);
     setInterval(loadWeather, UPDATE_INTERVALS.WEATHER);
     
     // Agregar indicador visual de actualización
