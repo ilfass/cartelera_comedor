@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Página Secundaria en Carrusel - Sin Scroll</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        .test-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .test-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .test-controls button {
+            margin: 2px;
+            padding: 5px 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .test-controls button:hover {
+            background: #0056b3;
+        }
+        
+        .scroll-indicator {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(255,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+        }
+
+        /* Estilos específicos para corregir el QR y la imagen */
+        .carousel-page#page-info .info-page-container {
+            height: calc(100vh - 120px) !important; /* Restar header y footer */
+            min-height: calc(100vh - 120px) !important;
+            max-height: calc(100vh - 120px) !important;
+            padding: 0.5rem !important;
+            gap: 0.5rem !important;
+        }
+
+        .carousel-page#page-info .info-left-column,
+        .carousel-page#page-info .info-right-column {
+            gap: 0.4rem !important;
+            padding: 0.3rem !important;
+        }
+
+        .carousel-page#page-info .featured-image-container,
+        .carousel-page#page-info .qr-container {
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            padding: 0.4rem !important;
+        }
+
+        .carousel-page#page-info .featured-image {
+            height: 200px !important;
+            min-height: 200px !important;
+            max-height: 200px !important;
+        }
+
+        .carousel-page#page-info .featured-image img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+        }
+
+        .carousel-page#page-info .qr-code {
+            height: 150px !important;
+            min-height: 150px !important;
+            max-height: 150px !important;
+        }
+
+        .carousel-page#page-info .qr-code img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+        }
+
+        /* Responsive para pantallas pequeñas */
+        @media (max-width: 900px) {
+            .carousel-page#page-info .info-page-container {
+                height: calc(100vh - 100px) !important;
+                min-height: calc(100vh - 100px) !important;
+                max-height: calc(100vh - 100px) !important;
+                padding: 0.3rem !important;
+                gap: 0.3rem !important;
+            }
+
+            .carousel-page#page-info .featured-image {
+                height: 150px !important;
+                min-height: 150px !important;
+                max-height: 150px !important;
+            }
+
+            .carousel-page#page-info .qr-code {
+                height: 120px !important;
+                min-height: 120px !important;
+                max-height: 120px !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .carousel-page#page-info .info-page-container {
+                height: calc(100vh - 80px) !important;
+                min-height: calc(100vh - 80px) !important;
+                max-height: calc(100vh - 80px) !important;
+                padding: 0.2rem !important;
+                gap: 0.2rem !important;
+            }
+
+            .carousel-page#page-info .featured-image {
+                height: 120px !important;
+                min-height: 120px !important;
+                max-height: 120px !important;
+            }
+
+            .carousel-page#page-info .qr-code {
+                height: 100px !important;
+                min-height: 100px !important;
+                max-height: 100px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <strong>Prueba Página Secundaria en Carrusel</strong><br>
+        Verificando que no haya scroll<br>
+        QR e imagen deben verse completos
+    </div>
+    
+    <div class="test-controls">
+        <button onclick="checkScroll()">Verificar Scroll</button>
+        <button onclick="toggleFullscreen()">Pantalla Completa</button>
+        <button onclick="window.location.reload()">Recargar</button>
+    </div>
+    
+    <div class="scroll-indicator" id="scrollIndicator">
+        ⚠️ SCROLL DETECTADO - Problema encontrado
+    </div>
+
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-left">
+            <img src="assets/logo-unicen.png" alt="Logo UNICEN" class="logo-header">
+            <span class="header-title">Comedor Universitario UNICEN</span>
+        </div>
+        <div class="header-right">
+            <span id="current-time">12:00:00</span> | <span id="current-date">23/06/2025</span>
+        </div>
+    </header>
+
+    <!-- Carrusel con página secundaria -->
+    <div class="carousel-container">
+        <!-- Página 2: Información y Mensajes -->
+        <div class="carousel-page active" id="page-info">
+            <div class="info-page-container">
+                <!-- Columna Izquierda -->
+                <div class="info-left-column">
+                    <div class="messages-container">
+                        <h2 class="section-title">📢 Mensajes Importantes</h2>
+                        <div class="messages-display">
+                            <div class="message-item">¡Bienvenidos al Comedor UNICEN!</div>
+                            <div class="message-item">Menú Vegetariano Disponible</div>
+                            <div class="message-item">Horarios de Atención</div>
+                            <div class="message-item">Información Nutricional</div>
+                        </div>
+                    </div>
+                    
+                    <div class="featured-image-container">
+                        <h2 class="section-title">🖼️ Imagen Destacada</h2>
+                        <div class="featured-image">
+                            <img src="https://via.placeholder.com/400x300/4CAF50/white?text=Imagen+Destacada" alt="Imagen destacada">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Columna Derecha -->
+                <div class="info-right-column">
+                    <div class="weather-container">
+                        <h2 class="section-title">🌤️ Clima Actual</h2>
+                        <div class="weather-display">
+                            <div class="weather-emoji">☀️</div>
+                            <div class="weather-info">
+                                <h4>Buenos Aires</h4>
+                                <p>25°C - Soleado</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-container">
+                        <h2 class="section-title">ℹ️ Información</h2>
+                        <div class="info-content">
+                            <div class="info-item">
+                                <strong>🕒 Horario de Atención</strong>
+                                <p>Lunes a Viernes: 9:00 - 18:00</p>
+                            </div>
+                            <div class="info-item">
+                                <strong>📍 Ubicación</strong>
+                                <p>Campus Universitario - Tandil</p>
+                            </div>
+                            <div class="info-item">
+                                <strong>📧 Contacto</strong>
+                                <p>comedor@unicen.edu.ar</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="qr-container">
+                        <h2 class="section-title">📱 Escanea para más info</h2>
+                        <div class="qr-code">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://comedor.unicen.edu.ar/menu" alt="Código QR">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-left">
+            <b>Comedor Universitario UNICEN</b><br>Campus Universitario - Tandil
+        </div>
+        <div class="footer-center">© 2023 Universidad Nacional del Centro de la Provincia de Buenos Aires</div>
+        <div class="footer-right">
+            <b>Horarios de Atención</b><br>Lunes a Viernes: 9:00 - 18:00
+        </div>
+    </footer>
+
+    <script>
+        // Verificar si hay scroll
+        function checkScroll() {
+            const body = document.body;
+            const html = document.documentElement;
+            const scrollIndicator = document.getElementById('scrollIndicator');
+            
+            const hasScroll = body.scrollHeight > body.clientHeight || 
+                            html.scrollHeight > html.clientHeight ||
+                            body.scrollWidth > body.clientWidth ||
+                            html.scrollWidth > html.clientWidth;
+            
+            if (hasScroll) {
+                scrollIndicator.style.display = 'block';
+                console.error('❌ SCROLL DETECTADO - Problema encontrado');
+                console.log('Body scrollHeight:', body.scrollHeight, 'clientHeight:', body.clientHeight);
+                console.log('HTML scrollHeight:', html.scrollHeight, 'clientHeight:', html.clientHeight);
+            } else {
+                scrollIndicator.style.display = 'none';
+                console.log('✅ No hay scroll - Todo correcto');
+            }
+        }
+        
+        // Toggle pantalla completa
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // Verificar scroll al cargar y al cambiar tamaño
+        window.addEventListener('load', checkScroll);
+        window.addEventListener('resize', checkScroll);
+        
+        // Verificar cada 2 segundos
+        setInterval(checkScroll, 2000);
+        
+        // Log inicial
+        console.log('🔍 Iniciando verificación de scroll en carrusel...');
+        console.log('📱 Tamaño de ventana:', window.innerWidth, 'x', window.innerHeight);
+        console.log('📄 Tamaño de documento:', document.documentElement.scrollWidth, 'x', document.documentElement.scrollHeight);
+    </script>
+</body>
+</html> 

@@ -110,32 +110,67 @@ async function loadMenu() {
 // Cargar mensajes destacados
 async function loadMessages() {
     try {
+        console.log('🔄 Cargando mensajes...');
         const response = await fetch(`${API_URL}/api/mensajes`);
         const messages = await response.json();
+        console.log('📨 Mensajes recibidos:', messages);
         
+        // Actualizar mensajes en la página principal (si existe)
         const messagesContent = document.getElementById('messages-content');
-        messagesContent.innerHTML = messages.map(message => `
-            <div class="message ${message.destacado ? 'destacado' : ''}">
-                <h3>${message.titulo}</h3>
-                <p>${message.contenido}</p>
-                <small>${formatDate(message.fecha)}</small>
-            </div>
-        `).join('');
+        if (messagesContent) {
+            console.log('📝 Actualizando mensajes en página principal');
+            messagesContent.innerHTML = messages.map(message => `
+                <div class="message ${message.destacado ? 'destacado' : ''}">
+                    <h3>${message.titulo}</h3>
+                    <p>${message.contenido}</p>
+                    <small>${formatDate(message.fecha)}</small>
+                </div>
+            `).join('');
+        }
+        
+        // Actualizar mensajes en la página secundaria
+        const messagesDisplay = document.getElementById('messages-display');
+        if (messagesDisplay) {
+            console.log('📝 Actualizando mensajes en página secundaria');
+            if (messages.length > 0) {
+                messagesDisplay.innerHTML = messages.map(message => `
+                    <div class="message-item ${message.destacado ? 'destacado' : ''}">
+                        <h3>${message.titulo}</h3>
+                        <p>${message.contenido}</p>
+                        <small>${formatDate(message.fecha)}</small>
+                    </div>
+                `).join('');
+                console.log('✅ Mensajes actualizados en página secundaria');
+            } else {
+                messagesDisplay.innerHTML = '<div class="message-item"><p>No hay mensajes disponibles</p></div>';
+                console.log('⚠️ No hay mensajes disponibles');
+            }
+        } else {
+            console.warn('⚠️ Elemento messages-display no encontrado');
+        }
     } catch (error) {
-        console.error('Error al cargar los mensajes:', error);
+        console.error('❌ Error al cargar los mensajes:', error);
         const messagesContent = document.getElementById('messages-content');
-        messagesContent.innerHTML = '<p>No se pudieron cargar los mensajes</p>';
+        const messagesDisplay = document.getElementById('messages-display');
+        
+        if (messagesContent) {
+            messagesContent.innerHTML = '<p>No se pudieron cargar los mensajes</p>';
+        }
+        if (messagesDisplay) {
+            messagesDisplay.innerHTML = '<div class="message-item"><p>Error al cargar los mensajes</p></div>';
+        }
     }
 }
 
 // Cargar clima actual
 async function loadWeather() {
     try {
+        console.log('🔄 Cargando clima...');
         const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${WEATHER_CITY}&appid=${WEATHER_API_KEY}&units=metric&lang=es`);
         const data = await response.json();
+        console.log('🌤️ Datos del clima recibidos:', data);
         
         if (data.cod === 200) {
-            const weatherContent = document.getElementById('weather-content');
             const temp = Math.round(data.main.temp);
             const humidity = data.main.humidity;
             const description = data.weather[0].description;
@@ -156,28 +191,51 @@ async function loadWeather() {
 
             const emoji = getWeatherEmoji(weatherId);
             
-            weatherContent.innerHTML = `
-                <div class="weather-info">
-                    <div class="weather-emoji">${emoji}</div>
-                    <h3>${temp}°C</h3>
-                    <p>${description}</p>
-                    <p>💧 ${humidity}%</p>
-                </div>
-            `;
+            // Actualizar clima en la página principal (si existe)
+            const weatherContent = document.getElementById('weather-content');
+            if (weatherContent) {
+                console.log('📝 Actualizando clima en página principal');
+                weatherContent.innerHTML = `
+                    <div class="weather-info">
+                        <div class="weather-emoji">${emoji}</div>
+                        <h3>${temp}°C</h3>
+                        <p>${description}</p>
+                        <p>💧 ${humidity}%</p>
+                    </div>
+                `;
+                console.log('✅ Clima actualizado en página principal');
+            }
+            
+            // Actualizar clima en la página secundaria
+            const weatherDisplay = document.getElementById('weather-display');
+            if (weatherDisplay) {
+                console.log('📝 Actualizando clima en página secundaria');
+                weatherDisplay.innerHTML = `
+                    <div class="weather-info">
+                        <div class="weather-emoji">${emoji}</div>
+                        <h3>${temp}°C</h3>
+                        <p>${description}</p>
+                        <p>💧 ${humidity}%</p>
+                    </div>
+                `;
+                console.log('✅ Clima actualizado en página secundaria');
+            } else {
+                console.warn('⚠️ Elemento weather-display no encontrado');
+            }
         } else {
-            throw new Error('No se pudo obtener el clima');
+            console.error('❌ Error en la respuesta del clima:', data);
         }
     } catch (error) {
-        console.error('Error al cargar el clima:', error);
+        console.error('❌ Error al cargar el clima:', error);
         const weatherContent = document.getElementById('weather-content');
-        weatherContent.innerHTML = `
-            <div class="weather-info">
-                <div class="weather-emoji">❓</div>
-                <h3>--°C</h3>
-                <p>Clima no disponible</p>
-                <p>💧 --%</p>
-            </div>
-        `;
+        const weatherDisplay = document.getElementById('weather-display');
+        
+        if (weatherContent) {
+            weatherContent.innerHTML = '<p>No se pudo cargar el clima</p>';
+        }
+        if (weatherDisplay) {
+            weatherDisplay.innerHTML = '<p>No se pudo cargar el clima</p>';
+        }
     }
 }
 
@@ -287,6 +345,13 @@ const mixedSlideInterval = 600000; // 10 minutos
 
 async function loadMixedCarousel() {
     try {
+        // Verificar si el elemento existe
+        const carouselElement = document.getElementById('messages-carousel');
+        if (!carouselElement) {
+            console.log('⚠️ Elemento messages-carousel no encontrado, omitiendo carga del carrusel mixto');
+            return;
+        }
+        
         // Obtener mensajes
         const messagesRes = await fetch(`${API_URL}/api/mensajes`);
         const messages = await messagesRes.json();
@@ -305,12 +370,21 @@ async function loadMixedCarousel() {
             }, mixedSlideInterval);
         }
     } catch (error) {
-        document.getElementById('messages-carousel').innerHTML = '<p>No se pudo cargar el carrusel</p>';
+        console.error('❌ Error en loadMixedCarousel:', error);
+        const carouselElement = document.getElementById('messages-carousel');
+        if (carouselElement) {
+            carouselElement.innerHTML = '<p>No se pudo cargar el carrusel</p>';
+        }
     }
 }
 
 function showMixedSlide() {
     const container = document.getElementById('messages-carousel');
+    if (!container) {
+        console.log('⚠️ Elemento messages-carousel no encontrado en showMixedSlide');
+        return;
+    }
+    
     if (!mixedSlides.length) {
         container.innerHTML = '<p style="text-align:center;">No hay mensajes ni imágenes disponibles</p>';
         return;
@@ -431,23 +505,163 @@ async function renderMenuWeekTable() {
 // Carrusel de páginas
 let currentPage = 0;
 const pages = ['page-menu', 'page-info'];
-const PAGE_INTERVAL = 600000; // 10 minutos
+const PAGE_INTERVAL = 10000; // 10 segundos (cambiado de 10 minutos para pruebas)
 
 function initPageCarousel() {
+    console.log('Inicializando carrusel de páginas...');
+    
+    // Verificar que los elementos existan
+    pages.forEach(pageId => {
+        const element = document.getElementById(pageId);
+        if (element) {
+            console.log(`Elemento ${pageId} encontrado:`, element);
+        } else {
+            console.error(`Elemento ${pageId} NO encontrado!`);
+        }
+    });
+    
     // Mostrar la primera página
     document.getElementById(pages[0]).classList.add('active');
+    console.log('Página activa inicial:', pages[0]);
     
     // Cambiar de página cada 10 segundos
     setInterval(() => {
+        console.log('Cambiando página...');
+        
         // Ocultar página actual
         document.getElementById(pages[currentPage]).classList.remove('active');
+        console.log('Página oculta:', pages[currentPage]);
         
         // Avanzar al siguiente índice
         currentPage = (currentPage + 1) % pages.length;
         
         // Mostrar nueva página
         document.getElementById(pages[currentPage]).classList.add('active');
+        console.log('Nueva página activa:', pages[currentPage]);
     }, PAGE_INTERVAL);
+}
+
+// Cargar imagen destacada
+async function loadFeaturedImage() {
+    try {
+        console.log('🔄 Cargando imagen destacada...');
+        const response = await fetch(`${API_URL}/api/imagenes`);
+        const images = await response.json();
+        console.log('🖼️ Imágenes recibidas:', images);
+        
+        // Actualizar imagen destacada en la página principal (si existe)
+        const imageContainer = document.querySelector('.featured-image-container');
+        if (imageContainer) {
+            console.log('📝 Actualizando imagen en página principal');
+            if (images.length > 0) {
+                // Tomar la primera imagen como destacada
+                const featuredImage = images[0];
+                imageContainer.innerHTML = `
+                    <img src="${featuredImage.url}" alt="${featuredImage.titulo || 'Imagen destacada'}" 
+                         style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 0.5rem;">
+                    <div style="position: absolute; bottom: 0.5rem; left: 0.5rem; right: 0.5rem; 
+                               background: rgba(0,0,0,0.7); color: white; padding: 0.5rem; 
+                               border-radius: 0.25rem; font-size: 0.9rem; text-align: center;">
+                        ${featuredImage.titulo || 'Imagen destacada'}
+                    </div>
+                `;
+                imageContainer.style.position = 'relative';
+                console.log('✅ Imagen actualizada en página principal');
+            } else {
+                // Mostrar placeholder si no hay imágenes
+                imageContainer.innerHTML = '<div class="image-placeholder">📸</div>';
+                console.log('⚠️ No hay imágenes disponibles para página principal');
+            }
+        }
+        
+        // Actualizar imagen destacada en la página secundaria
+        const featuredImageElement = document.getElementById('featured-image');
+        if (featuredImageElement) {
+            console.log('📝 Actualizando imagen en página secundaria');
+            if (images.length > 0) {
+                // Tomar la primera imagen como destacada
+                const featuredImage = images[0];
+                featuredImageElement.innerHTML = `
+                    <img src="${featuredImage.url}" alt="${featuredImage.titulo || 'Imagen destacada'}" 
+                         style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 0.5rem;">
+                    <div style="position: absolute; bottom: 0.5rem; left: 0.5rem; right: 0.5rem; 
+                               background: rgba(0,0,0,0.7); color: white; padding: 0.5rem; 
+                               border-radius: 0.25rem; font-size: 0.9rem; text-align: center;">
+                        ${featuredImage.titulo || 'Imagen destacada'}
+                    </div>
+                `;
+                featuredImageElement.style.position = 'relative';
+                console.log('✅ Imagen actualizada en página secundaria');
+            } else {
+                // Mostrar placeholder si no hay imágenes
+                featuredImageElement.innerHTML = '<div class="image-placeholder">📸</div>';
+                console.log('⚠️ No hay imágenes disponibles para página secundaria');
+            }
+        } else {
+            console.warn('⚠️ Elemento featured-image no encontrado');
+        }
+    } catch (error) {
+        console.error('❌ Error al cargar imagen destacada:', error);
+        const imageContainer = document.querySelector('.featured-image-container');
+        const featuredImageElement = document.getElementById('featured-image');
+        
+        if (imageContainer) {
+            imageContainer.innerHTML = '<div class="image-placeholder">📸</div>';
+        }
+        if (featuredImageElement) {
+            featuredImageElement.innerHTML = '<div class="image-placeholder">📸</div>';
+        }
+    }
+}
+
+// Cargar código QR
+async function loadQR() {
+    try {
+        console.log('🔄 Cargando código QR...');
+        const response = await fetch(`${API_URL}/api/qr`);
+        const qrCodes = await response.json();
+        console.log('📱 Códigos QR recibidos:', qrCodes);
+        
+        // Buscar el primer código QR activo
+        const activeQR = qrCodes.find(qr => qr.activo);
+        
+        if (activeQR) {
+            console.log('📱 Código QR activo encontrado:', activeQR);
+            
+            // Generar el código QR usando una API externa
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(activeQR.url)}`;
+            
+            // Actualizar el contenedor QR
+            const qrContainer = document.querySelector('.qr-code');
+            if (qrContainer) {
+                qrContainer.innerHTML = `
+                    <img src="${qrUrl}" alt="Código QR - ${activeQR.titulo}" 
+                         style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 0.5rem;">
+                    <div style="position: absolute; bottom: 0.5rem; left: 0.5rem; right: 0.5rem; 
+                               background: rgba(0,0,0,0.7); color: white; padding: 0.5rem; 
+                               border-radius: 0.25rem; font-size: 0.9rem; text-align: center;">
+                        ${activeQR.titulo}
+                    </div>
+                `;
+                qrContainer.style.position = 'relative';
+                console.log('✅ Código QR actualizado');
+            } else {
+                console.warn('⚠️ Elemento qr-code no encontrado');
+            }
+        } else {
+            console.log('⚠️ No hay códigos QR activos');
+            const qrContainer = document.querySelector('.qr-code');
+            if (qrContainer) {
+                qrContainer.innerHTML = '<div class="qr-placeholder">📱</div>';
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error al cargar código QR:', error);
+        const qrContainer = document.querySelector('.qr-code');
+        if (qrContainer) {
+            qrContainer.innerHTML = '<div class="qr-placeholder">📱</div>';
+        }
+    }
 }
 
 // Inicialización
@@ -457,14 +671,20 @@ document.addEventListener('DOMContentLoaded', () => {
     loadMenuTomorrow();
     renderMenuWeekTable();
     loadMixedCarousel();
+    loadMessages(); // Cargar mensajes
     loadWeather();
+    loadFeaturedImage(); // Cargar imagen destacada
+    loadQR(); // Cargar código QR
     initPageCarousel(); // Inicializar el carrusel de páginas
     
     setInterval(updateDateTime, UPDATE_INTERVALS.DATETIME);
     setInterval(loadMenuTomorrow, UPDATE_INTERVALS.MENU);
     setInterval(renderMenuWeekTable, UPDATE_INTERVALS.MENU);
     setInterval(loadMixedCarousel, UPDATE_INTERVALS.MESSAGES);
+    setInterval(loadMessages, UPDATE_INTERVALS.MESSAGES); // Actualizar mensajes
     setInterval(loadWeather, UPDATE_INTERVALS.WEATHER);
+    setInterval(loadFeaturedImage, UPDATE_INTERVALS.MESSAGES); // Actualizar imagen destacada
+    setInterval(loadQR, UPDATE_INTERVALS.MESSAGES); // Actualizar código QR
     
     // Agregar indicador visual de actualización
     const updateIndicator = document.createElement('div');

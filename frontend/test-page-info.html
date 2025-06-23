@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Página Secundaria - Sin Scroll</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        .test-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .test-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .test-controls button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 2px;
+            font-size: 11px;
+        }
+        
+        .test-controls button:hover {
+            background: #0056b3;
+        }
+        
+        .scroll-indicator {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .scroll-indicator.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <strong>🧪 Prueba Página Secundaria</strong><br>
+        <span id="viewport-info">Cargando...</span><br>
+        <span id="scroll-info">Sin scroll</span>
+    </div>
+    
+    <div class="test-controls">
+        <button onclick="toggleQR()">Toggle QR</button>
+        <button onclick="toggleImage()">Toggle Imagen</button>
+        <button onclick="toggleMessages()">Toggle Mensajes</button>
+        <button onclick="toggleWeather()">Toggle Clima</button>
+        <button onclick="refreshData()">🔄 Recargar</button>
+    </div>
+    
+    <div class="scroll-indicator" id="scroll-indicator">
+        ⚠️ SCROLL DETECTADO
+    </div>
+
+    <!-- Página secundaria -->
+    <div class="carousel-page" id="page-info">
+        <div class="info-page-container">
+            <!-- Columna izquierda -->
+            <div class="info-left-column">
+                <!-- Mensajes -->
+                <div class="messages-container">
+                    <h3 class="section-title">📢 Mensajes Importantes</h3>
+                    <div class="messages-display" id="messages-display">
+                        <div class="message-item">Cargando mensajes...</div>
+                    </div>
+                </div>
+                
+                <!-- Imagen destacada -->
+                <div class="featured-image-container">
+                    <h3 class="section-title">🖼️ Imagen Destacada</h3>
+                    <div class="featured-image" id="featured-image">
+                        <div class="qr-placeholder">📸</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Columna derecha -->
+            <div class="info-right-column">
+                <!-- Clima -->
+                <div class="weather-container">
+                    <h3 class="section-title">🌤️ Clima</h3>
+                    <div class="weather-display" id="weather-display">
+                        <div class="weather-emoji">🌤️</div>
+                        <div class="weather-info">Cargando clima...</div>
+                    </div>
+                </div>
+                
+                <!-- Información -->
+                <div class="info-container">
+                    <h3 class="section-title">ℹ️ Información</h3>
+                    <div class="info-content">
+                        <div class="info-item">Horarios: 11:00 - 15:00</div>
+                        <div class="info-item">Ubicación: Comedor Central</div>
+                        <div class="info-item">Tel: (249) 444-0000</div>
+                    </div>
+                </div>
+                
+                <!-- QR -->
+                <div class="qr-container">
+                    <h3 class="section-title">📱 Escanea para más info</h3>
+                    <div class="qr-code" id="qr-code">
+                        <div class="qr-placeholder">📱</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        
+        // Función para verificar scroll
+        function checkScroll() {
+            const hasScroll = document.documentElement.scrollHeight > document.documentElement.clientHeight ||
+                            document.body.scrollHeight > document.body.clientHeight;
+            
+            const scrollIndicator = document.getElementById('scroll-indicator');
+            const scrollInfo = document.getElementById('scroll-info');
+            
+            if (hasScroll) {
+                scrollIndicator.classList.add('show');
+                scrollInfo.textContent = '⚠️ CON SCROLL';
+                scrollInfo.style.color = '#dc3545';
+            } else {
+                scrollIndicator.classList.remove('show');
+                scrollInfo.textContent = '✅ Sin scroll';
+                scrollInfo.style.color = '#28a745';
+            }
+        }
+        
+        // Función para actualizar información del viewport
+        function updateViewportInfo() {
+            const viewportInfo = document.getElementById('viewport-info');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const scrollHeight = document.documentElement.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight;
+            
+            viewportInfo.textContent = `${width}x${height}px | Scroll: ${scrollHeight}px / ${clientHeight}px`;
+        }
+        
+        // Cargar mensajes
+        async function loadMessages() {
+            try {
+                const response = await fetch(`${API_URL}/api/mensajes`);
+                const messages = await response.json();
+                const messagesDisplay = document.getElementById('messages-display');
+                
+                if (messages.length > 0) {
+                    messagesDisplay.innerHTML = messages.slice(0, 3).map(msg => 
+                        `<div class="message-item">${msg.contenido}</div>`
+                    ).join('');
+                } else {
+                    messagesDisplay.innerHTML = '<div class="message-item">No hay mensajes disponibles</div>';
+                }
+            } catch (error) {
+                console.error('Error al cargar mensajes:', error);
+                document.getElementById('messages-display').innerHTML = 
+                    '<div class="message-item">Error al cargar mensajes</div>';
+            }
+        }
+        
+        // Cargar imagen destacada
+        async function loadFeaturedImage() {
+            try {
+                const response = await fetch(`${API_URL}/api/imagenes`);
+                const images = await response.json();
+                const featuredImage = document.getElementById('featured-image');
+                
+                if (images.length > 0) {
+                    const image = images[0];
+                    featuredImage.innerHTML = `
+                        <img src="${image.url}" alt="${image.titulo}" 
+                             style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 0.3rem;">
+                    `;
+                } else {
+                    featuredImage.innerHTML = '<div class="qr-placeholder">📸</div>';
+                }
+            } catch (error) {
+                console.error('Error al cargar imagen:', error);
+                document.getElementById('featured-image').innerHTML = '<div class="qr-placeholder">📸</div>';
+            }
+        }
+        
+        // Cargar QR
+        async function loadQR() {
+            try {
+                const response = await fetch(`${API_URL}/api/qr`);
+                const qrCodes = await response.json();
+                const qrCode = document.getElementById('qr-code');
+                
+                if (qrCodes.length > 0) {
+                    const activeQR = qrCodes.find(qr => qr.activo) || qrCodes[0];
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(activeQR.url)}`;
+                    
+                    qrCode.innerHTML = `
+                        <img src="${qrUrl}" alt="QR - ${activeQR.titulo}" 
+                             style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 0.3rem;">
+                    `;
+                } else {
+                    qrCode.innerHTML = '<div class="qr-placeholder">📱</div>';
+                }
+            } catch (error) {
+                console.error('Error al cargar QR:', error);
+                document.getElementById('qr-code').innerHTML = '<div class="qr-placeholder">📱</div>';
+            }
+        }
+        
+        // Cargar clima
+        async function loadWeather() {
+            try {
+                const response = await fetch(`${API_URL}/api/clima`);
+                const weather = await response.json();
+                const weatherDisplay = document.getElementById('weather-display');
+                
+                if (weather.temperatura) {
+                    weatherDisplay.innerHTML = `
+                        <div class="weather-emoji">${weather.emoji || '🌤️'}</div>
+                        <div class="weather-info">${weather.temperatura}°C</div>
+                    `;
+                } else {
+                    weatherDisplay.innerHTML = `
+                        <div class="weather-emoji">🌤️</div>
+                        <div class="weather-info">22°C</div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error al cargar clima:', error);
+                document.getElementById('weather-display').innerHTML = `
+                    <div class="weather-emoji">🌤️</div>
+                    <div class="weather-info">22°C</div>
+                `;
+            }
+        }
+        
+        // Funciones de control
+        function toggleQR() {
+            const qrCode = document.getElementById('qr-code');
+            qrCode.style.display = qrCode.style.display === 'none' ? 'flex' : 'none';
+            checkScroll();
+        }
+        
+        function toggleImage() {
+            const featuredImage = document.getElementById('featured-image');
+            featuredImage.style.display = featuredImage.style.display === 'none' ? 'flex' : 'none';
+            checkScroll();
+        }
+        
+        function toggleMessages() {
+            const messagesDisplay = document.getElementById('messages-display');
+            messagesDisplay.style.display = messagesDisplay.style.display === 'none' ? 'flex' : 'none';
+            checkScroll();
+        }
+        
+        function toggleWeather() {
+            const weatherDisplay = document.getElementById('weather-display');
+            weatherDisplay.style.display = weatherDisplay.style.display === 'none' ? 'flex' : 'none';
+            checkScroll();
+        }
+        
+        function refreshData() {
+            loadMessages();
+            loadFeaturedImage();
+            loadQR();
+            loadWeather();
+            setTimeout(() => {
+                checkScroll();
+                updateViewportInfo();
+            }, 500);
+        }
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMessages();
+            loadFeaturedImage();
+            loadQR();
+            loadWeather();
+            
+            // Verificar scroll después de cargar todo
+            setTimeout(() => {
+                checkScroll();
+                updateViewportInfo();
+            }, 1000);
+            
+            // Verificar en cambios de tamaño
+            window.addEventListener('resize', () => {
+                setTimeout(() => {
+                    checkScroll();
+                    updateViewportInfo();
+                }, 100);
+            });
+            
+            // Verificar periódicamente
+            setInterval(() => {
+                checkScroll();
+                updateViewportInfo();
+            }, 2000);
+        });
+    </script>
+</body>
+</html> 

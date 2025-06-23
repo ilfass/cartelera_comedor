@@ -46,34 +46,61 @@
             </main>
         </div>
 
-        <!-- Página 2: Mensajes y Info -->
+        <!-- Página 2: Información y Mensajes -->
         <div class="carousel-page" id="page-info">
-            <main class="main-content-redesign main-content-info-modern">
-                <div class="info-main-column">
-                    <section class="messages-section-redesign">
-                        <div class="messages-title">Mensajes Importantes</div>
-                        <div id="messages-carousel" class="messages-carousel"></div>
-                    </section>
-                    <div class="info-row">
-                        <section class="weather-section-redesign info-card">
-                            <div class="weather-title">Clima Actual</div>
-                            <div id="weather-content"></div>
-                        </section>
-                        <section class="info-section info-card">
-                            <div class="info-title">Información</div>
-                            <div class="info-item"><b>Horario de Atención</b><br>Lunes a Viernes: 9:00 - 18:00</div>
-                            <div class="info-item"><b>Ubicación</b><br>Campus Universitario - Tandil</div>
-                            <div class="info-item"><b>Contacto</b><br>comedor@unicen.edu.ar</div>
-                        </section>
+            <div class="info-page-container">
+                <!-- Columna Izquierda -->
+                <div class="info-left-column">
+                    <div class="messages-container">
+                        <h2 class="section-title">📢 Mensajes Importantes</h2>
+                        <div id="messages-display" class="messages-display">
+                            <!-- Los mensajes se cargarán dinámicamente -->
+                        </div>
+                    </div>
+                    
+                    <div class="featured-image-container">
+                        <h2 class="section-title">🖼️ Imagen Destacada</h2>
+                        <div id="featured-image" class="featured-image">
+                            <div class="image-placeholder">📸</div>
+                        </div>
                     </div>
                 </div>
-                <div class="qr-side-column">
-                    <section class="qr-section info-card">
-                        <div class="qr-title">Escanea para más info</div>
-                        <div class="qr-img-placeholder"></div>
-                    </section>
+                
+                <!-- Columna Derecha -->
+                <div class="info-right-column">
+                    <div class="weather-container">
+                        <h2 class="section-title">🌤️ Clima Actual</h2>
+                        <div id="weather-display" class="weather-display">
+                            <!-- El clima se cargará dinámicamente -->
+                        </div>
+                    </div>
+                    
+                    <div class="info-container">
+                        <h2 class="section-title">ℹ️ Información</h2>
+                        <div class="info-content">
+                            <div class="info-item">
+                                <strong>🕒 Horario de Atención</strong>
+                                <p>Lunes a Viernes: 9:00 - 18:00</p>
+                            </div>
+                            <div class="info-item">
+                                <strong>📍 Ubicación</strong>
+                                <p>Campus Universitario - Tandil</p>
+                            </div>
+                            <div class="info-item">
+                                <strong>📧 Contacto</strong>
+                                <p>comedor@unicen.edu.ar</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="qr-container">
+                        <h2 class="section-title">📱 Escanea para más info</h2>
+                        <div class="qr-code">
+                            <div class="qr-placeholder">📱</div>
+                        </div>
+                    </div>
                 </div>
-            </main>
+            </div>
         </div>
     </div>
     <footer class="main-footer">

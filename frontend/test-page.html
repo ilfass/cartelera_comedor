@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Página Secundaria</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-left">
+            <img src="assets/logo-unicen.png" alt="Logo UNICEN" class="logo-header">
+            <span class="header-title">Comedor Universitario UNICEN</span>
+        </div>
+        <div class="header-right">
+            <span id="current-time"></span> | <span id="current-date"></span>
+        </div>
+    </header>
+    
+    <!-- Página de Información -->
+    <div class="info-page-container">
+        <!-- Columna Izquierda -->
+        <div class="info-left-column">
+            <div class="messages-container">
+                <h2 class="section-title">📢 Mensajes Importantes</h2>
+                <div id="messages-display" class="messages-display">
+                    <!-- Los mensajes se cargarán dinámicamente -->
+                </div>
+            </div>
+            
+            <div class="featured-image-container">
+                <h2 class="section-title">🖼️ Imagen Destacada</h2>
+                <div id="featured-image" class="featured-image">
+                    <div class="image-placeholder">📸</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Columna Derecha -->
+        <div class="info-right-column">
+            <div class="weather-container">
+                <h2 class="section-title">🌤️ Clima Actual</h2>
+                <div id="weather-display" class="weather-display">
+                    <!-- El clima se cargará dinámicamente -->
+                </div>
+            </div>
+            
+            <div class="info-container">
+                <h2 class="section-title">ℹ️ Información</h2>
+                <div class="info-content">
+                    <div class="info-item">
+                        <strong>🕒 Horario de Atención</strong>
+                        <p>Lunes a Viernes: 9:00 - 18:00</p>
+                    </div>
+                    <div class="info-item">
+                        <strong>📍 Ubicación</strong>
+                        <p>Campus Universitario - Tandil</p>
+                    </div>
+                    <div class="info-item">
+                        <strong>📧 Contacto</strong>
+                        <p>comedor@unicen.edu.ar</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="qr-container">
+                <h2 class="section-title">📱 Escanea para más info</h2>
+                <div class="qr-code">
+                    <div class="qr-placeholder">📱</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="main-footer">
+        <div class="footer-left">
+            <b>Comedor Universitario UNICEN</b><br>Campus Universitario - Tandil
+        </div>
+        <div class="footer-center">© 2023 Universidad Nacional del Centro de la Provincia de Buenos Aires</div>
+        <div class="footer-right">
+            <b>Horarios de Atención</b><br>Lunes a Viernes: 9:00 - 18:00
+        </div>
+    </footer>
+    
+    <script src="app.js"></script>
+    <script>
+        // Función para actualizar la hora y fecha
+        function updateDateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('current-time');
+            const dateElement = document.getElementById('current-date');
+            
+            // Formatear hora
+            const timeOptions = { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            };
+            timeElement.textContent = now.toLocaleTimeString('es-AR', timeOptions);
+            
+            // Formatear fecha
+            const dateOptions = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            dateElement.textContent = now.toLocaleDateString('es-AR', dateOptions);
+        }
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDateTime();
+            loadMessages();
+            loadWeather();
+            loadFeaturedImage();
+            
+            setInterval(updateDateTime, 1000);
+            setInterval(loadMessages, 300000);
+            setInterval(loadWeather, 900000);
+            setInterval(loadFeaturedImage, 300000);
+        });
+    </script>
+</body>
+</html> 

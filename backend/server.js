@@ -119,6 +119,28 @@ const db = new sqlite3.Database(path.join(__dirname, 'database.sqlite'), (err) =
                 fecha DATETIME NOT NULL DEFAULT (datetime('now', 'localtime'))
             )`);
 
+            // Tabla de códigos QR
+            db.run(`CREATE TABLE IF NOT EXISTS qr_codes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                titulo TEXT NOT NULL,
+                url TEXT NOT NULL,
+                descripcion TEXT,
+                activo BOOLEAN DEFAULT 1,
+                fecha DATETIME NOT NULL DEFAULT (datetime('now', 'localtime'))
+            )`);
+
+            // Tabla de configuración general
+            db.run(`CREATE TABLE IF NOT EXISTS config (
+                clave TEXT PRIMARY KEY,
+                valor TEXT
+            )`);
+            // Insertar valor por defecto si no existe
+            db.get('SELECT * FROM config WHERE clave = ?', ['intervalo_carrusel'], (err, row) => {
+                if (!row) {
+                    db.run('INSERT INTO config (clave, valor) VALUES (?, ?)', ['intervalo_carrusel', '5000']);
+                }
+            });
+
             // Crear usuario administrador por defecto si no existe
             const defaultAdmin = {
                 username: 'admin',
@@ -146,6 +168,105 @@ const db = new sqlite3.Database(path.join(__dirname, 'database.sqlite'), (err) =
                     });
                 }
             });
+
+            // Insertar datos de prueba para mensajes
+            db.get('SELECT COUNT(*) as count FROM mensajes', [], (err, row) => {
+                if (err) {
+                    console.error('Error al verificar mensajes:', err);
+                } else if (row.count === 0) {
+                    const mensajesPrueba = [
+                        {
+                            titulo: '¡Bienvenidos al Comedor UNICEN!',
+                            contenido: 'Les damos la bienvenida a todos los estudiantes, docentes y personal. Disfruten de nuestros menús saludables y variados.',
+                            destacado: 1
+                        },
+                        {
+                            titulo: 'Menú Vegetariano Disponible',
+                            contenido: 'Recordamos que todos los días tenemos opciones vegetarianas y veganas. Consulten con nuestro personal para más información.',
+                            destacado: 0
+                        },
+                        {
+                            titulo: 'Horarios de Atención',
+                            contenido: 'Lunes a Viernes de 9:00 a 18:00. Los fines de semana permanecemos cerrados.',
+                            destacado: 0
+                        },
+                        {
+                            titulo: 'Información Nutricional',
+                            contenido: 'Todos nuestros menús están preparados siguiendo las recomendaciones nutricionales para una alimentación saludable.',
+                            destacado: 0
+                        }
+                    ];
+
+                    mensajesPrueba.forEach(mensaje => {
+                        db.run('INSERT INTO mensajes (titulo, contenido, destacado) VALUES (?, ?, ?)',
+                            [mensaje.titulo, mensaje.contenido, mensaje.destacado],
+                            (err) => {
+                                if (err) {
+                                    console.error('Error al insertar mensaje de prueba:', err);
+                                } else {
+                                    console.log('Mensaje de prueba insertado:', mensaje.titulo);
+                                }
+                            });
+                    });
+                }
+            });
+
+            // Insertar datos de prueba para imágenes
+            db.get('SELECT COUNT(*) as count FROM imagenes', [], (err, row) => {
+                if (err) {
+                    console.error('Error al verificar imágenes:', err);
+                } else if (row.count === 0) {
+                    const imagenesPrueba = [
+                        {
+                            titulo: 'Comedor UNICEN',
+                            url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&h=600&fit=crop'
+                        },
+                        {
+                            titulo: 'Menú Saludable',
+                            url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop'
+                        },
+                        {
+                            titulo: 'Campus Universitario',
+                            url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9e1?w=800&h=600&fit=crop'
+                        }
+                    ];
+
+                    imagenesPrueba.forEach(imagen => {
+                        db.run('INSERT INTO imagenes (titulo, url) VALUES (?, ?)',
+                            [imagen.titulo, imagen.url],
+                            (err) => {
+                                if (err) {
+                                    console.error('Error al insertar imagen de prueba:', err);
+                                } else {
+                                    console.log('Imagen de prueba insertada:', imagen.titulo);
+                                }
+                            });
+                    });
+                }
+            });
+
+            // Insertar datos de prueba para códigos QR
+            db.get('SELECT COUNT(*) as count FROM qr_codes', [], (err, row) => {
+                if (err) {
+                    console.error('Error al verificar códigos QR:', err);
+                } else if (row.count === 0) {
+                    const qrPrueba = {
+                        titulo: 'Menú Digital',
+                        url: 'https://comedor.unicen.edu.ar/menu',
+                        descripcion: 'Escanea para ver el menú completo del día'
+                    };
+
+                    db.run('INSERT INTO qr_codes (titulo, url, descripcion) VALUES (?, ?, ?)',
+                        [qrPrueba.titulo, qrPrueba.url, qrPrueba.descripcion],
+                        (err) => {
+                            if (err) {
+                                console.error('Error al insertar QR de prueba:', err);
+                            } else {
+                                console.log('QR de prueba insertado:', qrPrueba.titulo);
+                            }
+                        });
+                }
+            });
         });
     }
 });
@@ -153,6 +274,16 @@ const db = new sqlite3.Database(path.join(__dirname, 'database.sqlite'), (err) =
 // Rutas para el panel de administración
 app.get('/admin', auth, (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/admin.html'));
+});
+
+// Ruta para la página de login
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/login.html'));
+});
+
+// Ruta para la página de login (alternativa)
+app.get('/login.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/login.html'));
 });
 
 // Rutas para el menú
@@ -403,6 +534,71 @@ app.delete('/api/imagenes/:id', authenticateToken, (req, res) => {
     });
 });
 
+// Rutas para los códigos QR
+app.get('/api/qr', (req, res) => {
+    db.all('SELECT * FROM qr_codes ORDER BY fecha DESC', [], (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json(rows);
+    });
+});
+
+app.post('/api/qr', authenticateToken, (req, res) => {
+    const { titulo, url, descripcion } = req.body;
+    
+    if (!titulo || !url) {
+        return res.status(400).json({ message: 'Título y URL son requeridos' });
+    }
+
+    db.run('INSERT INTO qr_codes (titulo, url, descripcion) VALUES (?, ?, ?)',
+        [titulo, url, descripcion || ''],
+        function(err) {
+            if (err) {
+                res.status(500).json({ message: 'Error al guardar el código QR' });
+            } else {
+                res.json({ message: 'Código QR guardado exitosamente', id: this.lastID });
+            }
+        });
+});
+
+app.put('/api/qr/:id', authenticateToken, (req, res) => {
+    const { titulo, url, descripcion, activo } = req.body;
+    
+    if (!titulo || !url) {
+        return res.status(400).json({ message: 'Título y URL son requeridos' });
+    }
+
+    db.run('UPDATE qr_codes SET titulo = ?, url = ?, descripcion = ?, activo = ? WHERE id = ?',
+        [titulo, url, descripcion || '', activo ? 1 : 0, req.params.id],
+        function(err) {
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            if (this.changes === 0) {
+                res.status(404).json({ message: 'Código QR no encontrado' });
+                return;
+            }
+            res.json({ message: 'Código QR actualizado exitosamente' });
+        });
+});
+
+app.delete('/api/qr/:id', authenticateToken, (req, res) => {
+    db.run('DELETE FROM qr_codes WHERE id = ?', [req.params.id], function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        if (this.changes === 0) {
+            res.status(404).json({ message: 'Código QR no encontrado' });
+            return;
+        }
+        res.json({ message: 'Código QR eliminado exitosamente' });
+    });
+});
+
 // Rutas de autenticación
 app.post('/api/auth/login', async (req, res) => {
     console.log('Intento de login recibido');
@@ -439,6 +635,40 @@ app.post('/api/auth/login', async (req, res) => {
             res.status(500).json({ message: 'Error en el servidor' });
         }
     });
+});
+
+// Endpoint para obtener la configuración
+app.get('/api/config', (req, res) => {
+    db.all('SELECT * FROM config', [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        // Devolver como objeto clave: valor
+        const config = {};
+        rows.forEach(row => {
+            config[row.clave] = row.valor;
+        });
+        res.json(config);
+    });
+});
+
+// Endpoint para actualizar el intervalo del carrusel
+app.put('/api/config/intervalo_carrusel', authenticateToken, (req, res) => {
+    const { valor } = req.body;
+    if (!valor || isNaN(Number(valor)) || Number(valor) < 1000) {
+        return res.status(400).json({ message: 'Valor inválido para el intervalo (mínimo 1000 ms)' });
+    }
+    db.run('UPDATE config SET valor = ? WHERE clave = ?', [valor, 'intervalo_carrusel'], function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ message: 'Intervalo actualizado correctamente', valor });
+    });
+});
+
+// Ruta para el favicon
+app.get('/favicon.ico', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/favicon.ico'));
 });
 
 // Iniciar el servidor

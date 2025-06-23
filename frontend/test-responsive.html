@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Altura Responsiva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Estilos adicionales para el test */
+        .test-info {
+            background: #e3f2fd;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .test-info h3 {
+            margin: 0 0 0.5rem 0;
+            color: #1976d2;
+        }
+        
+        .test-info p {
+            margin: 0;
+            color: #424242;
+        }
+        
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.8rem;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info" id="debug-info">
+        Cargando información...
+    </div>
+    
+    <header class="main-header">
+        <div class="header-left">
+            <img src="assets/logo-unicen.png" alt="Logo UNICEN" class="logo-header">
+            <span class="header-title">Test - Altura Responsiva</span>
+        </div>
+        <div class="header-right">
+            <span id="current-time"></span> | <span id="current-date"></span>
+        </div>
+    </header>
+    
+    <div class="test-info">
+        <h3>🧪 Test de Altura Responsiva</h3>
+        <p>Esta página está diseñada para probar que la altura se adapte correctamente a diferentes tamaños de pantalla sin cortar el contenido.</p>
+    </div>
+    
+    <!-- Página de Información -->
+    <div class="info-page-container">
+        <!-- Columna Izquierda -->
+        <div class="info-left-column">
+            <div class="messages-container">
+                <h2 class="section-title">📢 Mensajes Importantes</h2>
+                <div id="messages-display" class="messages-display">
+                    <div class="message-item">
+                        <h3>Mensaje de Prueba 1</h3>
+                        <p>Este es un mensaje de prueba para verificar que el contenido se muestre correctamente sin cortarse.</p>
+                        <small>Hoy</small>
+                    </div>
+                    <div class="message-item">
+                        <h3>Mensaje de Prueba 2</h3>
+                        <p>Otro mensaje de prueba para asegurar que la altura responsiva funcione correctamente.</p>
+                        <small>Hoy</small>
+                    </div>
+                    <div class="message-item">
+                        <h3>Mensaje de Prueba 3</h3>
+                        <p>Tercer mensaje de prueba para verificar que el scroll funcione cuando hay mucho contenido.</p>
+                        <small>Hoy</small>
+                    </div>
+                    <div class="message-item">
+                        <h3>Mensaje de Prueba 4</h3>
+                        <p>Cuarto mensaje de prueba para asegurar que la altura se adapte correctamente.</p>
+                        <small>Hoy</small>
+                    </div>
+                    <div class="message-item">
+                        <h3>Mensaje de Prueba 5</h3>
+                        <p>Quinto mensaje de prueba para verificar que no se corte el contenido en la parte inferior.</p>
+                        <small>Hoy</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="featured-image-container">
+                <h2 class="section-title">🖼️ Imagen Destacada</h2>
+                <div id="featured-image" class="featured-image">
+                    <div class="image-placeholder">📸</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Columna Derecha -->
+        <div class="info-right-column">
+            <div class="weather-container">
+                <h2 class="section-title">🌤️ Clima Actual</h2>
+                <div id="weather-display" class="weather-display">
+                    <div class="weather-item">
+                        <h3>☀️ 25°C</h3>
+                        <p>Soleado</p>
+                    </div>
+                    <div class="weather-item">
+                        <h3>💧 Humedad</h3>
+                        <p>45%</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-container">
+                <h2 class="section-title">ℹ️ Información</h2>
+                <div class="info-content">
+                    <div class="info-item">
+                        <strong>🕒 Horario de Atención</strong>
+                        <p>Lunes a Viernes: 9:00 - 18:00</p>
+                    </div>
+                    <div class="info-item">
+                        <strong>📍 Ubicación</strong>
+                        <p>Campus Universitario - Tandil</p>
+                    </div>
+                    <div class="info-item">
+                        <strong>📧 Contacto</strong>
+                        <p>comedor@unicen.edu.ar</p>
+                    </div>
+                    <div class="info-item">
+                        <strong>📱 Teléfono</strong>
+                        <p>+54 249 438-5000</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="qr-container">
+                <h2 class="section-title">📱 Escanea para más info</h2>
+                <div class="qr-code">
+                    <div class="qr-placeholder">📱</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="main-footer">
+        <div class="footer-left">
+            <b>Test de Altura Responsiva</b><br>Comedor Universitario UNICEN
+        </div>
+        <div class="footer-center">© 2023 Universidad Nacional del Centro de la Provincia de Buenos Aires</div>
+        <div class="footer-right">
+            <b>Horarios de Atención</b><br>Lunes a Viernes: 9:00 - 18:00
+        </div>
+    </footer>
+    
+    <script>
+        // Función para actualizar la hora y fecha
+        function updateDateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('current-time');
+            const dateElement = document.getElementById('current-date');
+            
+            // Formatear hora
+            const timeOptions = { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            };
+            timeElement.textContent = now.toLocaleTimeString('es-AR', timeOptions);
+            
+            // Formatear fecha
+            const dateOptions = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            dateElement.textContent = now.toLocaleDateString('es-AR', dateOptions);
+        }
+        
+        // Función para mostrar información de debug
+        function updateDebugInfo() {
+            const debugInfo = document.getElementById('debug-info');
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+            const documentHeight = document.documentElement.scrollHeight;
+            const containerHeight = document.querySelector('.info-page-container').offsetHeight;
+            
+            debugInfo.innerHTML = `
+                <strong>Debug Info:</strong><br>
+                Viewport: ${viewportWidth}x${viewportHeight}<br>
+                Document Height: ${documentHeight}px<br>
+                Container Height: ${containerHeight}px<br>
+                Scroll: ${document.documentElement.scrollTop}/${document.documentElement.scrollHeight - viewportHeight}
+            `;
+        }
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDateTime();
+            updateDebugInfo();
+            
+            setInterval(updateDateTime, 1000);
+            setInterval(updateDebugInfo, 1000);
+            
+            // Actualizar debug info cuando cambie el tamaño de la ventana
+            window.addEventListener('resize', updateDebugInfo);
+            window.addEventListener('scroll', updateDebugInfo);
+        });
+    </script>
+</body>
+</html> 

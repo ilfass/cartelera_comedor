@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Altura Responsiva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Estilos adicionales para el test */
+        .test-info {
+            background: #e3f2fd;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .test-info h3 {
+            margin: 0 0 0.5rem 0;
+            color: #1976d2;
+        }
+        
+        .test-info p {
+            margin: 0;
+            color: #1565c0;
+        }
+        
+        .test-content {
+            background: #f5f5f5;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0.5rem;
+            border: 1px solid #ddd;
+        }
+        
+        .test-content h4 {
+            margin: 0 0 0.5rem 0;
+            color: #333;
+        }
+        
+        .test-content p {
+            margin: 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-left">
+            <span class="header-title">Test - Altura Responsiva</span>
+        </div>
+        <div class="header-right">
+            <span id="current-time"></span> | <span id="current-date"></span>
+        </div>
+    </header>
+    
+    <!-- Página de Información -->
+    <div class="carousel-page active">
+        <div class="info-page-container">
+            <!-- Columna Izquierda -->
+            <div class="info-left-column">
+                <!-- Mensajes -->
+                <div class="messages-container">
+                    <h3 class="section-title">📢 Mensajes Importantes</h3>
+                    <div class="messages-display">
+                        <div class="message-item">
+                            <h3>Test de Altura Responsiva</h3>
+                            <p>Este es un mensaje de prueba para verificar que la altura se adapte correctamente sin cortar el contenido en la parte inferior.</p>
+                        </div>
+                        <div class="message-item">
+                            <h3>Segundo Mensaje de Prueba</h3>
+                            <p>Contenido adicional para probar el scroll y la responsividad de la altura en diferentes tamaños de pantalla.</p>
+                        </div>
+                        <div class="message-item">
+                            <h3>Tercer Mensaje de Prueba</h3>
+                            <p>Más contenido para asegurar que el scroll funcione correctamente y no se corte nada en la parte inferior.</p>
+                        </div>
+                        <div class="message-item">
+                            <h3>Cuarto Mensaje de Prueba</h3>
+                            <p>Contenido adicional para llenar el espacio y probar la funcionalidad de scroll en la página secundaria.</p>
+                        </div>
+                        <div class="message-item">
+                            <h3>Quinto Mensaje de Prueba</h3>
+                            <p>Último mensaje para completar la prueba de altura responsiva y verificar que todo funcione correctamente.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Imagen Destacada -->
+                <div class="featured-image-container">
+                    <h3 class="section-title">🖼️ Imagen Destacada</h3>
+                    <div class="featured-image">
+                        <div class="image-placeholder">📷</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Columna Derecha -->
+            <div class="info-right-column">
+                <!-- Clima -->
+                <div class="weather-container">
+                    <h3 class="section-title">🌤️ Clima</h3>
+                    <div class="weather-display">
+                        <div class="weather-item">
+                            <h3>Temperatura Actual</h3>
+                            <p>22°C - Soleado</p>
+                        </div>
+                        <div class="weather-item">
+                            <h3>Pronóstico</h3>
+                            <p>Máx: 25°C, Mín: 18°C</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Información -->
+                <div class="info-container">
+                    <h3 class="section-title">ℹ️ Información</h3>
+                    <div class="info-content">
+                        <div class="info-item">
+                            <strong>Horarios de Atención:</strong>
+                            <p>Lunes a Viernes: 11:00 - 15:00</p>
+                        </div>
+                        <div class="info-item">
+                            <strong>Ubicación:</strong>
+                            <p>Edificio Central, Planta Baja</p>
+                        </div>
+                        <div class="info-item">
+                            <strong>Contacto:</strong>
+                            <p>comedor@unicen.edu.ar</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- QR -->
+                <div class="qr-container">
+                    <h3 class="section-title">📱 Código QR</h3>
+                    <div class="qr-code">
+                        <div class="qr-placeholder">📱</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="main-footer">
+        <div class="footer-left">
+            <span>Comedor Universitario UNICEN</span>
+        </div>
+        <div class="footer-center">
+            <span>Test de Altura Responsiva</span>
+        </div>
+        <div class="footer-right">
+            <span>Versión: 1.0</span>
+        </div>
+    </footer>
+
+    <script>
+        // Función para actualizar fecha y hora
+        function updateDateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('current-time');
+            const dateElement = document.getElementById('current-date');
+            
+            if (timeElement) {
+                timeElement.textContent = now.toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
+            
+            if (dateElement) {
+                dateElement.textContent = now.toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+        }
+        
+        // Actualizar cada segundo
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        
+        // Log para debug
+        console.log('Test de altura responsiva cargado');
+        console.log('Altura del viewport:', window.innerHeight);
+        console.log('Altura del body:', document.body.offsetHeight);
+        console.log('Altura del contenedor principal:', document.querySelector('.info-page-container').offsetHeight);
+    </script>
+</body>
+</html> 

@@ -163,16 +163,33 @@ button:hover {
     margin: 0 auto;
 }
 
+/* Vista previa de imagen */
 .image-preview {
-    max-width: 300px;
+    margin-top: 10px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    background: #f9f9f9;
+}
+
+.image-preview img {
+    max-width: 100%;
     max-height: 200px;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    margin: 10px 0;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Mejoras en el formulario de imágenes */
+#image-file {
+    padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 5px;
+    width: 100%;
+}
+
+#image-url {
+    margin-top: 10px;
 }
 
 .image-container {
@@ -180,4 +197,104 @@ button:hover {
     align-items: center;
     justify-content: center;
     margin: 10px 0;
+}
+
+/* Estilos para mensajes destacados */
+.highlighted-message {
+    background-color: #fef3c7 !important;
+    border-left: 4px solid #f59e0b !important;
+}
+
+.highlighted-message td {
+    font-weight: 500;
+}
+
+.destacado-badge {
+    background-color: #f59e0b;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.no-destacado-badge {
+    background-color: #6b7280;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+/* Estilos para códigos QR */
+.qr-activo {
+    background-color: #f0f9ff !important;
+    border-left: 4px solid #3b82f6 !important;
+}
+
+.qr-inactivo {
+    background-color: #fef2f2 !important;
+    border-left: 4px solid #ef4444 !important;
+    opacity: 0.7;
+}
+
+.activo-badge {
+    background-color: #10b981;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.inactivo-badge {
+    background-color: #ef4444;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.url-link {
+    color: #3b82f6;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.url-link:hover {
+    text-decoration: underline;
+}
+
+/* Botones de acción */
+.btn-edit {
+    background-color: #28a745;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-right: 5px;
+    transition: background-color 0.3s;
+}
+
+.btn-edit:hover {
+    background-color: #218838;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
 } 
