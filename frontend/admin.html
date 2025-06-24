@@ -5,140 +5,181 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - Pizarra Digital</title>
     <link rel="stylesheet" href="admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="admin-container">
-        <h1>Panel de Administración</h1>
+        <!-- Header del Admin -->
+        <div class="admin-header">
+            <h1><i class="fas fa-cogs"></i> Panel de Administración</h1>
+            <p>Gestiona el contenido de la Pizarra Digital UNICEN</p>
+        </div>
         
         <!-- Sección de Menú -->
         <section class="admin-section">
-            <h2>Gestión de Menú</h2>
-            <form id="menu-form" onsubmit="saveMenu(event)">
-                <div class="form-group">
-                    <label for="dia">Día:</label>
-                    <select id="dia" name="dia" required>
-                        <option value="Lunes">Lunes</option>
-                        <option value="Martes">Martes</option>
-                        <option value="Miércoles">Miércoles</option>
-                        <option value="Jueves">Jueves</option>
-                        <option value="Viernes">Viernes</option>
-                    </select>
+            <div class="section-header">
+                <h2><i class="fas fa-utensils"></i> Gestión de Menú</h2>
+            </div>
+            <div class="section-content">
+                <form id="menu-form" onsubmit="saveMenu(event)">
+                    <div class="form-group">
+                        <label for="dia">Día:</label>
+                        <select id="dia" name="dia" required>
+                            <option value="Lunes">Lunes</option>
+                            <option value="Martes">Martes</option>
+                            <option value="Miércoles">Miércoles</option>
+                            <option value="Jueves">Jueves</option>
+                            <option value="Viernes">Viernes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="menu_general">Menú General:</label>
+                        <textarea id="menu_general" name="menu_general" required placeholder="Ingresa el menú general del día..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="menu_vegetariano">Menú Vegetariano:</label>
+                        <textarea id="menu_vegetariano" name="menu_vegetariano" required placeholder="Ingresa el menú vegetariano del día..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="menu-celiaco">Menú Celíaco:</label>
+                        <textarea id="menu-celiaco" name="menu-celiaco" required placeholder="Ingresa el menú celíaco del día..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Menú
+                    </button>
+                </form>
+                <div class="table-container">
+                    <table id="menu-table">
+                        <!-- Los datos se cargarán dinámicamente -->
+                    </table>
                 </div>
-                <div class="form-group">
-                    <label for="menu_general">Menú General:</label>
-                    <textarea id="menu_general" name="menu_general" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="menu_vegetariano">Menú Vegetariano:</label>
-                    <textarea id="menu_vegetariano" name="menu_vegetariano" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="menu-celiaco">Menú Celíaco:</label>
-                    <textarea id="menu-celiaco" name="menu-celiaco" required></textarea>
-                </div>
-                <button type="submit">Guardar Menú</button>
-            </form>
-            <div class="table-container">
-                <table id="menu-table">
-                    <!-- Los datos se cargarán dinámicamente -->
-                </table>
             </div>
         </section>
 
         <!-- Sección de Mensajes -->
         <section class="admin-section">
-            <h2>Gestión de Mensajes</h2>
-            <form id="message-form" onsubmit="saveMessage(event)">
-                <div class="form-group">
-                    <label for="titulo">Título:</label>
-                    <input type="text" id="titulo" name="titulo" required>
+            <div class="section-header">
+                <h2><i class="fas fa-comments"></i> Gestión de Mensajes</h2>
+            </div>
+            <div class="section-content">
+                <form id="message-form" onsubmit="saveMessage(event)">
+                    <div class="form-group">
+                        <label for="titulo">Título:</label>
+                        <input type="text" id="titulo" name="titulo" required placeholder="Título del mensaje">
+                    </div>
+                    <div class="form-group">
+                        <label for="contenido">Contenido:</label>
+                        <textarea id="contenido" name="contenido" required placeholder="Contenido del mensaje..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="destacado">
+                            <input type="checkbox" id="destacado" name="destacado">
+                            Destacado
+                        </label>
+                        <small>Los mensajes destacados se muestran con mayor prominencia</small>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-paper-plane"></i> Guardar Mensaje
+                    </button>
+                </form>
+                <div class="table-container">
+                    <table id="messages-table">
+                        <!-- Los datos se cargarán dinámicamente -->
+                    </table>
                 </div>
-                <div class="form-group">
-                    <label for="contenido">Contenido:</label>
-                    <textarea id="contenido" name="contenido" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="destacado">Destacado:</label>
-                    <input type="checkbox" id="destacado" name="destacado">
-                </div>
-                <button type="submit">Guardar Mensaje</button>
-            </form>
-            <div class="table-container">
-                <table id="messages-table">
-                    <!-- Los datos se cargarán dinámicamente -->
-                </table>
             </div>
         </section>
 
         <!-- Sección de Imágenes -->
         <section class="admin-section">
-            <h2>Gestión de Imágenes</h2>
-            <form id="image-form" onsubmit="saveImage(event)" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="image-titulo">Título:</label>
-                    <input type="text" id="image-titulo" name="titulo" required>
-                </div>
-                <div class="form-group">
-                    <label for="image-file">Subir imagen:</label>
-                    <input type="file" id="image-file" name="imagen" accept="image/*" onchange="previewImage(event)">
-                    <div id="image-preview" class="image-preview" style="display: none;">
-                        <img id="preview-img" src="" alt="Vista previa">
+            <div class="section-header">
+                <h2><i class="fas fa-images"></i> Gestión de Imágenes</h2>
+            </div>
+            <div class="section-content">
+                <form id="image-form" onsubmit="saveImage(event)" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="image-titulo">Título:</label>
+                        <input type="text" id="image-titulo" name="titulo" required placeholder="Título de la imagen">
                     </div>
+                    <div class="form-group">
+                        <label for="image-file">Subir imagen:</label>
+                        <input type="file" id="image-file" name="imagen" accept="image/*" onchange="previewImage(event)">
+                        <div id="image-preview" class="image-preview" style="display: none;">
+                            <img id="preview-img" src="" alt="Vista previa">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="image-url">O URL de la imagen:</label>
+                        <input type="url" id="image-url" name="url" placeholder="https://ejemplo.com/imagen.jpg">
+                        <small>Alternativa a subir archivo: proporciona una URL directa</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Guardar Imagen
+                    </button>
+                </form>
+                <div class="table-container">
+                    <table id="images-table">
+                        <!-- Los datos se cargarán dinámicamente -->
+                    </table>
                 </div>
-                <div class="form-group">
-                    <label for="image-url">O URL de la imagen:</label>
-                    <input type="url" id="image-url" name="url" placeholder="https://ejemplo.com/imagen.jpg">
-                </div>
-                <button type="submit">Guardar Imagen</button>
-            </form>
-            <div class="table-container">
-                <table id="images-table">
-                    <!-- Los datos se cargarán dinámicamente -->
-                </table>
             </div>
         </section>
 
         <!-- Sección de Códigos QR -->
         <section class="admin-section">
-            <h2>Gestión de Códigos QR</h2>
-            <form id="qr-form" onsubmit="saveQR(event)">
-                <div class="form-group">
-                    <label for="qr-titulo">Título:</label>
-                    <input type="text" id="qr-titulo" name="titulo" required>
+            <div class="section-header">
+                <h2><i class="fas fa-qrcode"></i> Gestión de Códigos QR</h2>
+            </div>
+            <div class="section-content">
+                <form id="qr-form" onsubmit="saveQR(event)">
+                    <div class="form-group">
+                        <label for="qr-titulo">Título:</label>
+                        <input type="text" id="qr-titulo" name="titulo" required placeholder="Título del código QR">
+                    </div>
+                    <div class="form-group">
+                        <label for="qr-url">URL del enlace:</label>
+                        <input type="url" id="qr-url" name="url" placeholder="https://ejemplo.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="qr-descripcion">Descripción:</label>
+                        <textarea id="qr-descripcion" name="descripcion" placeholder="Descripción del enlace (opcional)"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="qr-activo">
+                            <input type="checkbox" id="qr-activo" name="activo" checked>
+                            Activo
+                        </label>
+                        <small>Si está activo, se mostrará en la pizarra</small>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-qrcode"></i> Guardar Código QR
+                    </button>
+                </form>
+                <div class="table-container">
+                    <table id="qr-table">
+                        <!-- Los datos se cargarán dinámicamente -->
+                    </table>
                 </div>
-                <div class="form-group">
-                    <label for="qr-url">URL del enlace:</label>
-                    <input type="url" id="qr-url" name="url" placeholder="https://ejemplo.com" required>
-                </div>
-                <div class="form-group">
-                    <label for="qr-descripcion">Descripción:</label>
-                    <textarea id="qr-descripcion" name="descripcion" placeholder="Descripción del enlace (opcional)"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="qr-activo">Activo:</label>
-                    <input type="checkbox" id="qr-activo" name="activo" checked>
-                    <small>Si está activo, se mostrará en la pizarra</small>
-                </div>
-                <button type="submit">Guardar Código QR</button>
-            </form>
-            <div class="table-container">
-                <table id="qr-table">
-                    <!-- Los datos se cargarán dinámicamente -->
-                </table>
             </div>
         </section>
 
         <!-- Sección de Configuración -->
         <section class="admin-section">
-            <h2>Configuración del Sistema</h2>
-            <form id="config-form" onsubmit="saveConfig(event)">
-                <div class="form-group">
-                    <label for="intervalo-carrusel">Intervalo del Carrusel (segundos):</label>
-                    <input type="number" id="intervalo-carrusel" name="intervalo" min="1" max="60" step="1" required>
-                    <small>Define el tiempo entre cambios de página en la pizarra (1-60 segundos)</small>
-                </div>
-                <button type="submit">Guardar Configuración</button>
-            </form>
+            <div class="section-header">
+                <h2><i class="fas fa-cog"></i> Configuración del Sistema</h2>
+            </div>
+            <div class="section-content">
+                <form id="config-form" onsubmit="saveConfig(event)">
+                    <div class="form-group">
+                        <label for="intervalo-carrusel">Intervalo del Carrusel (segundos):</label>
+                        <input type="number" id="intervalo-carrusel" name="intervalo" min="1" max="60" step="1" required value="10">
+                        <small>Define el tiempo entre cambios de página en la pizarra (1-60 segundos)</small>
+                    </div>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save"></i> Guardar Configuración
+                    </button>
+                </form>
+            </div>
         </section>
     </div>
     <script src="admin.js"></script>

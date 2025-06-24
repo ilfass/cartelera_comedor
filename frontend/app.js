@@ -520,11 +520,14 @@ function initPageCarousel() {
         }
     });
     
-    // Mostrar la primera página
-    document.getElementById(pages[0]).classList.add('active');
-    console.log('Página activa inicial:', pages[0]);
+    // Mostrar la página de información (página secundaria) en lugar de la primera página
+    currentPage = 1; // Cambiar a la página de información
+    document.getElementById(pages[currentPage]).classList.add('active');
+    console.log('Página activa inicial:', pages[currentPage]);
     
+    // CARRUSEL AUTOMÁTICO DESACTIVADO - PÁGINA ESTÁTICA
     // Cambiar de página cada 10 segundos
+    /*
     setInterval(() => {
         console.log('Cambiando página...');
         
@@ -539,6 +542,9 @@ function initPageCarousel() {
         document.getElementById(pages[currentPage]).classList.add('active');
         console.log('Nueva página activa:', pages[currentPage]);
     }, PAGE_INTERVAL);
+    */
+    
+    console.log('✅ Carrusel automático desactivado - Página estática en información');
 }
 
 // Cargar imagen destacada
@@ -663,6 +669,48 @@ async function loadQR() {
         }
     }
 }
+
+// FUNCIONES PARA CONTROL MANUAL DEL CARRUSEL
+// Hacer las funciones disponibles globalmente para usar desde la consola
+window.carrusel = {
+    // Ir a la página del menú
+    irAMenu: function() {
+        document.getElementById(pages[currentPage]).classList.remove('active');
+        currentPage = 0; // Índice de la página del menú
+        document.getElementById(pages[currentPage]).classList.add('active');
+        console.log('📋 Cambiado a página del menú');
+    },
+    
+    // Ir a la página de información
+    irAInfo: function() {
+        document.getElementById(pages[currentPage]).classList.remove('active');
+        currentPage = 1; // Índice de la página de información
+        document.getElementById(pages[currentPage]).classList.add('active');
+        console.log('ℹ️ Cambiado a página de información');
+    },
+    
+    // Mostrar página actual
+    paginaActual: function() {
+        console.log(`📄 Página actual: ${pages[currentPage]} (índice ${currentPage})`);
+        return pages[currentPage];
+    },
+    
+    // Listar páginas disponibles
+    paginasDisponibles: function() {
+        console.log('📚 Páginas disponibles:');
+        pages.forEach((page, index) => {
+            console.log(`  ${index}: ${page} ${index === currentPage ? '(ACTUAL)' : ''}`);
+        });
+        return pages;
+    }
+};
+
+// Mostrar instrucciones en la consola
+console.log('🎮 Controles del carrusel disponibles:');
+console.log('  carrusel.irAMenu() - Ir a la página del menú');
+console.log('  carrusel.irAInfo() - Ir a la página de información');
+console.log('  carrusel.paginaActual() - Ver página actual');
+console.log('  carrusel.paginasDisponibles() - Listar todas las páginas');
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
