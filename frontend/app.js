@@ -1172,7 +1172,8 @@ function updateWeeklyMenu(menuData, currentDay) {
         if (i !== actualCurrentDayIndex && daysOfWeek[i] !== nextDay) {
             otherDays.push({
                 day: daysOfWeek[i],
-                dayName: dayNames[i]
+                dayName: dayNames[i],
+                index: i
             });
         }
     }
@@ -1213,6 +1214,24 @@ function updateWeeklyMenu(menuData, currentDay) {
         `;
     }
     
+    // Función para crear el título con los 3 días en rotación
+    function createRotationTitle(activeDayIndex) {
+        if (otherDays.length === 0) {
+            return 'ROTACIÓN COMPLETA';
+        }
+        
+        let titleHTML = '';
+        for (let i = 0; i < otherDays.length; i++) {
+            const day = otherDays[i];
+            const isActive = i === activeDayIndex;
+            const dayClass = isActive ? 'active-rotation-day' : 'inactive-rotation-day';
+            const separator = i < otherDays.length - 1 ? ' | ' : '';
+            
+            titleHTML += `<span class="${dayClass}">${day.dayName}</span>${separator}`;
+        }
+        return titleHTML;
+    }
+    
     // Función para actualizar solo la columna derecha
     function updateRightColumn() {
         console.log('🔄 Actualizando columna derecha...');
@@ -1239,12 +1258,16 @@ function updateWeeklyMenu(menuData, currentDay) {
         // Obtener el día adicional a mostrar
         const otherDayToShow = otherDays[currentOtherDayIndex];
         const otherDayMenu = menuData.find(menu => menu.dia.toLowerCase() === otherDayToShow.day);
+        
+        // Crear título con los 3 días en rotación
+        const rotationTitle = createRotationTitle(currentOtherDayIndex);
+        
         let otherDayHTML = '';
         if (otherDayMenu) {
             otherDayHTML = `
                 <div class="menu-day other-day fade-out">
                     <div class="day-header">
-                        <h3 class="day-title">${otherDayToShow.dayName}</h3>
+                        <h3 class="day-title">${rotationTitle}</h3>
                         <span class="rotation-indicator">ROTACIÓN</span>
                     </div>
                     <div class="day-menus">
@@ -1267,7 +1290,7 @@ function updateWeeklyMenu(menuData, currentDay) {
             otherDayHTML = `
                 <div class="menu-day other-day fade-out">
                     <div class="day-header">
-                        <h3 class="day-title">${otherDayToShow.dayName}</h3>
+                        <h3 class="day-title">${rotationTitle}</h3>
                         <span class="rotation-indicator">ROTACIÓN</span>
                     </div>
                     <div class="day-menus" style="justify-content:center;align-items:center;min-height:120px;">
@@ -1310,8 +1333,6 @@ function updateWeeklyMenu(menuData, currentDay) {
         console.log('⏰ Iniciando rotación automática cada 8 segundos');
         setInterval(rotateToNextDay, 8000);
     } else {
-        console.log('ℹ️ No hay días adicionales para rotar (solo quedan 2 días de la semana)');
+        console.log('⚠️ No hay días para rotar, mostrando solo día actual');
     }
-    
-    console.log('✅ Menú semanal actualizado correctamente');
 } 

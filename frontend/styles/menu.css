@@ -1185,4 +1185,104 @@ body {
 
 .day-menus::-webkit-scrollbar-thumb:hover {
     background: rgba(52, 152, 219, 0.5);
+}
+
+/* ESTILOS PARA DÍAS EN ROTACIÓN */
+.active-rotation-day {
+    color: #3498db;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+    animation: pulse-rotation 2s infinite;
+    position: relative;
+}
+
+.active-rotation-day::after {
+    content: '●';
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    color: #3498db;
+    font-size: 12px;
+    animation: blink 1s infinite;
+}
+
+.inactive-rotation-day {
+    color: #666;
+    font-weight: 400;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.inactive-rotation-day:hover {
+    color: #999;
+    opacity: 0.9;
+}
+
+/* Animación de pulso para el día activo en rotación */
+@keyframes pulse-rotation {
+    0% {
+        text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+    }
+    50% {
+        text-shadow: 0 0 15px rgba(52, 152, 219, 0.8);
+    }
+    100% {
+        text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+    }
+}
+
+/* Animación de parpadeo para el indicador */
+@keyframes blink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0.3;
+    }
+}
+
+/* Responsive para títulos de rotación */
+@media (max-width: 1200px) {
+    .day-title {
+        font-size: clamp(18px, 2.2vw, 24px);
+    }
+    
+    .active-rotation-day,
+    .inactive-rotation-day {
+        font-size: clamp(16px, 2vw, 22px);
+    }
+}
+
+@media (max-width: 768px) {
+    .day-title {
+        font-size: clamp(16px, 2vw, 20px);
+    }
+    
+    .active-rotation-day,
+    .inactive-rotation-day {
+        font-size: clamp(14px, 1.8vw, 18px);
+    }
+    
+    .active-rotation-day::after {
+        font-size: 10px;
+        top: -4px;
+        right: -6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .day-title {
+        font-size: clamp(14px, 1.8vw, 18px);
+    }
+    
+    .active-rotation-day,
+    .inactive-rotation-day {
+        font-size: clamp(12px, 1.6vw, 16px);
+    }
+    
+    .active-rotation-day::after {
+        font-size: 8px;
+        top: -3px;
+        right: -5px;
+    }
 } 
