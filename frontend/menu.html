@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú - Comedor Universitario UNICEN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/menu.css">
+</head>
+<body>
+    <!-- HEADER PRINCIPAL -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <img src="assets/logo-unicen.png" alt="Logo UNICEN" class="logo">
+                <div class="title-section">
+                    <h1 class="main-title">Comedor Universitario UNICEN</h1>
+                </div>
+            </div>
+            <div class="datetime-section">
+                <div class="current-date" id="current-date"></div>
+                <div class="current-time" id="current-time"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="main-container">
+        <!-- SECCIÓN PRÓXIMO MENÚ - DESTACADA -->
+        <section class="next-menu-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="icon">🍽️</span>
+                    PRÓXIMO MENÚ
+                </h2>
+                <div class="next-day-info" id="next-day"></div>
+            </div>
+            
+            <div class="next-menu-grid">
+                <div class="menu-card general-card">
+                    <div class="card-header">
+                        <span class="menu-icon">🍖</span>
+                        <h3 class="menu-type">GENERAL</h3>
+                    </div>
+                    <div class="card-content">
+                        <p class="menu-text" id="next-general-menu">Cargando...</p>
+                    </div>
+                </div>
+                
+                <div class="menu-card vegetarian-card">
+                    <div class="card-header">
+                        <span class="menu-icon">🥬</span>
+                        <h3 class="menu-type">VEGETARIANO</h3>
+                    </div>
+                    <div class="card-content">
+                        <p class="menu-text" id="next-vegetarian-menu">Cargando...</p>
+                    </div>
+                </div>
+                
+                <div class="menu-card celiac-card">
+                    <div class="card-header">
+                        <span class="menu-icon">🌾</span>
+                        <h3 class="menu-type">CELÍACO</h3>
+                    </div>
+                    <div class="card-content">
+                        <p class="menu-text" id="next-celiac-menu">Cargando...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NUEVA SECCIÓN MENÚ SEMANAL -->
+        <section class="weekly-menu-section">
+            <h2>MENÚ SEMANAL</h2>
+            
+            <div class="weekly-menu-container">
+                <div class="menu-display" id="menu-display">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html> 

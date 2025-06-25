@@ -17,28 +17,41 @@ const carouselConfig = {
     fadeTime: 1000 // 1 segundo para el efecto de fade
 };
 
+// Configuración del cambio automático de menús
+const menuRotationConfig = {
+    interval: 8000, // 8 segundos por menú
+    fadeTime: 1000  // 1 segundo para la transición
+};
+
+// Variables globales para el cambio automático de menús
+let currentMenuIndex = 0;
+let menuRotationInterval = null;
+let allMenuData = [];
+
 // Función para actualizar la hora y fecha
 function updateDateTime() {
     const now = new Date();
     const timeElement = document.getElementById('current-time');
     const dateElement = document.getElementById('current-date');
     
-    // Formatear hora
-    const timeOptions = { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false 
-    };
-    timeElement.textContent = now.toLocaleTimeString('es-AR', timeOptions);
+    if (timeElement) {
+        const timeString = now.toLocaleTimeString('es-AR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        timeElement.textContent = timeString;
+    }
     
-    // Formatear fecha
-    const dateOptions = { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-    };
-    dateElement.textContent = now.toLocaleDateString('es-AR', dateOptions);
+    if (dateElement) {
+        const dateString = now.toLocaleDateString('es-AR', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        dateElement.textContent = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+    }
 }
 
 // Funciones de utilidad
@@ -51,60 +64,411 @@ const formatDate = (date) => {
     });
 };
 
-// Cargar menú semanal
+// Función para obtener el día de la semana en español
+function getDayName(day) {
+    const days = {
+        'lunes': 'Lunes',
+        'martes': 'Martes',
+        'miercoles': 'Miércoles',
+        'jueves': 'Jueves',
+        'viernes': 'Viernes',
+        'sabado': 'Sábado',
+        'domingo': 'Domingo'
+    };
+    return days[day.toLowerCase()] || day;
+}
+
+// Función para obtener el próximo día de la semana
+function getNextDay() {
+    const today = new Date();
+    const days = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    const currentDay = days[today.getDay()];
+    
+    // Si es viernes, el próximo día es lunes
+    if (currentDay === 'viernes') {
+        return 'lunes';
+    }
+    // Si es sábado o domingo, el próximo día es lunes
+    if (currentDay === 'sabado' || currentDay === 'domingo') {
+        return 'lunes';
+    }
+    
+    // Para otros días (lunes a jueves), obtener el siguiente
+    const currentIndex = days.indexOf(currentDay);
+    const nextIndex = (currentIndex + 1) % 7;
+    return days[nextIndex];
+}
+
+// Función para obtener el día actual
+function getCurrentDay() {
+    const today = new Date();
+    const days = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    return days[today.getDay()];
+}
+
+// Función para actualizar el próximo menú
+function updateNextMenu(menuData, currentDay) {
+    console.log('🔄 Actualizando próximo menú...');
+    
+    // Obtener el próximo día (solo días laborables: lunes a viernes)
+    const daysOfWeek = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+    const currentDayIndex = daysOfWeek.indexOf(currentDay.toLowerCase());
+    
+    let nextDay;
+    if (currentDayIndex === -1) {
+        // Si el día actual no está en la lista (sábado/domingo), mostrar lunes
+        nextDay = 'lunes';
+    } else if (currentDayIndex === daysOfWeek.length - 1) {
+        // Si es viernes, el próximo día es lunes
+        nextDay = 'lunes';
+    } else {
+        // Para otros días, obtener el siguiente
+        nextDay = daysOfWeek[currentDayIndex + 1];
+    }
+    
+    console.log('📅 Día actual:', currentDay, 'Próximo día:', nextDay);
+    
+    // Buscar el menú del próximo día
+    const nextMenu = menuData.find(menu => menu.dia.toLowerCase() === nextDay);
+    
+    if (nextMenu) {
+        console.log('📋 Menú del próximo día encontrado:', nextMenu);
+        
+        // Actualizar elementos del próximo menú
+        const nextGeneralMenu = document.getElementById('next-general-menu');
+        const nextVegetarianMenu = document.getElementById('next-vegetarian-menu');
+        const nextCeliacMenu = document.getElementById('next-celiac-menu');
+        const nextDayElement = document.getElementById('next-day');
+        
+        if (nextGeneralMenu) nextGeneralMenu.textContent = nextMenu.menu_general;
+        if (nextVegetarianMenu) nextVegetarianMenu.textContent = nextMenu.menu_vegetariano;
+        if (nextCeliacMenu) nextCeliacMenu.textContent = nextMenu.menu_celiaco;
+        if (nextDayElement) nextDayElement.textContent = nextDay.toUpperCase();
+        
+        console.log('✅ Próximo menú actualizado correctamente');
+    } else {
+        console.warn('⚠️ No se encontró menú para el próximo día:', nextDay);
+        
+        // Si no hay menú para el próximo día, mostrar el primer menú disponible de lunes a viernes
+        const weekdayMenus = menuData.filter(menu => {
+            const day = menu.dia.toLowerCase();
+            return ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].includes(day);
+        });
+        
+        if (weekdayMenus.length > 0) {
+            const firstMenu = weekdayMenus[0];
+            const nextGeneralMenu = document.getElementById('next-general-menu');
+            const nextVegetarianMenu = document.getElementById('next-vegetarian-menu');
+            const nextCeliacMenu = document.getElementById('next-celiac-menu');
+            const nextDayElement = document.getElementById('next-day');
+            
+            if (nextGeneralMenu) nextGeneralMenu.textContent = firstMenu.menu_general;
+            if (nextVegetarianMenu) nextVegetarianMenu.textContent = firstMenu.menu_vegetariano;
+            if (nextCeliacMenu) nextCeliacMenu.textContent = firstMenu.menu_celiaco;
+            if (nextDayElement) nextDayElement.textContent = firstMenu.dia.toUpperCase();
+            
+            console.log('✅ Mostrando primer menú de lunes a viernes como próximo menú');
+        }
+    }
+}
+
+// Función para cargar el menú
 async function loadMenu() {
     try {
+        console.log('🔄 Iniciando carga de menús...');
         const response = await fetch(`${API_URL}/api/menu`);
         if (!response.ok) {
-            throw new Error('Error al cargar el menú');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const menu = await response.json();
-        console.log('Menú cargado:', menu);
         
-        // Obtener el día actual en español
-        const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-        const diaActual = diasSemana[new Date().getDay()];
+        const menuData = await response.json();
+        console.log('📋 Menús cargados:', menuData.length);
+        console.log('📋 Datos del menú:', menuData);
         
-        // Limpiar todos los contenedores de menú
-        ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].forEach(dia => {
-            const container = document.getElementById(`menu-${dia}`);
-            const menuDay = container.parentElement;
-            
-            // Remover la clase current-day de todos los días
-            menuDay.classList.remove('current-day');
-            
-            // Agregar la clase current-day al día actual
-            if (dia === diaActual) {
-                menuDay.classList.add('current-day');
-            }
-            
-            if (container) {
-                const menuDia = menu.find(m => m.dia.toLowerCase() === dia);
-                if (menuDia) {
-                    container.innerHTML = `
-                        <div class="menu-item">
-                            <h4>Menú General</h4>
-                            <p>${menuDia.menu_general || 'No disponible'}</p>
-                            <h4>Menú Vegetariano</h4>
-                            <p>${menuDia.menu_vegetariano || 'No disponible'}</p>
-                            <h4>Menú Celíaco</h4>
-                            <p>${menuDia.menu_celiaco || 'No disponible'}</p>
-                        </div>
-                    `;
-                } else {
-                    container.innerHTML = '<p class="no-menu">No hay menú disponible</p>';
-                }
-            }
-        });
+        // Obtener día actual
+        const currentDay = getCurrentDay();
+        console.log('📅 Día actual:', currentDay);
+        
+        // Actualizar próximo menú
+        console.log('🔄 Actualizando próximo menú...');
+        updateNextMenu(menuData, currentDay);
+        
+        // Actualizar menú semanal
+        console.log('🔄 Actualizando menú semanal...');
+        updateWeeklyMenu(menuData, currentDay);
+        
+        console.log('✅ Carga de menús completada exitosamente');
+        
     } catch (error) {
-        console.error('Error al cargar el menú:', error);
-        ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].forEach(dia => {
-            const container = document.getElementById(`menu-${dia}`);
-            if (container) {
-                container.innerHTML = '<p class="error-menu">Error al cargar el menú</p>';
-            }
-        });
+        console.error('❌ Error cargando menús:', error);
+        // Mostrar mensaje de error en la interfaz
+        const menuContainer = document.querySelector('.menu-container');
+        if (menuContainer) {
+            menuContainer.innerHTML = '<div class="error-message">Error cargando menús</div>';
+        }
     }
+}
+
+// Función para iniciar la rotación automática de menús
+function startMenuRotation() {
+    if (menuRotationInterval) {
+        clearInterval(menuRotationInterval);
+    }
+    
+    currentMenuIndex = 0;
+    menuRotationInterval = setInterval(() => {
+        rotateMenuDisplay();
+    }, menuRotationConfig.interval);
+    
+    console.log('🔄 Rotación automática de menús iniciada');
+}
+
+// Función para rotar la visualización de menús
+function rotateMenuDisplay() {
+    if (!allMenuData || allMenuData.length === 0) return;
+    
+    const weekDays = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+    const currentDay = getCurrentDay();
+    
+    // Reordenar días para que el actual esté primero
+    const reorderedDays = [];
+    const currentDayIndex = weekDays.indexOf(currentDay);
+    
+    if (currentDayIndex !== -1) {
+        reorderedDays.push(currentDay);
+        for (let i = 0; i < weekDays.length; i++) {
+            if (i !== currentDayIndex) {
+                reorderedDays.push(weekDays[i]);
+            }
+        }
+    } else {
+        reorderedDays.push(...weekDays);
+    }
+    
+    // Obtener el día a mostrar
+    const dayToShow = reorderedDays[currentMenuIndex % reorderedDays.length];
+    console.log(`🔄 Mostrando menú para: ${dayToShow} (índice: ${currentMenuIndex})`);
+    
+    // Incrementar índice
+    currentMenuIndex = (currentMenuIndex + 1) % reorderedDays.length;
+}
+
+// Función para actualizar la tabla con animación
+function updateWeeklyMenuTableWithAnimation(menuData, dayToShow) {
+    const tbody = document.getElementById('weekly-menu-tbody');
+    if (!tbody) return;
+    
+    // Fade out
+    tbody.style.opacity = '0';
+    tbody.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+        // Actualizar contenido
+        updateWeeklyMenuTableContent(menuData, dayToShow);
+        
+        // Fade in con un pequeño delay para asegurar que el contenido se haya actualizado
+        setTimeout(() => {
+            tbody.style.opacity = '1';
+            tbody.style.transform = 'translateY(0)';
+        }, 50);
+    }, menuRotationConfig.fadeTime / 2);
+}
+
+// Función para actualizar la visualización del menú
+function updateMenuDisplay(menuData) {
+    console.log('🔄 Actualizando visualización del menú...');
+    const nextDay = getNextDay();
+    const currentDay = getCurrentDay();
+    console.log('📅 Próximo día:', nextDay, 'Día actual:', currentDay);
+    
+    // Actualizar información del próximo día
+    const nextDayElement = document.getElementById('next-day');
+    if (nextDayElement) {
+        nextDayElement.textContent = getDayName(nextDay);
+        console.log('✅ Próximo día actualizado:', getDayName(nextDay));
+    } else {
+        console.warn('⚠️ Elemento next-day no encontrado');
+    }
+    
+    // Actualizar próximo menú
+    const nextMenu = menuData.find(item => item.dia.toLowerCase() === nextDay);
+    console.log('🍽️ Próximo menú encontrado:', nextMenu);
+    
+    if (nextMenu) {
+        const generalElement = document.getElementById('next-general-menu');
+        const vegetarianElement = document.getElementById('next-vegetarian-menu');
+        const celiacElement = document.getElementById('next-celiac-menu');
+        
+        if (generalElement) generalElement.textContent = nextMenu.menu_general || 'No disponible';
+        if (vegetarianElement) vegetarianElement.textContent = nextMenu.menu_vegetariano || 'No disponible';
+        if (celiacElement) celiacElement.textContent = nextMenu.menu_celiaco || 'No disponible';
+        
+        console.log('✅ Próximo menú actualizado');
+    } else {
+        const generalElement = document.getElementById('next-general-menu');
+        const vegetarianElement = document.getElementById('next-vegetarian-menu');
+        const celiacElement = document.getElementById('next-celiac-menu');
+        
+        if (generalElement) generalElement.textContent = 'Menú no disponible';
+        if (vegetarianElement) vegetarianElement.textContent = 'Menú no disponible';
+        if (celiacElement) celiacElement.textContent = 'Menú no disponible';
+        
+        console.warn('⚠️ No se encontró menú para el próximo día');
+    }
+    
+    // Actualizar tabla semanal
+    console.log('📊 Actualizando tabla semanal...');
+    updateWeeklyMenuTable(menuData, currentDay);
+}
+
+// Función para actualizar la tabla del menú semanal
+function updateWeeklyMenuTable(menuData, currentDay) {
+    const tbody = document.getElementById('weekly-menu-tbody');
+    if (!tbody) return;
+    
+    // Limpiar tabla
+    tbody.innerHTML = '';
+    
+    // Obtener días de la semana
+    const daysOfWeek = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+    const dayNames = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'];
+    
+    // Encontrar índice del día actual
+    const currentDayIndex = daysOfWeek.indexOf(currentDay.toLowerCase());
+    
+    // Crear array con el día actual primero y los demás después
+    let orderedDays = [];
+    if (currentDayIndex !== -1) {
+        // Agregar el día actual primero
+        orderedDays.push({
+            day: daysOfWeek[currentDayIndex],
+            dayName: dayNames[currentDayIndex],
+            isCurrent: true
+        });
+        
+        // Agregar los demás días después del actual
+        for (let i = 0; i < daysOfWeek.length; i++) {
+            if (i !== currentDayIndex) {
+                orderedDays.push({
+                    day: daysOfWeek[i],
+                    dayName: dayNames[i],
+                    isCurrent: false
+                });
+            }
+        }
+    } else {
+        // Si no se encuentra el día actual, usar orden normal
+        orderedDays = daysOfWeek.map((day, index) => ({
+            day: day,
+            dayName: dayNames[index],
+            isCurrent: false
+        }));
+    }
+    
+    // Mostrar solo los primeros 4 días (día actual + 3 más)
+    const daysToShow = orderedDays.slice(0, 4);
+    
+    // Crear filas de la tabla
+    daysToShow.forEach((dayInfo, index) => {
+        const menuForDay = menuData.find(menu => menu.dia.toLowerCase() === dayInfo.day);
+        
+        const row = document.createElement('tr');
+        if (dayInfo.isCurrent) {
+            row.classList.add('current-day');
+        }
+        
+        // Agregar clase para animación de entrada
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(20px)';
+        
+        row.innerHTML = `
+            <td>${dayInfo.dayName}</td>
+            <td>
+                <div class="menu-type-content-table">
+                    ${menuForDay ? menuForDay.menu_general : 'Menú no disponible'}
+                </div>
+            </td>
+            <td>
+                <div class="menu-type-content-table">
+                    ${menuForDay ? menuForDay.menu_vegetariano : 'Menú no disponible'}
+                </div>
+            </td>
+            <td>
+                <div class="menu-type-content-table">
+                    ${menuForDay ? menuForDay.menu_celiaco : 'Menú no disponible'}
+                </div>
+            </td>
+        `;
+        
+        tbody.appendChild(row);
+        
+        // Animación de entrada con delay
+        setTimeout(() => {
+            row.style.transition = 'all 0.6s ease';
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+}
+
+// Función para rotar automáticamente los días del menú semanal
+function startWeeklyMenuRotation(menuData, currentDay) {
+    const daysOfWeek = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+    const dayNames = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'];
+    
+    // Encontrar índice del día actual
+    const currentDayIndex = daysOfWeek.indexOf(currentDay.toLowerCase());
+    
+    // Crear array con todos los días excepto el actual
+    let otherDays = [];
+    for (let i = 0; i < daysOfWeek.length; i++) {
+        if (i !== currentDayIndex) {
+            otherDays.push({
+                day: daysOfWeek[i],
+                dayName: dayNames[i]
+            });
+        }
+    }
+    
+    let currentRotationIndex = 0;
+    
+    // Función para cambiar el día mostrado
+    function rotateWeeklyMenu() {
+        if (otherDays.length === 0) return;
+        
+        // Obtener el día actual y los próximos 3 días para mostrar
+        const daysToShow = [
+            { day: daysOfWeek[currentDayIndex], dayName: dayNames[currentDayIndex], isCurrent: true },
+            ...otherDays.slice(currentRotationIndex, currentRotationIndex + 3)
+        ];
+        
+        // Si no hay suficientes días, completar desde el inicio
+        while (daysToShow.length < 4) {
+            const remainingDays = otherDays.filter(d => !daysToShow.some(show => show.day === d.day));
+            if (remainingDays.length > 0) {
+                daysToShow.push(remainingDays[0]);
+            } else {
+                break;
+            }
+        }
+        
+        // Actualizar tabla con animación
+        updateWeeklyMenuTableWithAnimation(menuData, daysToShow);
+        
+        // Avanzar al siguiente grupo de días
+        currentRotationIndex = (currentRotationIndex + 1) % otherDays.length;
+    }
+    
+    // Iniciar rotación automática
+    if (otherDays.length > 0) {
+        setInterval(rotateWeeklyMenu, menuRotationConfig.interval);
+    }
+}
+
+// Función para mostrar errores
+function showError(message) {
+    console.error(message);
+    // Aquí podrías agregar una notificación visual si es necesario
 }
 
 // Cargar mensajes destacados
@@ -277,67 +641,6 @@ function startCarousel() {
     }, carouselConfig.transitionTime);
 }
 
-function updateMenuTomorrowTitle() {
-    const dias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-    const hoy = new Date();
-    let manana = new Date(hoy);
-    manana.setDate(hoy.getDate() + 1);
-    // Si es viernes, mostrar lunes siguiente
-    if (hoy.getDay() === 5) {
-        manana.setDate(hoy.getDate() + 3);
-    } else if (hoy.getDay() === 6) { // Si es sábado, mostrar lunes
-        manana.setDate(hoy.getDate() + 2);
-    }
-    const diaNombre = dias[manana.getDay()];
-    const diaNumero = String(manana.getDate()).padStart(2, '0');
-    const mesNombre = meses[manana.getMonth()];
-    document.getElementById('menu-tomorrow-dia').textContent = diaNombre.charAt(0).toUpperCase() + diaNombre.slice(1);
-    document.getElementById('menu-tomorrow-fecha').textContent = `${diaNumero} de ${mesNombre}`;
-}
-
-// Mostrar menú de mañana en el bloque destacado
-async function loadMenuTomorrow() {
-    try {
-        const response = await fetch(`${API_URL}/api/menu`);
-        if (!response.ok) {
-            throw new Error('Error al cargar el menú');
-        }
-        const menu = await response.json();
-        console.log('Menú cargado para mañana:', menu);
-        
-        const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-        const hoy = new Date();
-        let manana = new Date(hoy);
-        manana.setDate(hoy.getDate() + 1);
-        
-        // Si es viernes, mostrar lunes siguiente
-        if (hoy.getDay() === 5) {
-            manana.setDate(hoy.getDate() + 3);
-        } else if (hoy.getDay() === 6) {
-            manana.setDate(hoy.getDate() + 2);
-        }
-        
-        const diaNombre = diasSemana[manana.getDay()];
-        const menuDia = menu.find(m => m.dia.toLowerCase() === diaNombre);
-        
-        if (menuDia) {
-            document.getElementById('menu-tomorrow-general').textContent = menuDia.menu_general || 'No disponible';
-            document.getElementById('menu-tomorrow-vegetariano').textContent = menuDia.menu_vegetariano || 'No disponible';
-            document.getElementById('menu-tomorrow-celiaco').textContent = menuDia.menu_celiaco || 'No disponible';
-        } else {
-            document.getElementById('menu-tomorrow-general').textContent = 'No disponible';
-            document.getElementById('menu-tomorrow-vegetariano').textContent = 'No disponible';
-            document.getElementById('menu-tomorrow-celiaco').textContent = 'No disponible';
-        }
-    } catch (error) {
-        console.error('Error al cargar el menú de mañana:', error);
-        document.getElementById('menu-tomorrow-general').textContent = 'No disponible';
-        document.getElementById('menu-tomorrow-vegetariano').textContent = 'No disponible';
-        document.getElementById('menu-tomorrow-celiaco').textContent = 'No disponible';
-    }
-}
-
 // Carrusel de mensajes e imágenes mezclados
 let currentMixedSlide = 0;
 let mixedSlides = [];
@@ -421,84 +724,45 @@ function showMixedSlide() {
     }
 }
 
-// Mostrar tabla de menú semanal compacto
-async function renderMenuWeekTable() {
+// Mostrar menú de mañana en el bloque destacado
+async function loadMenuTomorrow() {
     try {
         const response = await fetch(`${API_URL}/api/menu`);
         if (!response.ok) {
             throw new Error('Error al cargar el menú');
         }
         const menu = await response.json();
-        console.log('Menú cargado para la tabla:', menu);
+        console.log('Menú cargado para mañana:', menu);
         
-        const diasSemana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+        const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
         const hoy = new Date();
-        const diaActual = diasSemana[hoy.getDay() - 1];
-        
-        // Calcular el día de mañana
         let manana = new Date(hoy);
         manana.setDate(hoy.getDate() + 1);
+        
         // Si es viernes, mostrar lunes siguiente
         if (hoy.getDay() === 5) {
             manana.setDate(hoy.getDate() + 3);
         } else if (hoy.getDay() === 6) {
             manana.setDate(hoy.getDate() + 2);
         }
-        const diaManana = diasSemana[manana.getDay() - 1];
         
-        // Filtrar los días para excluir el día de mañana
-        const diasAMostrar = diasSemana.filter(dia => dia !== diaManana);
+        const diaNombre = diasSemana[manana.getDay()];
+        const menuDia = menu.find(m => m.dia.toLowerCase() === diaNombre);
         
-        // Construir tabla
-        let html = '<table id="menu-week-table">';
-        
-        // Encabezado con días
-        html += '<tr>';
-        html += '<th style="width: 10%; text-align: center; font-size: 2rem; background: linear-gradient(45deg, #2d5a27, #3a7d32, #51cb93);">Tipo</th>';
-        diasAMostrar.forEach(dia => {
-            const esHoy = dia === diaActual;
-            html += `<th class="${esHoy ? 'menu-week-cell-dia-hoy' : ''}">${esHoy ? 'HOY' : dia.charAt(0).toUpperCase() + dia.slice(1)}</th>`;
-        });
-        html += '</tr>';
-        
-        // Fila de menú general
-        html += '<tr class="menu-general-row">';
-        html += '<td style="text-align: center; font-size: 5rem; padding: 15px; text-shadow: 2px 2px 7px rgb(0 0 0); border-right: 4px solid #dc2626;">🍽️</td>';
-        diasAMostrar.forEach(dia => {
-            const menuDia = menu.find(m => m.dia.toLowerCase() === dia);
-            const esHoy = dia === diaActual;
-            const menuGeneral = menuDia && menuDia.menu_general ? menuDia.menu_general : 'No disponible';
-            html += `<td class="${esHoy ? 'current-day' : ''}">${menuGeneral}</td>`;
-        });
-        html += '</tr>';
-        
-        // Fila de menú vegetariano
-        html += '<tr class="menu-vegetariano-row">';
-        html += '<td style="text-align: center; font-size: 5rem; padding: 15px; text-shadow: 2px 2px 7px rgb(0 0 0); border-right: 4px solid #3b82f6;">🥗</td>';
-        diasAMostrar.forEach(dia => {
-            const menuDia = menu.find(m => m.dia.toLowerCase() === dia);
-            const esHoy = dia === diaActual;
-            const menuVegetariano = menuDia && menuDia.menu_vegetariano ? menuDia.menu_vegetariano : 'No disponible';
-            html += `<td class="${esHoy ? 'current-day' : ''}">${menuVegetariano}</td>`;
-        });
-        html += '</tr>';
-        
-        // Fila de menú celíaco
-        html += '<tr class="menu-celiaco-row">';
-        html += '<td style="text-align: center; font-size: 5rem; padding: 15px; text-shadow: 2px 2px 7px rgb(0 0 0); border-right: 4px solid #eab308;">🌾</td>';
-        diasAMostrar.forEach(dia => {
-            const menuDia = menu.find(m => m.dia.toLowerCase() === dia);
-            const esHoy = dia === diaActual;
-            const menuCeliaco = menuDia && menuDia.menu_celiaco ? menuDia.menu_celiaco : 'No disponible';
-            html += `<td class="${esHoy ? 'current-day' : ''}">${menuCeliaco}</td>`;
-        });
-        html += '</tr>';
-        
-        html += '</table>';
-        document.getElementById('menu-week-table').innerHTML = html;
+        if (menuDia) {
+            document.getElementById('menu-tomorrow-general').textContent = menuDia.menu_general || 'No disponible';
+            document.getElementById('menu-tomorrow-vegetariano').textContent = menuDia.menu_vegetariano || 'No disponible';
+            document.getElementById('menu-tomorrow-celiaco').textContent = menuDia.menu_celiaco || 'No disponible';
+        } else {
+            document.getElementById('menu-tomorrow-general').textContent = 'No disponible';
+            document.getElementById('menu-tomorrow-vegetariano').textContent = 'No disponible';
+            document.getElementById('menu-tomorrow-celiaco').textContent = 'No disponible';
+        }
     } catch (error) {
-        console.error('Error al cargar la tabla del menú:', error);
-        document.getElementById('menu-week-table').innerHTML = '<p>Error al cargar el menú semanal</p>';
+        console.error('Error al cargar el menú de mañana:', error);
+        document.getElementById('menu-tomorrow-general').textContent = 'No disponible';
+        document.getElementById('menu-tomorrow-vegetariano').textContent = 'No disponible';
+        document.getElementById('menu-tomorrow-celiaco').textContent = 'No disponible';
     }
 }
 
@@ -520,12 +784,12 @@ function initPageCarousel() {
         }
     });
     
-    // Mostrar la página de información (página secundaria) en lugar de la primera página
-    currentPage = 1; // Cambiar a la página de información
+    // Mostrar la página del menú (página principal) como inicial
+    currentPage = 0; // Cambiar a la página del menú
     document.getElementById(pages[currentPage]).classList.add('active');
     console.log('Página activa inicial:', pages[currentPage]);
     
-    // CARRUSEL AUTOMÁTICO DESACTIVADO - PÁGINA ESTÁTICA
+    // CARRUSEL AUTOMÁTICO DESACTIVADO - PÁGINA ESTÁTICA EN MENÚ
     // Cambiar de página cada 10 segundos
     /*
     setInterval(() => {
@@ -544,7 +808,7 @@ function initPageCarousel() {
     }, PAGE_INTERVAL);
     */
     
-    console.log('✅ Carrusel automático desactivado - Página estática en información');
+    console.log('✅ Carrusel automático desactivado - Página estática en menú');
 }
 
 // Cargar imagen destacada
@@ -714,25 +978,54 @@ console.log('  carrusel.paginasDisponibles() - Listar todas las páginas');
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
-    updateDateTime();
-    updateMenuTomorrowTitle();
-    loadMenuTomorrow();
-    renderMenuWeekTable();
-    loadMixedCarousel();
-    loadMessages(); // Cargar mensajes
-    loadWeather();
-    loadFeaturedImage(); // Cargar imagen destacada
-    loadQR(); // Cargar código QR
-    initPageCarousel(); // Inicializar el carrusel de páginas
+    console.log('🚀 Inicializando aplicación...');
     
+    // Actualizar fecha y hora
+    updateDateTime();
+    
+    // Cargar datos según la página actual
+    const currentPath = window.location.pathname;
+    
+    if (currentPath.includes('menu.html')) {
+        console.log('📋 Página del menú detectada');
+        // Cargar menú para la página específica del menú
+        loadMenu();
+        setInterval(loadMenu, UPDATE_INTERVALS.MENU);
+    } else if (currentPath.includes('info.html')) {
+        console.log('ℹ️ Página de información detectada');
+        // Cargar datos para la página de información
+        loadMixedCarousel();
+        loadMessages();
+        loadWeather();
+        loadFeaturedImage();
+        loadQR();
+        
+        setInterval(loadMixedCarousel, UPDATE_INTERVALS.MESSAGES);
+        setInterval(loadMessages, UPDATE_INTERVALS.MESSAGES);
+        setInterval(loadWeather, UPDATE_INTERVALS.WEATHER);
+        setInterval(loadFeaturedImage, UPDATE_INTERVALS.MESSAGES);
+        setInterval(loadQR, UPDATE_INTERVALS.MESSAGES);
+    } else {
+        console.log('🏠 Página principal detectada');
+        // Página principal con carrusel
+        loadMenuTomorrow();
+        loadMixedCarousel();
+        loadMessages();
+        loadWeather();
+        loadFeaturedImage();
+        loadQR();
+        initPageCarousel();
+        
+        setInterval(loadMenuTomorrow, UPDATE_INTERVALS.MENU);
+        setInterval(loadMixedCarousel, UPDATE_INTERVALS.MESSAGES);
+        setInterval(loadMessages, UPDATE_INTERVALS.MESSAGES);
+        setInterval(loadWeather, UPDATE_INTERVALS.WEATHER);
+        setInterval(loadFeaturedImage, UPDATE_INTERVALS.MESSAGES);
+        setInterval(loadQR, UPDATE_INTERVALS.MESSAGES);
+    }
+    
+    // Actualizar fecha y hora cada segundo
     setInterval(updateDateTime, UPDATE_INTERVALS.DATETIME);
-    setInterval(loadMenuTomorrow, UPDATE_INTERVALS.MENU);
-    setInterval(renderMenuWeekTable, UPDATE_INTERVALS.MENU);
-    setInterval(loadMixedCarousel, UPDATE_INTERVALS.MESSAGES);
-    setInterval(loadMessages, UPDATE_INTERVALS.MESSAGES); // Actualizar mensajes
-    setInterval(loadWeather, UPDATE_INTERVALS.WEATHER);
-    setInterval(loadFeaturedImage, UPDATE_INTERVALS.MESSAGES); // Actualizar imagen destacada
-    setInterval(loadQR, UPDATE_INTERVALS.MESSAGES); // Actualizar código QR
     
     // Agregar indicador visual de actualización
     const updateIndicator = document.createElement('div');
@@ -790,4 +1083,235 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error al actualizar el clima:', error);
         }
     };
-}); 
+    
+    console.log('✅ Aplicación inicializada correctamente');
+});
+
+// Función para verificar el estado del servidor
+async function checkServerStatus() {
+    try {
+        const response = await fetch(`${API_URL}/api/health`);
+        return response.ok;
+    } catch (error) {
+        return false;
+    }
+}
+
+// Función para recargar la página si es necesario
+function reloadIfNeeded() {
+    // Verificar si la página ha estado inactiva por más de 1 hora
+    const lastActivity = localStorage.getItem('lastActivity') || Date.now();
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000;
+    
+    if (now - lastActivity > oneHour) {
+        console.log('Página inactiva por más de 1 hora, recargando...');
+        window.location.reload();
+    }
+    
+    localStorage.setItem('lastActivity', now);
+}
+
+// Actualizar actividad del usuario
+document.addEventListener('click', function() {
+    localStorage.setItem('lastActivity', Date.now());
+});
+
+document.addEventListener('keypress', function() {
+    localStorage.setItem('lastActivity', Date.now());
+});
+
+// Verificar recarga cada 30 minutos
+setInterval(reloadIfNeeded, 30 * 60 * 1000);
+
+// NUEVA FUNCIÓN PARA ACTUALIZAR EL MENÚ SEMANAL
+function updateWeeklyMenu(menuData, currentDay) {
+    console.log('🔄 Actualizando menú semanal...');
+    console.log('📊 Datos del menú:', menuData);
+    console.log('📅 Día actual:', currentDay);
+    
+    const menuDisplay = document.getElementById('menu-display');
+    if (!menuDisplay) {
+        console.error('❌ Elemento menu-display no encontrado');
+        return;
+    }
+    
+    console.log('✅ Elemento menu-display encontrado');
+    
+    // Obtener días de la semana (solo días laborables: lunes a viernes)
+    const daysOfWeek = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+    const dayNames = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES'];
+    
+    // Encontrar índice del día actual
+    const currentDayIndex = daysOfWeek.indexOf(currentDay.toLowerCase());
+    console.log('🔍 Índice del día actual:', currentDayIndex);
+    
+    // Si el día actual no está en la lista (sábado/domingo), mostrar lunes como día actual
+    let actualCurrentDay = currentDay;
+    let actualCurrentDayIndex = currentDayIndex;
+    if (currentDayIndex === -1) {
+        actualCurrentDay = 'lunes';
+        actualCurrentDayIndex = 0;
+        console.log('📅 Día actual ajustado a lunes (fin de semana detectado)');
+    }
+    
+    // Obtener el próximo día (el mismo que se muestra en la sección de próximo menú)
+    let nextDay;
+    if (actualCurrentDayIndex === daysOfWeek.length - 1) {
+        // Si es viernes, el próximo día es lunes
+        nextDay = 'lunes';
+    } else {
+        // Para otros días, obtener el siguiente
+        nextDay = daysOfWeek[actualCurrentDayIndex + 1];
+    }
+    console.log('📅 Próximo día:', nextDay);
+    
+    // Crear array con todos los días excepto el actual Y el próximo día
+    let otherDays = [];
+    for (let i = 0; i < daysOfWeek.length; i++) {
+        if (i !== actualCurrentDayIndex && daysOfWeek[i] !== nextDay) {
+            otherDays.push({
+                day: daysOfWeek[i],
+                dayName: dayNames[i]
+            });
+        }
+    }
+    
+    console.log('📋 Días adicionales para rotar (excluyendo actual y próximo):', otherDays);
+    
+    // Variable para controlar qué día adicional mostrar
+    let currentOtherDayIndex = 0;
+    
+    // Buscar el menú del día actual (fijo)
+    const currentDayMenu = menuData.find(menu => menu.dia.toLowerCase() === daysOfWeek[actualCurrentDayIndex]);
+    console.log('🍽️ Menú del día actual:', currentDayMenu);
+    
+    // Crear HTML para el día actual (fijo)
+    let currentDayHTML = '';
+    if (currentDayMenu) {
+        currentDayHTML = `
+            <div class="menu-day current-day">
+                <div class="day-header">
+                    <h3 class="day-title">${dayNames[actualCurrentDayIndex]}</h3>
+                    <span class="current-indicator">HOY</span>
+                </div>
+                <div class="day-menus">
+                    <div class="menu-item general">
+                        <div class="menu-type-label">GENERAL</div>
+                        <div class="menu-content">${currentDayMenu.menu_general}</div>
+                    </div>
+                    <div class="menu-item vegetarian">
+                        <div class="menu-type-label">VEGETARIANO</div>
+                        <div class="menu-content">${currentDayMenu.menu_vegetariano}</div>
+                    </div>
+                    <div class="menu-item celiac">
+                        <div class="menu-type-label">CELÍACO</div>
+                        <div class="menu-content">${currentDayMenu.menu_celiaco}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Función para actualizar solo la columna derecha
+    function updateRightColumn() {
+        console.log('🔄 Actualizando columna derecha...');
+        console.log('📅 Día adicional actual:', currentOtherDayIndex);
+        
+        // Si no hay días adicionales para rotar, mostrar mensaje
+        if (otherDays.length === 0) {
+            const otherDayHTML = `
+                <div class="menu-day other-day fade-out">
+                    <div class="day-header">
+                        <h3 class="day-title">ROTACIÓN</h3>
+                        <span class="rotation-indicator">COMPLETA</span>
+                    </div>
+                    <div class="day-menus" style="justify-content:center;align-items:center;min-height:120px;">
+                        <div style="width:100%;text-align:center;color:#aaa;font-size:1.5em;opacity:0.7;">Todos los días mostrados</div>
+                    </div>
+                </div>
+            `;
+            const completeHTML = currentDayHTML + otherDayHTML;
+            menuDisplay.innerHTML = completeHTML;
+            return;
+        }
+        
+        // Obtener el día adicional a mostrar
+        const otherDayToShow = otherDays[currentOtherDayIndex];
+        const otherDayMenu = menuData.find(menu => menu.dia.toLowerCase() === otherDayToShow.day);
+        let otherDayHTML = '';
+        if (otherDayMenu) {
+            otherDayHTML = `
+                <div class="menu-day other-day fade-out">
+                    <div class="day-header">
+                        <h3 class="day-title">${otherDayToShow.dayName}</h3>
+                        <span class="rotation-indicator">ROTACIÓN</span>
+                    </div>
+                    <div class="day-menus">
+                        <div class="menu-item general">
+                            <div class="menu-type-label">GENERAL</div>
+                            <div class="menu-content">${otherDayMenu.menu_general}</div>
+                        </div>
+                        <div class="menu-item vegetarian">
+                            <div class="menu-type-label">VEGETARIANO</div>
+                            <div class="menu-content">${otherDayMenu.menu_vegetariano}</div>
+                        </div>
+                        <div class="menu-item celiac">
+                            <div class="menu-type-label">CELÍACO</div>
+                            <div class="menu-content">${otherDayMenu.menu_celiaco}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            otherDayHTML = `
+                <div class="menu-day other-day fade-out">
+                    <div class="day-header">
+                        <h3 class="day-title">${otherDayToShow.dayName}</h3>
+                        <span class="rotation-indicator">ROTACIÓN</span>
+                    </div>
+                    <div class="day-menus" style="justify-content:center;align-items:center;min-height:120px;">
+                        <div style="width:100%;text-align:center;color:#aaa;font-size:1.5em;opacity:0.7;">Sin menú cargado</div>
+                    </div>
+                </div>
+            `;
+        }
+        const completeHTML = currentDayHTML + otherDayHTML;
+        const rightColumn = menuDisplay.querySelector('.other-day');
+        if (rightColumn) {
+            rightColumn.classList.add('fade-out');
+        }
+        setTimeout(() => {
+            menuDisplay.innerHTML = completeHTML;
+            const newRightColumn = menuDisplay.querySelector('.other-day');
+            if (newRightColumn) {
+                setTimeout(() => {
+                    newRightColumn.classList.remove('fade-out');
+                    newRightColumn.classList.add('fade-in');
+                }, 50);
+            }
+        }, 400);
+    }
+    
+    // Mostrar inicialmente
+    updateRightColumn();
+    
+    // Función para rotar al siguiente día
+    function rotateToNextDay() {
+        console.log('🔄 Rotando al siguiente día...');
+        if (otherDays.length > 0) {
+            currentOtherDayIndex = (currentOtherDayIndex + 1) % otherDays.length;
+            updateRightColumn();
+        }
+    }
+    
+    // Iniciar rotación automática cada 8 segundos solo si hay días para rotar
+    if (otherDays.length > 0) {
+        console.log('⏰ Iniciando rotación automática cada 8 segundos');
+        setInterval(rotateToNextDay, 8000);
+    } else {
+        console.log('ℹ️ No hay días adicionales para rotar (solo quedan 2 días de la semana)');
+    }
+    
+    console.log('✅ Menú semanal actualizado correctamente');
+} 

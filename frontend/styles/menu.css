@@ -1,0 +1,1188 @@
+/* RESET Y CONFIGURACIÓN BASE */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    height: 100vh;
+    overflow: hidden;
+    color: #333;
+    width: 100vw;
+}
+
+/* HEADER PRINCIPAL */
+.main-header {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+    backdrop-filter: blur(10px);
+    padding: 10px 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border-bottom: 4px solid #004071;
+    position: relative;
+    z-index: 100;
+    height: 70px;
+    width: 100%;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto;
+    height: 100%;
+    padding: 0 15px;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    height: 45px;
+    width: auto;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.title-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.main-title {
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 900;
+    color: #004071;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 0;
+    line-height: 1.1;
+}
+
+.subtitle {
+    font-size: clamp(18px, 2.2vw, 26px);
+    color: #666;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.datetime-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.current-date {
+    font-size: clamp(20px, 2.5vw, 28px);
+    color: #004071;
+    font-weight: 700;
+}
+
+.current-time {
+    font-size: clamp(24px, 3vw, 32px);
+    color: #004071;
+    font-weight: 900;
+    font-family: 'Courier New', monospace;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 70px);
+    padding: 10px 15px;
+    gap: 10px;
+    width: 100%;
+    margin: 0;
+}
+
+/* SECCIÓN PRÓXIMO MENÚ */
+.next-menu-section {
+    flex: 1;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.9));
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    position: relative;
+}
+
+.next-menu-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #004071, #0056b3, #007bff);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(52, 152, 219, 0.2);
+}
+
+.section-title {
+    font-size: clamp(24px, 3vw, 32px);
+    color: #2c3e50;
+    margin: 0;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-title .icon {
+    font-size: 1.2em;
+}
+
+.next-day-info {
+    font-size: clamp(20px, 2.5vw, 28px);
+    font-weight: 600;
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+    padding: 8px 16px;
+    border-radius: 12px;
+    border: 2px solid rgba(231, 76, 60, 0.3);
+    text-align: center;
+    min-width: 120px;
+}
+
+/* GRID DE MENÚS */
+.next-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    height: calc(100% - 70px);
+}
+
+/* TARJETAS DE MENÚ */
+.menu-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3498db, #2980b9);
+    opacity: 0.8;
+}
+
+.menu-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    border-color: rgba(52, 152, 219, 0.4);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.menu-icon {
+    font-size: clamp(24px, 3vw, 32px);
+}
+
+.menu-type {
+    font-size: clamp(16px, 2vw, 20px);
+    font-weight: 700;
+    color: #2c3e50;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+}
+
+.menu-text {
+    font-size: clamp(20px, 2.5vw, 30px);
+    line-height: 1.2;
+    color: #2c3e50;
+    font-weight: 600;
+    word-wrap: break-word;
+    hyphens: auto;
+    margin: 0;
+    text-align: center;
+    width: 100%;
+}
+
+/* SECCIÓN DEL MENÚ SEMANAL */
+.weekly-menu-section {
+    flex: 1;
+    padding: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.9));
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    position: relative;
+    min-height: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.weekly-menu-section h2 {
+    font-size: clamp(16px, 2vw, 20px);
+    color: #2c3e50;
+    margin: 0;
+    text-align: center;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    width: 35px;
+    padding: 8px 4px;
+    border-right: 2px solid rgba(52, 152, 219, 0.2);
+    border-radius: 10px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.weekly-menu-container {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-left: 8px;
+}
+
+/* CONTENEDOR PARA LOS DÍAS */
+#menu-display {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    height: 100%;
+    transition: all 0.5s ease-in-out;
+    opacity: 1;
+    transform: translateY(0);
+    min-height: 0;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* TARJETAS DE DÍA */
+.menu-day {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+}
+
+.menu-day:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+    border-color: rgba(52, 152, 219, 0.3);
+}
+
+.menu-day.current-day {
+    border-color: #3498db;
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.4);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(52, 152, 219, 0.05));
+    font-size: larger;
+}
+
+/* DÍA EN ROTACIÓN - CON TRANSICIONES SUAVES */
+.other-day {
+    border-color: #95a5a6;
+    box-shadow: 0 4px 20px rgba(149, 165, 166, 0.2);
+    transition: all 0.5s ease-in-out; /* Transiciones suaves para la rotación */
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.other-day::before {
+    background: linear-gradient(90deg, #f39c12, #e67e22);
+}
+
+/* ESTADOS DE TRANSICIÓN PARA LA COLUMNA DERECHA */
+.other-day.fade-out {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+    transition: opacity 0.7s cubic-bezier(.4,0,.2,1), transform 0.7s cubic-bezier(.4,0,.2,1);
+}
+
+.other-day.fade-in {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: opacity 0.7s cubic-bezier(.4,0,.2,1), transform 0.7s cubic-bezier(.4,0,.2,1);
+}
+
+/* ENCABEZADO DEL DÍA */
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+    padding-bottom: 1px;
+    border-bottom: 2px solid rgba(52, 152, 219, 0.2);
+    flex-shrink: 0;
+}
+
+.day-title {
+    font-size: clamp(16px, 2vw, 24px);
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.current-indicator, .rotation-indicator {
+    font-size: clamp(16px, 2vw, 24px) !important;
+    padding: 6px 18px;
+    border-radius: 16px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    border: 2px solid #fff;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.12);
+}
+
+.current-indicator {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+.rotation-indicator {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+}
+
+/* CONTENEDOR DE MENÚS */
+.day-menus {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    height: calc(100% - 25px);
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    padding-right: 1px;
+    width: 100%;
+}
+
+/* ELEMENTOS DE MENÚ */
+.menu-item {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 6px;
+    padding: 4px;
+    border-left: 3px solid #3498db;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+
+.menu-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.menu-item.general {
+    border-left-color: #e74c3c;
+}
+
+.menu-item.vegetarian {
+    border-left-color: #27ae60;
+}
+
+.menu-item.celiac {
+    border-left-color: #f39c12;
+}
+
+.menu-type-label {
+    font-size: clamp(12px, 1.4vw, 16px);
+    font-weight: 600;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-align: center;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.menu-item.general .menu-type-label {
+    color: #e74c3c;
+}
+
+.menu-item.vegetarian .menu-type-label {
+    color: #27ae60;
+}
+
+.menu-item.celiac .menu-type-label {
+    color: #f39c12;
+}
+
+.menu-content {
+    font-size: clamp(18px, 2.8vw, 32px);
+    line-height: 1.0;
+    color: #34495e;
+    font-weight: 600;
+    word-wrap: break-word;
+    hyphens: auto;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2px;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1200px) {
+    .section-title {
+        font-size: clamp(22px, 2.8vw, 30px);
+    }
+    
+    .weekly-menu-section h2 {
+        font-size: clamp(18px, 2.2vw, 24px);
+        width: 30px;
+    }
+    
+    .day-title {
+        font-size: clamp(16px, 2vw, 22px);
+    }
+    
+    .menu-content {
+        font-size: clamp(16px, 2.2vw, 26px);
+    }
+    
+    .menu-text {
+        font-size: clamp(20px, 2.5vw, 28px);
+    }
+}
+
+@media (max-width: 768px) {
+    #menu-display {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .next-menu-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .weekly-menu-section {
+        padding: 10px;
+    }
+    
+    .section-title {
+        font-size: clamp(20px, 2.5vw, 26px);
+    }
+    
+    .weekly-menu-section h2 {
+        font-size: clamp(16px, 2vw, 22px);
+        width: 25px;
+        padding: 6px 2px;
+    }
+    
+    .day-title {
+        font-size: clamp(14px, 1.8vw, 20px);
+    }
+    
+    .menu-content {
+        font-size: clamp(14px, 2vw, 24px);
+    }
+    
+    .menu-text {
+        font-size: clamp(18px, 2.2vw, 24px);
+    }
+    
+    .current-indicator,
+    .rotation-indicator {
+        font-size: clamp(12px, 1.4vw, 16px);
+        padding: 3px 8px;
+    }
+    
+    .next-day-info {
+        font-size: clamp(18px, 2.2vw, 24px);
+        padding: 5px 10px;
+        min-width: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-title {
+        font-size: clamp(18px, 2.2vw, 24px);
+    }
+    
+    .weekly-menu-section h2 {
+        font-size: clamp(14px, 1.8vw, 20px);
+    }
+    
+    .day-title {
+        font-size: clamp(12px, 1.6vw, 18px);
+    }
+    
+    .menu-content {
+        font-size: clamp(12px, 1.8vw, 22px);
+    }
+    
+    .menu-text {
+        font-size: clamp(16px, 2vw, 22px);
+    }
+    
+    .menu-item {
+        padding: 2px;
+    }
+    
+    .day-header {
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+    }
+    
+    .section-header {
+        margin-bottom: 12px;
+        padding-bottom: 6px;
+    }
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 1920px) {
+    .menu-display {
+        gap: 20px;
+    }
+    
+    .menu-day {
+        padding: 15px;
+    }
+    
+    .day-title {
+        font-size: clamp(18px, 2.2vw, 26px);
+    }
+    
+    .menu-content {
+        font-size: clamp(20px, 2.5vw, 30px);
+    }
+}
+
+@media (max-width: 1366px) {
+    .menu-display {
+        gap: 15px;
+    }
+    
+    .menu-day {
+        padding: 12px;
+    }
+    
+    .day-title {
+        font-size: clamp(16px, 2vw, 24px);
+    }
+    
+    .menu-content {
+        font-size: clamp(18px, 2.2vw, 28px);
+    }
+}
+
+@media (max-width: 1024px) {
+    .weekly-menu-section {
+        padding: 10px;
+    }
+    
+    .menu-display {
+        gap: 12px;
+    }
+    
+    .menu-day {
+        padding: 10px;
+    }
+    
+    .day-title {
+        font-size: clamp(14px, 1.8vw, 22px);
+    }
+    
+    .menu-content {
+        font-size: clamp(16px, 2vw, 26px);
+    }
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 1200px) {
+    .main-container {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+    
+    .next-menu-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 8px;
+    }
+    
+    .next-menu-section,
+    .weekly-menu-section {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        padding: 6px 8px;
+        gap: 6px;
+    }
+    
+    .header-content {
+        padding: 0 10px;
+        gap: 10px;
+    }
+    
+    .datetime-section {
+        gap: 1px;
+    }
+    
+    .next-menu-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .menu-card {
+        padding: 12px;
+    }
+    
+    .next-menu-section,
+    .weekly-menu-section {
+        padding: 10px;
+    }
+    
+    .weekly-menu-table th,
+    .weekly-menu-table td {
+        padding: 8px 6px;
+        font-size: clamp(10px, 1.3vw, 14px);
+    }
+}
+
+/* ANIMACIONES */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    50% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ANIMACIONES PARA LAS TARJETAS */
+.menu-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.menu-card:nth-child(1) { animation-delay: 0.1s; }
+.menu-card:nth-child(2) { animation-delay: 0.2s; }
+.menu-card:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.menu-card:hover .card-header {
+    background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+#weekly-menu-tbody {
+    transition: all 0.5s ease-in-out;
+}
+
+#weekly-menu-tbody.fade-out {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+#weekly-menu-tbody.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* PANTALLAS GRANDES */
+@media (min-width: 1920px) {
+    .main-title {
+        font-size: clamp(36px, 4vw, 48px);
+    }
+    
+    .subtitle {
+        font-size: clamp(20px, 2.2vw, 26px);
+    }
+    
+    .section-title {
+        font-size: clamp(28px, 3vw, 36px);
+    }
+    
+    .menu-text {
+        font-size: clamp(24px, 2.8vw, 32px);
+    }
+    
+    .weekly-menu-table {
+        font-size: clamp(18px, 2vw, 24px);
+    }
+    
+    .menu-type-content-table {
+        font-size: clamp(20px, 2.2vw, 28px);
+    }
+}
+
+@media (min-width: 2560px) {
+    .main-title {
+        font-size: clamp(42px, 4.5vw, 56px);
+    }
+    
+    .subtitle {
+        font-size: clamp(24px, 2.5vw, 32px);
+    }
+    
+    .section-title {
+        font-size: clamp(32px, 3.5vw, 42px);
+    }
+    
+    .menu-text {
+        font-size: clamp(28px, 3.2vw, 38px);
+    }
+    
+    .weekly-menu-table {
+        font-size: clamp(22px, 2.3vw, 28px);
+    }
+    
+    .menu-type-content-table {
+        font-size: clamp(24px, 2.5vw, 32px);
+    }
+}
+
+/* TABLA SEMANAL */
+.weekly-menu-table tbody {
+    font-size: clamp(12px, 1.6vw, 16px);
+}
+
+.weekly-menu-table tr {
+    transition: all 0.3s ease;
+}
+
+.weekly-menu-table tr:hover {
+    background: rgba(52, 152, 219, 0.05);
+    transform: scale(1.01);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 1920px) {
+    .weekly-menu-table {
+        font-size: clamp(11px, 1.5vw, 15px);
+    }
+    
+    .weekly-menu-table th {
+        padding: 8px 6px;
+        font-size: clamp(10px, 1.4vw, 14px);
+    }
+    
+    .weekly-menu-table td {
+        padding: 6px 4px;
+        font-size: clamp(9px, 1.3vw, 13px);
+    }
+    
+    .day-header {
+        font-size: clamp(10px, 1.4vw, 14px);
+    }
+    
+    .weekly-menu-table td:first-child {
+        font-size: clamp(9px, 1.3vw, 13px);
+        padding: 4px 2px;
+    }
+    
+    .menu-type-content-table {
+        font-size: clamp(8px, 1.2vw, 12px);
+    }
+    
+    .weekly-menu-table tr.current-day td {
+        font-size: clamp(10px, 1.4vw, 14px);
+    }
+    
+    .weekly-menu-table tr.current-day td:first-child {
+        font-size: clamp(9px, 1.3vw, 13px);
+    }
+}
+
+@media (max-width: 1366px) {
+    .weekly-menu-table {
+        font-size: clamp(10px, 1.4vw, 14px);
+    }
+    
+    .weekly-menu-table th {
+        padding: 6px 4px;
+        font-size: clamp(9px, 1.3vw, 13px);
+    }
+    
+    .weekly-menu-table td {
+        padding: 4px 3px;
+        font-size: clamp(8px, 1.2vw, 12px);
+    }
+    
+    .day-header {
+        font-size: clamp(9px, 1.3vw, 13px);
+    }
+    
+    .weekly-menu-table td:first-child {
+        font-size: clamp(8px, 1.2vw, 12px);
+        padding: 3px 1px;
+    }
+    
+    .menu-type-content-table {
+        font-size: clamp(7px, 1.1vw, 11px);
+    }
+    
+    .weekly-menu-table tr.current-day td {
+        font-size: clamp(9px, 1.3vw, 13px);
+    }
+    
+    .weekly-menu-table tr.current-day td:first-child {
+        font-size: clamp(8px, 1.2vw, 12px);
+    }
+}
+
+/* MEDIA QUERIES OPTIMIZADAS PARA FUENTES GRANDES */
+@media (min-width: 1400px) {
+    .section-title {
+        font-size: clamp(26px, 3vw, 34px);
+    }
+    
+    .weekly-menu-section h2 {
+        font-size: clamp(20px, 2.2vw, 26px);
+    }
+    
+    .day-title {
+        font-size: clamp(18px, 2vw, 24px);
+    }
+    
+    .menu-content {
+        font-size: clamp(20px, 2.5vw, 30px);
+    }
+    
+    .menu-text {
+        font-size: clamp(22px, 2.8vw, 32px);
+    }
+}
+
+@media (max-width: 1399px) and (min-width: 1200px) {
+    .section-title {
+        font-size: clamp(24px, 2.8vw, 32px);
+    }
+    
+    .weekly-menu-section h2 {
+        font-size: clamp(18px, 2vw, 24px);
+    }
+    
+    .day-title {
+        font-size: clamp(16px, 1.8vw, 22px);
+    }
+    
+    .menu-content {
+        font-size: clamp(18px, 2.2vw, 28px);
+    }
+    
+    .menu-text {
+        font-size: clamp(20px, 2.5vw, 30px);
+    }
+}
+
+@media (max-width: 1199px) and (min-width: 768px) {
+    .section-title {
+        font-size: clamp(22px, 2.5vw, 30px);
+    }
+    
+    .weekly-menu-section h2 {
+        font-size: clamp(16px, 1.8vw, 22px);
+    }
+    
+    .day-title {
+        font-size: clamp(14px, 1.6vw, 20px);
+    }
+    
+    .menu-content {
+        font-size: clamp(16px, 2vw, 26px);
+    }
+    
+    .menu-text {
+        font-size: clamp(18px, 2.2vw, 28px);
+    }
+}
+
+@media (max-width: 767px) and (min-width: 480px) {
+    #menu-display {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .next-menu-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .weekly-menu-section {
+        padding: 8px;
+    }
+    
+    .section-title {
+        font-size: clamp(20px, 2.5vw, 26px);
+    }
+    
+    .weekly-menu-section h2 {
+        font-size: clamp(16px, 2vw, 22px);
+    }
+    
+    .day-title {
+        font-size: clamp(14px, 1.8vw, 20px);
+    }
+    
+    .menu-content {
+        font-size: clamp(16px, 2.2vw, 24px);
+    }
+    
+    .menu-text {
+        font-size: clamp(18px, 2.2vw, 24px);
+    }
+    
+    .current-indicator,
+    .rotation-indicator {
+        font-size: clamp(12px, 1.4vw, 16px);
+    }
+    
+    .next-day-info {
+        font-size: clamp(18px, 2.2vw, 24px);
+    }
+    
+    .menu-day {
+        padding: 8px;
+    }
+    
+    .menu-item {
+        padding: 4px;
+    }
+    
+    .day-menus {
+        gap: 4px;
+    }
+}
+
+@media (max-width: 479px) {
+    #menu-display {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .next-menu-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .weekly-menu-section {
+        padding: 6px;
+    }
+    
+    .section-title {
+        font-size: clamp(18px, 2.2vw, 24px);
+    }
+    
+    .weekly-menu-section h2 {
+        font-size: clamp(14px, 1.8vw, 20px);
+    }
+    
+    .day-title {
+        font-size: clamp(12px, 1.6vw, 18px);
+    }
+    
+    .menu-content {
+        font-size: clamp(14px, 2vw, 22px);
+    }
+    
+    .menu-text {
+        font-size: clamp(16px, 2vw, 22px);
+    }
+    
+    .menu-item {
+        padding: 3px;
+    }
+    
+    .day-header {
+        margin-bottom: 4px;
+        padding-bottom: 2px;
+    }
+    
+    .section-header {
+        margin-bottom: 8px;
+        padding-bottom: 4px;
+    }
+    
+    .current-indicator,
+    .rotation-indicator {
+        font-size: clamp(10px, 1.2vw, 14px);
+        padding: 2px 6px;
+    }
+    
+    .next-day-info {
+        font-size: clamp(16px, 2vw, 22px);
+        padding: 4px 8px;
+        min-width: 70px;
+    }
+    
+    .menu-day {
+        padding: 6px;
+    }
+    
+    .day-menus {
+        gap: 3px;
+    }
+    
+    .menu-type-label {
+        font-size: clamp(10px, 1.2vw, 14px);
+    }
+    
+    .menu-icon {
+        font-size: clamp(12px, 1.4vw, 16px);
+    }
+    
+    .menu-type {
+        font-size: clamp(10px, 1.2vw, 14px);
+        padding: 2px 6px;
+    }
+}
+
+@media (max-width: 360px) {
+    .section-title {
+        font-size: clamp(16px, 2vw, 22px);
+    }
+    
+    .weekly-menu-section h2 {
+        font-size: clamp(12px, 1.6vw, 18px);
+    }
+    
+    .day-title {
+        font-size: clamp(10px, 1.4vw, 16px);
+    }
+    
+    .menu-content {
+        font-size: clamp(12px, 1.8vw, 20px);
+    }
+    
+    .menu-text {
+        font-size: clamp(14px, 1.8vw, 20px);
+    }
+    
+    .menu-day {
+        padding: 4px;
+    }
+    
+    .menu-item {
+        padding: 2px;
+    }
+    
+    .next-day-info {
+        font-size: clamp(14px, 1.8vw, 20px);
+        padding: 3px 6px;
+        min-width: 60px;
+    }
+    
+    .current-indicator,
+    .rotation-indicator {
+        font-size: clamp(8px, 1vw, 12px);
+        padding: 1px 4px;
+    }
+}
+
+/* SCROLLBAR PERSONALIZADA */
+.day-menus::-webkit-scrollbar {
+    width: 4px;
+}
+
+.day-menus::-webkit-scrollbar-track {
+    background: rgba(52, 152, 219, 0.1);
+    border-radius: 2px;
+}
+
+.day-menus::-webkit-scrollbar-thumb {
+    background: rgba(52, 152, 219, 0.3);
+    border-radius: 2px;
+}
+
+.day-menus::-webkit-scrollbar-thumb:hover {
+    background: rgba(52, 152, 219, 0.5);
+} 

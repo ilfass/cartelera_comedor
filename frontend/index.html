@@ -5,7 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comedor Universitario UNICEN</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=4.0">
+    <link rel="stylesheet" href="styles/common.css">
+    <style>
+        .navigation-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 140px);
+            gap: 40px;
+            padding: 20px;
+        }
+        
+        .nav-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 64, 113, 0.1);
+            border: 1px solid rgba(0, 64, 113, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-width: 300px;
+        }
+        
+        .nav-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 16px 48px rgba(0, 64, 113, 0.2);
+        }
+        
+        .nav-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .nav-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #004071;
+            margin-bottom: 15px;
+        }
+        
+        .nav-description {
+            font-size: 18px;
+            color: #005a9e;
+            line-height: 1.5;
+        }
+        
+        .menu-card {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(40, 167, 69, 0.1), rgba(255, 193, 7, 0.1));
+        }
+        
+        .info-card {
+            background: linear-gradient(135deg, rgba(0, 64, 113, 0.1), rgba(0, 90, 158, 0.1));
+        }
+        
+        @media (max-width: 768px) {
+            .navigation-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .nav-card {
+                min-width: 250px;
+                padding: 30px;
+            }
+            
+            .nav-icon {
+                font-size: 48px;
+            }
+            
+            .nav-title {
+                font-size: 24px;
+            }
+            
+            .nav-description {
+                font-size: 16px;
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="main-header">
@@ -16,92 +94,21 @@
             <span id="current-time"></span> | <span id="current-date"></span>
         </div>
     </header>
-    <div class="carousel-container">
-        <!-- Página 1: Menú -->
-        <div class="carousel-page" id="page-menu">
-            <main class="main-content-redesign">
-                <div class="main-left">
-                    <section class="menu-tomorrow-section">
-                        <h2 id="menu-tomorrow-title">PRÓXIMO MENÚ - <span id="menu-tomorrow-dia">DÍA</span> <span id="menu-tomorrow-fecha"></span></h2>
-                        <div class="menu-tomorrow-content">
-                            <div>
-                                <span class="menu-tomorrow-label general">🍽️ General</span>
-                                <div id="menu-tomorrow-general" class="menu-tomorrow-general"></div>
-                            </div>
-                            <div>
-                                <span class="menu-tomorrow-label vegetariano">🥗 Vegetariano</span>
-                                <div id="menu-tomorrow-vegetariano" class="menu-tomorrow-vegetariano"></div>
-                            </div>
-                            <div>
-                                <span class="menu-tomorrow-label celiaco">🌾 Celíaco</span>
-                                <div id="menu-tomorrow-celiaco" class="menu-tomorrow-celiaco"></div>
-                            </div>
-                        </div>
-                    </section>
-                    <section class="menu-week-section">
-                        <div id="menu-week-table"></div>
-                    </section>
-                </div>
-            </main>
+    
+    <div class="navigation-container">
+        <div class="nav-card menu-card" onclick="window.location.href='menu.html'">
+            <span class="nav-icon">🍽️</span>
+            <h2 class="nav-title">Menú Semanal</h2>
+            <p class="nav-description">Consulta los menús del día y de la semana completa. Incluye opciones General, Vegetariano y Celíaco.</p>
         </div>
-
-        <!-- Página 2: Información y Mensajes -->
-        <div class="carousel-page" id="page-info">
-            <div class="info-page-container">
-                <!-- Columna Izquierda -->
-                <div class="info-left-column">
-                    <div class="messages-container">
-                        <h2 class="section-title">📢 Mensajes Importantes</h2>
-                        <div id="messages-display" class="messages-display">
-                            <!-- Los mensajes se cargarán dinámicamente -->
-                        </div>
-                    </div>
-                    
-                    <div class="featured-image-container">
-                        <h2 class="section-title">🖼️ Imagen Destacada</h2>
-                        <div id="featured-image" class="featured-image">
-                            <div class="image-placeholder">📸</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Columna Derecha -->
-                <div class="info-right-column">
-                    <div class="weather-container">
-                        <h2 class="section-title">🌤️ Clima Actual</h2>
-                        <div id="weather-display" class="weather-display">
-                            <!-- El clima se cargará dinámicamente -->
-                        </div>
-                    </div>
-                    
-                    <div class="info-container">
-                        <h2 class="section-title">ℹ️ Información</h2>
-                        <div class="info-content">
-                            <div class="info-item">
-                                <strong>🕒 Horario de Atención</strong>
-                                <p>Lunes a Viernes: 9:00 - 18:00</p>
-                            </div>
-                            <div class="info-item">
-                                <strong>📍 Ubicación</strong>
-                                <p>Campus Universitario - Tandil</p>
-                            </div>
-                            <div class="info-item">
-                                <strong>📧 Contacto</strong>
-                                <p>comedor@unicen.edu.ar</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="qr-container">
-                        <h2 class="section-title">📱 Escanea para más info</h2>
-                        <div class="qr-code">
-                            <div class="qr-placeholder">📱</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        
+        <div class="nav-card info-card" onclick="window.location.href='info.html'">
+            <span class="nav-icon">ℹ️</span>
+            <h2 class="nav-title">Información</h2>
+            <p class="nav-description">Mensajes importantes, clima actual, horarios y toda la información del comedor universitario.</p>
         </div>
     </div>
+    
     <footer class="main-footer">
         <div class="footer-left">
             <b>Comedor Universitario UNICEN</b><br>Campus Universitario - Tandil
@@ -111,6 +118,34 @@
             <b>Horarios de Atención</b><br>Lunes a Viernes: 9:00 - 18:00
         </div>
     </footer>
-    <script src="app.js"></script>
+    
+    <script>
+        // Función para actualizar fecha y hora
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Formatear hora
+            const timeString = now.toLocaleTimeString('es-AR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            // Formatear fecha
+            const dateString = now.toLocaleDateString('es-AR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            document.getElementById('current-time').textContent = timeString;
+            document.getElementById('current-date').textContent = dateString;
+        }
+        
+        // Actualizar cada segundo
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+    </script>
 </body>
 </html> 
