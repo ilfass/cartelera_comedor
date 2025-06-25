@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Roboto', sans-serif;
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    background: linear-gradient(135deg, #fdfeff 0%, #074abf70 100%);;
     height: 100vh;
     overflow: hidden;
     color: #333;
@@ -20,11 +20,55 @@ body {
     backdrop-filter: blur(10px);
     padding: 10px 20px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    border-bottom: 4px solid #004071;
+    border-bottom: 1px solid transparent;
     position: relative;
     z-index: 100;
     height: 70px;
     width: 100%;
+}
+
+.main-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(0, 64, 113, 0.2) 20%, 
+        rgba(0, 64, 113, 0.6) 50%, 
+        rgba(0, 64, 113, 0.2) 80%, 
+        transparent 100%);
+    animation: headerShine 6s ease-in-out infinite;
+    box-shadow: 
+        0 0 5px rgba(0, 64, 113, 0.3),
+        0 0 10px rgba(0, 64, 113, 0.2);
+}
+
+@keyframes headerShine {
+    0%, 100% {
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(0, 64, 113, 0.2) 20%, 
+            rgba(0, 64, 113, 0.6) 50%, 
+            rgba(0, 64, 113, 0.2) 80%, 
+            transparent 100%);
+        box-shadow: 
+            0 0 5px rgba(0, 64, 113, 0.3),
+            0 0 10px rgba(0, 64, 113, 0.2);
+    }
+    50% {
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(0, 64, 113, 0.4) 20%, 
+            rgba(0, 64, 113, 0.8) 50%, 
+            rgba(0, 64, 113, 0.4) 80%, 
+            transparent 100%);
+        box-shadow: 
+            0 0 8px rgba(0, 64, 113, 0.4),
+            0 0 15px rgba(0, 64, 113, 0.3);
+    }
 }
 
 .header-content {
@@ -78,13 +122,11 @@ body {
 }
 
 .current-date {
-    font-size: clamp(20px, 2.5vw, 28px);
     color: #004071;
     font-weight: 700;
 }
 
 .current-time {
-    font-size: clamp(24px, 3vw, 32px);
     color: #004071;
     font-weight: 900;
     font-family: 'Courier New', monospace;
@@ -94,7 +136,7 @@ body {
 .main-container {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 70px);
+    height: 100vh;
     padding: 10px 15px;
     gap: 10px;
     width: 100%;

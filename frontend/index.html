@@ -7,79 +7,80 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/common.css">
     <style>
-        .navigation-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: calc(100vh - 140px);
-            gap: 40px;
-            padding: 20px;
+        .carousel-container {
+            height: calc(100vh - 80px);
+            position: relative;
+            overflow: hidden;
         }
         
-        .nav-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 64, 113, 0.1);
-            border: 1px solid rgba(0, 64, 113, 0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            min-width: 300px;
+        .carousel-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            display: none;
+            border: none;
         }
         
-        .nav-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 16px 48px rgba(0, 64, 113, 0.2);
-        }
-        
-        .nav-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
+        .carousel-page.active {
+            opacity: 1;
             display: block;
         }
         
-        .nav-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: #004071;
-            margin-bottom: 15px;
+        .header-carousel-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
         
-        .nav-description {
+        .header-carousel-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
             font-size: 18px;
-            color: #005a9e;
-            line-height: 1.5;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .menu-card {
-            background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(40, 167, 69, 0.1), rgba(255, 193, 7, 0.1));
+        .header-carousel-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
         }
         
-        .info-card {
-            background: linear-gradient(135deg, rgba(0, 64, 113, 0.1), rgba(0, 90, 158, 0.1));
+        .header-carousel-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .header-page-indicator {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         @media (max-width: 768px) {
-            .navigation-container {
-                flex-direction: column;
-                gap: 20px;
+            .header-carousel-controls {
+                gap: 10px;
             }
             
-            .nav-card {
-                min-width: 250px;
-                padding: 30px;
-            }
-            
-            .nav-icon {
-                font-size: 48px;
-            }
-            
-            .nav-title {
-                font-size: 24px;
-            }
-            
-            .nav-description {
+            .header-carousel-btn {
+                width: 30px;
+                height: 30px;
                 font-size: 16px;
             }
         }
@@ -90,23 +91,24 @@
         <div class="header-left">
             <span class="header-title">Comedor Universitario UNICEN</span>
         </div>
+        <div class="header-center">
+            <div class="header-carousel-controls">
+                <button class="header-carousel-btn" onclick="previousPage()">‹</button>
+                <span class="header-page-indicator" id="header-page-indicator">Menú (1/2)</span>
+                <button class="header-carousel-btn" onclick="nextPage()">›</button>
+            </div>
+        </div>
         <div class="header-right">
             <span id="current-time"></span> | <span id="current-date"></span>
         </div>
     </header>
     
-    <div class="navigation-container">
-        <div class="nav-card menu-card" onclick="window.location.href='menu.html'">
-            <span class="nav-icon">🍽️</span>
-            <h2 class="nav-title">Menú Semanal</h2>
-            <p class="nav-description">Consulta los menús del día y de la semana completa. Incluye opciones General, Vegetariano y Celíaco.</p>
-        </div>
+    <div class="carousel-container">
+        <!-- Página del Menú -->
+        <iframe src="menu.html" class="carousel-page active" id="menu-page"></iframe>
         
-        <div class="nav-card info-card" onclick="window.location.href='info.html'">
-            <span class="nav-icon">ℹ️</span>
-            <h2 class="nav-title">Información</h2>
-            <p class="nav-description">Mensajes importantes, clima actual, horarios y toda la información del comedor universitario.</p>
-        </div>
+        <!-- Página de Información -->
+        <iframe src="info.html" class="carousel-page" id="info-page"></iframe>
     </div>
     
     <footer class="main-footer">
@@ -120,6 +122,13 @@
     </footer>
     
     <script>
+        let currentPage = 0;
+        let carouselInterval;
+        const pages = [
+            { id: 'menu-page', title: 'Menú Semanal', indicator: 'Menú' },
+            { id: 'info-page', title: 'Información', indicator: 'Info' }
+        ];
+        
         // Función para actualizar fecha y hora
         function updateDateTime() {
             const now = new Date();
@@ -143,9 +152,68 @@
             document.getElementById('current-date').textContent = dateString;
         }
         
-        // Actualizar cada segundo
+        // Función para cambiar a la siguiente página
+        function nextPage() {
+            currentPage = (currentPage + 1) % pages.length;
+            updateCarousel();
+        }
+        
+        // Función para cambiar a la página anterior
+        function previousPage() {
+            currentPage = (currentPage - 1 + pages.length) % pages.length;
+            updateCarousel();
+        }
+        
+        // Función para ir a una página específica
+        function goToPage(pageIndex) {
+            currentPage = pageIndex;
+            updateCarousel();
+        }
+        
+        // Función para actualizar el carrusel
+        function updateCarousel() {
+            // Ocultar todas las páginas
+            pages.forEach((page, index) => {
+                const pageElement = document.getElementById(page.id);
+                
+                if (index === currentPage) {
+                    pageElement.classList.add('active');
+                } else {
+                    pageElement.classList.remove('active');
+                }
+            });
+            
+            // Actualizar indicador en el header
+            document.getElementById('header-page-indicator').textContent = `${pages[currentPage].indicator} (${currentPage + 1}/2)`;
+            
+            // Reiniciar el intervalo
+            resetCarouselInterval();
+        }
+        
+        // Función para reiniciar el intervalo del carrusel
+        function resetCarouselInterval() {
+            if (carouselInterval) {
+                clearInterval(carouselInterval);
+            }
+            carouselInterval = setInterval(nextPage, 10000); // 10 segundos
+        }
+        
+        // Inicializar
         updateDateTime();
         setInterval(updateDateTime, 1000);
+        resetCarouselInterval();
+        
+        // Pausar el carrusel cuando el usuario interactúa
+        document.addEventListener('mouseenter', () => {
+            if (carouselInterval) {
+                clearInterval(carouselInterval);
+            }
+        });
+        
+        // Reanudar el carrusel cuando el usuario deja de interactuar
+        document.addEventListener('mouseleave', () => {
+            resetCarouselInterval();
+        });
     </script>
 </body>
 </html> 

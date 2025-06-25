@@ -1,0 +1,136 @@
+/* CSS PARA EL CARRUSEL - index.html */
+
+.carousel-container {
+    height: calc(100vh - 80px); /* Solo header, sin footer */
+    position: relative;
+    overflow: hidden;
+}
+
+.carousel-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    display: none;
+    border: none;
+}
+
+.carousel-page.active {
+    opacity: 1;
+    display: block;
+}
+
+/* Controles del carrusel */
+.carousel-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    z-index: 10;
+}
+
+.carousel-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.carousel-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.carousel-btn:active {
+    transform: scale(0.95);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .carousel-controls {
+        bottom: 10px;
+        gap: 15px;
+    }
+    
+    .carousel-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+}
+
+/* HEADER CON TRES SECCIONES */
+.main-header {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 50%, #6c757d 100%);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 80px;
+    position: relative;
+}
+
+.header-left {
+    flex: 1;
+    text-align: left;
+}
+
+.header-center {
+    flex: 1;
+    text-align: center;
+}
+
+.header-right {
+    flex: 1;
+    text-align: right;
+}
+
+.header-title {
+    font-size: clamp(18px, 2.5vw, 24px);
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#page-title {
+    font-size: clamp(16px, 2vw, 20px);
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#current-time, #current-date {
+    font-size: clamp(14px, 1.8vw, 18px);
+    font-weight: 500;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .main-header {
+        padding: 10px 15px;
+        height: 70px;
+    }
+    
+    .header-title {
+        font-size: 18px;
+    }
+    
+    #page-title {
+        font-size: 16px;
+    }
+    
+    #current-time, #current-date {
+        font-size: 14px;
+    }
+} 
