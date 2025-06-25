@@ -68,12 +68,12 @@ body {
 
 /* Header del admin */
 .admin-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    color: var(--white);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
     padding: 30px;
     text-align: center;
+    border-radius: 15px 15px 0 0;
     position: relative;
-    overflow: hidden;
 }
 
 .admin-header::before {
@@ -88,7 +88,7 @@ body {
 }
 
 .admin-header h1 {
-    margin: 0;
+    margin: 0 0 10px 0;
     font-size: 2.5em;
     font-weight: 700;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -97,11 +97,39 @@ body {
 }
 
 .admin-header p {
-    margin: 10px 0 0 0;
+    margin: 0;
     font-size: 1.2em;
     opacity: 0.9;
     position: relative;
     z-index: 1;
+}
+
+.logout-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logout-btn:hover {
+    background: #b91c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.logout-btn:active {
+    transform: translateY(0);
 }
 
 /* Secciones del admin */

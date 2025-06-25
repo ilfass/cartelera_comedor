@@ -325,8 +325,32 @@ app.post('/api/menu', authenticateToken, (req, res) => {
         });
 });
 
+app.put('/api/menu', authenticateToken, (req, res) => {
+    let { dia, menu_general, menu_vegetariano, menu_celiaco } = req.body;
+    dia = normalizarDia(dia);
+    db.run('UPDATE menu SET dia = ?, menu_general = ?, menu_vegetariano = ?, menu_celiaco = ? WHERE id = ?',
+        [dia, menu_general, menu_vegetariano, menu_celiaco, req.params.id],
+        function(err) {
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            res.json({ changes: this.changes });
+        });
+});
+
+app.delete('/api/menu', authenticateToken, (req, res) => {
+    db.run('DELETE FROM menu WHERE id = ?', req.params.id, function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({ changes: this.changes });
+    });
+});
+
 // Ruta para eliminar un menú por día
-app.delete('/api/menu/:dia', authenticateToken, (req, res) => {
+app.delete('/api/menu', authenticateToken, (req, res) => {
     console.log('Intentando eliminar menú para el día:', req.params.dia);
     console.log('Usuario autenticado:', req.user);
     
@@ -374,7 +398,7 @@ app.delete('/api/menu/:dia', authenticateToken, (req, res) => {
 });
 
 // Ruta para actualizar un menú por día
-app.put('/api/menu/:dia', authenticateToken, (req, res) => {
+app.put('/api/menu', authenticateToken, (req, res) => {
     console.log('Intentando actualizar menú para el día:', req.params.dia);
     console.log('Usuario autenticado:', req.user);
     console.log('Datos recibidos:', req.body);

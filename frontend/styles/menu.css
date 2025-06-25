@@ -176,7 +176,7 @@ body {
 }
 
 .section-title {
-    font-size: clamp(24px, 3vw, 32px);
+    font-size: clamp(28px, 3.5vw, 42px);
     color: #2c3e50;
     margin: 0;
     font-weight: 700;
@@ -195,15 +195,19 @@ body {
 }
 
 .next-day-info {
-    font-size: clamp(20px, 2.5vw, 28px);
+    font-size: clamp(24px, 3vw, 36px);
     font-weight: 600;
     color: #e74c3c;
-    background: rgba(231, 76, 60, 0.1);
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     padding: 8px 16px;
     border-radius: 12px;
-    border: 2px solid rgba(231, 76, 60, 0.3);
-    text-align: center;
     min-width: 120px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(231, 76, 60, 0.2);
+    border: 2px solid rgba(231, 76, 60, 0.1);
 }
 
 /* GRID DE MENÚS */
@@ -270,14 +274,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 8px;
     min-height: 0;
 }
 
 .menu-text {
-    font-size: clamp(20px, 2.5vw, 30px);
-    line-height: 1.2;
+    font-size: clamp(28px, 3.5vw, 48px);
+    line-height: 1.1;
     color: #2c3e50;
-    font-weight: 600;
+    font-weight: 700;
     word-wrap: break-word;
     hyphens: auto;
     margin: 0;
@@ -303,7 +308,7 @@ body {
 }
 
 .weekly-menu-section h2 {
-    font-size: clamp(16px, 2vw, 20px);
+    font-size: clamp(20px, 2.5vw, 28px);
     color: #2c3e50;
     margin: 0;
     text-align: center;
@@ -416,7 +421,7 @@ body {
 }
 
 .day-title {
-    font-size: clamp(16px, 2vw, 24px);
+    font-size: clamp(20px, 2.5vw, 32px);
     font-weight: 700;
     color: #2c3e50;
     margin: 0;
@@ -425,9 +430,9 @@ body {
 }
 
 .current-indicator, .rotation-indicator {
-    font-size: clamp(16px, 2vw, 24px) !important;
-    padding: 6px 18px;
-    border-radius: 16px;
+    font-size: clamp(18px, 2.2vw, 28px) !important;
+    padding: 8px 20px;
+    border-radius: 18px;
     font-weight: 900;
     letter-spacing: 1px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.12);
@@ -518,10 +523,10 @@ body {
 }
 
 .menu-content {
-    font-size: clamp(18px, 2.8vw, 32px);
+    font-size: clamp(24px, 3.2vw, 42px);
     line-height: 1.0;
     color: #34495e;
-    font-weight: 600;
+    font-weight: 700;
     word-wrap: break-word;
     hyphens: auto;
     flex: 1;
@@ -529,7 +534,7 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 2px;
+    padding: 4px;
     min-height: 0;
     width: 100%;
     height: 100%;
@@ -538,24 +543,24 @@ body {
 /* RESPONSIVE */
 @media (max-width: 1200px) {
     .section-title {
-        font-size: clamp(22px, 2.8vw, 30px);
+        font-size: clamp(26px, 3.2vw, 36px);
     }
     
     .weekly-menu-section h2 {
-        font-size: clamp(18px, 2.2vw, 24px);
+        font-size: clamp(18px, 2.2vw, 26px);
         width: 30px;
     }
     
     .day-title {
-        font-size: clamp(16px, 2vw, 22px);
+        font-size: clamp(18px, 2.2vw, 28px);
     }
     
     .menu-content {
-        font-size: clamp(16px, 2.2vw, 26px);
+        font-size: clamp(22px, 2.8vw, 36px);
     }
     
     .menu-text {
-        font-size: clamp(20px, 2.5vw, 28px);
+        font-size: clamp(26px, 3.2vw, 40px);
     }
 }
 
@@ -575,63 +580,63 @@ body {
     }
     
     .section-title {
-        font-size: clamp(20px, 2.5vw, 26px);
+        font-size: clamp(24px, 3vw, 32px);
     }
     
     .weekly-menu-section h2 {
-        font-size: clamp(16px, 2vw, 22px);
+        font-size: clamp(16px, 2vw, 24px);
         width: 25px;
         padding: 6px 2px;
     }
     
     .day-title {
-        font-size: clamp(14px, 1.8vw, 20px);
+        font-size: clamp(16px, 2vw, 24px);
     }
     
     .menu-content {
-        font-size: clamp(14px, 2vw, 24px);
+        font-size: clamp(20px, 2.5vw, 32px);
     }
     
     .menu-text {
-        font-size: clamp(18px, 2.2vw, 24px);
+        font-size: clamp(24px, 3vw, 32px);
     }
     
     .current-indicator,
     .rotation-indicator {
-        font-size: clamp(12px, 1.4vw, 16px);
-        padding: 3px 8px;
+        font-size: clamp(14px, 1.6vw, 20px);
+        padding: 4px 10px;
     }
     
     .next-day-info {
-        font-size: clamp(18px, 2.2vw, 24px);
-        padding: 5px 10px;
-        min-width: 80px;
+        font-size: clamp(22px, 2.8vw, 32px);
+        padding: 6px 12px;
+        min-width: 100px;
     }
 }
 
 @media (max-width: 480px) {
     .section-title {
-        font-size: clamp(18px, 2.2vw, 24px);
+        font-size: clamp(22px, 2.8vw, 28px);
     }
     
     .weekly-menu-section h2 {
-        font-size: clamp(14px, 1.8vw, 20px);
+        font-size: clamp(14px, 1.8vw, 22px);
     }
     
     .day-title {
-        font-size: clamp(12px, 1.6vw, 18px);
+        font-size: clamp(14px, 1.8vw, 22px);
     }
     
     .menu-content {
-        font-size: clamp(12px, 1.8vw, 22px);
+        font-size: clamp(18px, 2.2vw, 28px);
     }
     
     .menu-text {
-        font-size: clamp(16px, 2vw, 22px);
+        font-size: clamp(22px, 2.8vw, 28px);
     }
     
     .menu-item {
-        padding: 2px;
+        padding: 3px;
     }
     
     .day-header {
@@ -656,11 +661,11 @@ body {
     }
     
     .day-title {
-        font-size: clamp(18px, 2.2vw, 26px);
+        font-size: clamp(22px, 2.8vw, 32px);
     }
     
     .menu-content {
-        font-size: clamp(20px, 2.5vw, 30px);
+        font-size: clamp(26px, 3.2vw, 38px);
     }
 }
 
@@ -674,11 +679,11 @@ body {
     }
     
     .day-title {
-        font-size: clamp(16px, 2vw, 24px);
+        font-size: clamp(20px, 2.5vw, 30px);
     }
     
     .menu-content {
-        font-size: clamp(18px, 2.2vw, 28px);
+        font-size: clamp(24px, 3vw, 36px);
     }
 }
 
@@ -696,11 +701,11 @@ body {
     }
     
     .day-title {
-        font-size: clamp(14px, 1.8vw, 22px);
+        font-size: clamp(18px, 2.2vw, 28px);
     }
     
     .menu-content {
-        font-size: clamp(16px, 2vw, 26px);
+        font-size: clamp(22px, 2.8vw, 32px);
     }
 }
 
@@ -822,53 +827,53 @@ body {
 /* PANTALLAS GRANDES */
 @media (min-width: 1920px) {
     .main-title {
-        font-size: clamp(36px, 4vw, 48px);
+        font-size: clamp(48px, 5vw, 64px);
     }
     
     .subtitle {
-        font-size: clamp(20px, 2.2vw, 26px);
-    }
-    
-    .section-title {
         font-size: clamp(28px, 3vw, 36px);
     }
     
+    .section-title {
+        font-size: clamp(32px, 4vw, 48px);
+    }
+    
     .menu-text {
-        font-size: clamp(24px, 2.8vw, 32px);
+        font-size: clamp(32px, 4vw, 56px);
     }
     
     .weekly-menu-table {
-        font-size: clamp(18px, 2vw, 24px);
+        font-size: clamp(24px, 3vw, 36px);
     }
     
     .menu-type-content-table {
-        font-size: clamp(20px, 2.2vw, 28px);
+        font-size: clamp(22px, 2.8vw, 32px);
     }
 }
 
 @media (min-width: 2560px) {
     .main-title {
-        font-size: clamp(42px, 4.5vw, 56px);
+        font-size: clamp(56px, 6vw, 80px);
     }
     
     .subtitle {
-        font-size: clamp(24px, 2.5vw, 32px);
+        font-size: clamp(32px, 3.5vw, 44px);
     }
     
     .section-title {
-        font-size: clamp(32px, 3.5vw, 42px);
+        font-size: clamp(40px, 5vw, 64px);
     }
     
     .menu-text {
-        font-size: clamp(28px, 3.2vw, 38px);
+        font-size: clamp(40px, 5vw, 72px);
     }
     
     .weekly-menu-table {
-        font-size: clamp(22px, 2.3vw, 28px);
+        font-size: clamp(32px, 4vw, 48px);
     }
     
     .menu-type-content-table {
-        font-size: clamp(24px, 2.5vw, 32px);
+        font-size: clamp(28px, 3.5vw, 40px);
     }
 }
 
@@ -964,67 +969,67 @@ body {
 /* MEDIA QUERIES OPTIMIZADAS PARA FUENTES GRANDES */
 @media (min-width: 1400px) {
     .section-title {
-        font-size: clamp(26px, 3vw, 34px);
+        font-size: clamp(30px, 3.8vw, 44px);
     }
     
     .weekly-menu-section h2 {
-        font-size: clamp(20px, 2.2vw, 26px);
+        font-size: clamp(22px, 2.8vw, 30px);
     }
     
     .day-title {
-        font-size: clamp(18px, 2vw, 24px);
+        font-size: clamp(24px, 3vw, 36px);
     }
     
     .menu-content {
-        font-size: clamp(20px, 2.5vw, 30px);
+        font-size: clamp(28px, 3.5vw, 44px);
     }
     
     .menu-text {
-        font-size: clamp(22px, 2.8vw, 32px);
+        font-size: clamp(32px, 4vw, 48px);
     }
 }
 
 @media (max-width: 1399px) and (min-width: 1200px) {
     .section-title {
-        font-size: clamp(24px, 2.8vw, 32px);
+        font-size: clamp(28px, 3.5vw, 40px);
     }
     
     .weekly-menu-section h2 {
-        font-size: clamp(18px, 2vw, 24px);
+        font-size: clamp(20px, 2.5vw, 28px);
     }
     
     .day-title {
-        font-size: clamp(16px, 1.8vw, 22px);
+        font-size: clamp(22px, 2.8vw, 32px);
     }
     
     .menu-content {
-        font-size: clamp(18px, 2.2vw, 28px);
+        font-size: clamp(26px, 3.2vw, 40px);
     }
     
     .menu-text {
-        font-size: clamp(20px, 2.5vw, 30px);
+        font-size: clamp(30px, 3.8vw, 44px);
     }
 }
 
 @media (max-width: 1199px) and (min-width: 768px) {
     .section-title {
-        font-size: clamp(22px, 2.5vw, 30px);
+        font-size: clamp(26px, 3.2vw, 36px);
     }
     
     .weekly-menu-section h2 {
-        font-size: clamp(16px, 1.8vw, 22px);
+        font-size: clamp(18px, 2.2vw, 26px);
     }
     
     .day-title {
-        font-size: clamp(14px, 1.6vw, 20px);
+        font-size: clamp(20px, 2.5vw, 30px);
     }
     
     .menu-content {
-        font-size: clamp(16px, 2vw, 26px);
+        font-size: clamp(24px, 3vw, 36px);
     }
     
     .menu-text {
-        font-size: clamp(18px, 2.2vw, 28px);
+        font-size: clamp(28px, 3.5vw, 40px);
     }
 }
 
@@ -1044,32 +1049,35 @@ body {
     }
     
     .section-title {
-        font-size: clamp(20px, 2.5vw, 26px);
+        font-size: clamp(24px, 3vw, 30px);
     }
     
     .weekly-menu-section h2 {
-        font-size: clamp(16px, 2vw, 22px);
+        font-size: clamp(16px, 2vw, 24px);
     }
     
     .day-title {
-        font-size: clamp(14px, 1.8vw, 20px);
+        font-size: clamp(18px, 2.2vw, 26px);
     }
     
     .menu-content {
-        font-size: clamp(16px, 2.2vw, 24px);
+        font-size: clamp(22px, 2.8vw, 32px);
     }
     
     .menu-text {
-        font-size: clamp(18px, 2.2vw, 24px);
+        font-size: clamp(26px, 3.2vw, 36px);
     }
     
     .current-indicator,
     .rotation-indicator {
-        font-size: clamp(12px, 1.4vw, 16px);
+        font-size: clamp(12px, 1.4vw, 18px);
+        padding: 3px 8px;
     }
     
     .next-day-info {
-        font-size: clamp(18px, 2.2vw, 24px);
+        font-size: clamp(20px, 2.5vw, 28px);
+        padding: 4px 8px;
+        min-width: 80px;
     }
     
     .menu-day {
@@ -1077,18 +1085,18 @@ body {
     }
     
     .menu-item {
-        padding: 4px;
+        padding: 3px;
     }
     
     .day-menus {
-        gap: 4px;
+        gap: 2px;
     }
 }
 
 @media (max-width: 479px) {
     #menu-display {
         grid-template-columns: 1fr;
-        gap: 8px;
+        gap: 10px;
     }
     
     .next-menu-grid {
@@ -1101,27 +1109,27 @@ body {
     }
     
     .section-title {
-        font-size: clamp(18px, 2.2vw, 24px);
+        font-size: clamp(22px, 2.8vw, 28px);
     }
     
     .weekly-menu-section h2 {
-        font-size: clamp(14px, 1.8vw, 20px);
+        font-size: clamp(14px, 1.8vw, 22px);
     }
     
     .day-title {
-        font-size: clamp(12px, 1.6vw, 18px);
+        font-size: clamp(16px, 2vw, 24px);
     }
     
     .menu-content {
-        font-size: clamp(14px, 2vw, 22px);
+        font-size: clamp(20px, 2.5vw, 28px);
     }
     
     .menu-text {
-        font-size: clamp(16px, 2vw, 22px);
+        font-size: clamp(24px, 3vw, 32px);
     }
     
     .menu-item {
-        padding: 3px;
+        padding: 2px;
     }
     
     .day-header {
@@ -1136,13 +1144,13 @@ body {
     
     .current-indicator,
     .rotation-indicator {
-        font-size: clamp(10px, 1.2vw, 14px);
+        font-size: clamp(10px, 1.2vw, 16px);
         padding: 2px 6px;
     }
     
     .next-day-info {
-        font-size: clamp(16px, 2vw, 22px);
-        padding: 4px 8px;
+        font-size: clamp(18px, 2.2vw, 24px);
+        padding: 3px 6px;
         min-width: 70px;
     }
     
@@ -1151,7 +1159,7 @@ body {
     }
     
     .day-menus {
-        gap: 3px;
+        gap: 1px;
     }
     
     .menu-type-label {
@@ -1164,29 +1172,28 @@ body {
     
     .menu-type {
         font-size: clamp(10px, 1.2vw, 14px);
-        padding: 2px 6px;
     }
 }
 
 @media (max-width: 360px) {
     .section-title {
-        font-size: clamp(16px, 2vw, 22px);
+        font-size: clamp(20px, 2.5vw, 26px);
     }
     
     .weekly-menu-section h2 {
-        font-size: clamp(12px, 1.6vw, 18px);
+        font-size: clamp(12px, 1.6vw, 20px);
     }
     
     .day-title {
-        font-size: clamp(10px, 1.4vw, 16px);
+        font-size: clamp(14px, 1.8vw, 22px);
     }
     
     .menu-content {
-        font-size: clamp(12px, 1.8vw, 20px);
+        font-size: clamp(18px, 2.2vw, 26px);
     }
     
     .menu-text {
-        font-size: clamp(14px, 1.8vw, 20px);
+        font-size: clamp(22px, 2.8vw, 30px);
     }
     
     .menu-day {
@@ -1194,18 +1201,18 @@ body {
     }
     
     .menu-item {
-        padding: 2px;
+        padding: 1px;
     }
     
     .next-day-info {
-        font-size: clamp(14px, 1.8vw, 20px);
-        padding: 3px 6px;
+        font-size: clamp(16px, 2vw, 22px);
+        padding: 2px 4px;
         min-width: 60px;
     }
     
     .current-indicator,
     .rotation-indicator {
-        font-size: clamp(8px, 1vw, 12px);
+        font-size: clamp(8px, 1vw, 14px);
         padding: 1px 4px;
     }
 }

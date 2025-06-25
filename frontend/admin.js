@@ -145,12 +145,54 @@ function editMenu(dia) {
                 document.getElementById('menu_general').value = item.menu_general || '';
                 document.getElementById('menu_vegetariano').value = item.menu_vegetariano || '';
                 document.getElementById('menu-celiaco').value = item.menu_celiaco || '';
+                
+                // Cambiar el botón para indicar que estamos editando
+                const submitBtn = document.querySelector('#menu-form button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-edit"></i> Actualizar Menú';
+                submitBtn.onclick = (e) => updateMenu(e, dia);
+                
+                showMessage(`Editando menú de ${dia}`, 'success');
             }
         })
         .catch(error => {
             console.error('Error:', error);
             showMessage('Error al cargar el menú para editar', 'error');
         });
+}
+
+async function updateMenu(event, dia) {
+    event.preventDefault();
+    const menuData = {
+        dia: document.getElementById('dia').value,
+        menu_general: document.getElementById('menu_general').value,
+        menu_vegetariano: document.getElementById('menu_vegetariano').value,
+        menu_celiaco: document.getElementById('menu-celiaco').value
+    };
+    
+    try {
+        const response = await fetch(`${API_URL}/api/menu/${dia}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(menuData)
+        });
+        
+        if (response.ok) {
+            showMessage('Menú actualizado exitosamente', 'success');
+            loadMenu();
+            document.getElementById('menu-form').reset();
+            
+            // Restaurar el botón original
+            const submitBtn = document.querySelector('#menu-form button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Menú';
+            submitBtn.onclick = saveMenu;
+        } else {
+            const error = await response.json();
+            throw new Error(error.message || 'Error al actualizar el menú');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage(error.message || 'Error al actualizar el menú', 'error');
+    }
 }
 
 async function deleteMenu(dia) {
