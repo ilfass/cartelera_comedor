@@ -168,7 +168,6 @@ body {
 
 .section-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
     padding-bottom: 8px;
@@ -188,6 +187,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    padding-right: 15px;
 }
 
 .section-title .icon {
