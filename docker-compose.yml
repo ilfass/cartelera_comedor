@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: apptv-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./backend/database.sqlite:/app/database.sqlite
+      - ./frontend/uploads:/app/uploads
+    restart: unless-stopped
+    networks:
+      - apptv-network
+
+  frontend:
+    build: ./frontend
+    container_name: apptv-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/uploads:/usr/share/nginx/html/uploads
+    restart: unless-stopped
+    networks:
+      - apptv-network
+
+networks:
+  apptv-network:
+    driver: bridge
+
+volumes:
+  uploads: 

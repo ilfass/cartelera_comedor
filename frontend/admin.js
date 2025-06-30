@@ -69,6 +69,66 @@ function getAuthHeaders() {
     };
 }
 
+// Función para renovar el token automáticamente
+async function renovarToken() {
+    try {
+        const response = await fetch(`${API_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: 'admin',
+                password: 'admin123'
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('token', data.token);
+            return data.token;
+        } else {
+            throw new Error('Error al renovar el token');
+        }
+    } catch (error) {
+        console.error('Error al renovar token:', error);
+        // Si no se puede renovar, redirigir al login
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+        throw error;
+    }
+}
+
+// Función mejorada para manejar peticiones con renovación automática de token
+async function fetchWithTokenRenewal(url, options = {}) {
+    try {
+        // Primera petición
+        let response = await fetch(url, options);
+        
+        // Si el token expiró, intentar renovarlo
+        if (response.status === 401) {
+            const errorData = await response.json();
+            if (errorData.code === 'TOKEN_EXPIRED' || errorData.code === 'INVALID_TOKEN') {
+                console.log('Token expirado, renovando...');
+                const newToken = await renovarToken();
+                
+                // Actualizar el token en los headers
+                if (options.headers) {
+                    options.headers.Authorization = `Bearer ${newToken}`;
+                }
+                
+                // Reintentar la petición con el nuevo token
+                response = await fetch(url, options);
+            }
+        }
+        
+        return response;
+    } catch (error) {
+        console.error('Error en fetchWithTokenRenewal:', error);
+        throw error;
+    }
+}
+
 // Funciones para el menú
 async function loadMenu() {
     try {
@@ -78,7 +138,7 @@ async function loadMenu() {
         menuTable.innerHTML = `
             <tr>
                 <th>Día</th>
-                <th>Menú General</th>
+                <th>Menú Clásico</th>
                 <th>Menú Vegetariano</th>
                 <th>Menú Celíaco</th>
                 <th>Acciones</th>
@@ -115,7 +175,7 @@ async function saveMenu(event) {
     };
     
     try {
-        const response = await fetch(`${API_URL}/api/menu`, {
+        const response = await fetchWithTokenRenewal(`${API_URL}/api/menu`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(menuData)
@@ -149,7 +209,14 @@ function editMenu(dia) {
                 // Cambiar el botón para indicar que estamos editando
                 const submitBtn = document.querySelector('#menu-form button[type="submit"]');
                 submitBtn.innerHTML = '<i class="fas fa-edit"></i> Actualizar Menú';
-                submitBtn.onclick = (e) => updateMenu(e, dia);
+                
+                // Remover el onsubmit del formulario y agregar el onclick al botón
+                const form = document.getElementById('menu-form');
+                form.onsubmit = null;
+                submitBtn.onclick = (e) => {
+                    e.preventDefault();
+                    updateMenu(e, dia);
+                };
                 
                 showMessage(`Editando menú de ${dia}`, 'success');
             }
@@ -170,7 +237,7 @@ async function updateMenu(event, dia) {
     };
     
     try {
-        const response = await fetch(`${API_URL}/api/menu/${dia}`, {
+        const response = await fetchWithTokenRenewal(`${API_URL}/api/menu/${encodeURIComponent(dia)}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify(menuData)
@@ -181,10 +248,13 @@ async function updateMenu(event, dia) {
             loadMenu();
             document.getElementById('menu-form').reset();
             
-            // Restaurar el botón original
+            // Restaurar el botón original y el formulario
             const submitBtn = document.querySelector('#menu-form button[type="submit"]');
             submitBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Menú';
-            submitBtn.onclick = saveMenu;
+            submitBtn.onclick = null;
+            
+            const form = document.getElementById('menu-form');
+            form.onsubmit = saveMenu;
         } else {
             const error = await response.json();
             throw new Error(error.message || 'Error al actualizar el menú');
@@ -198,7 +268,7 @@ async function updateMenu(event, dia) {
 async function deleteMenu(dia) {
     if (confirm('¿Estás seguro de que deseas eliminar este menú?')) {
         try {
-            const response = await fetch(`${API_URL}/api/menu/${dia}`, {
+            const response = await fetchWithTokenRenewal(`${API_URL}/api/menu/${encodeURIComponent(dia)}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders()
             });
@@ -267,7 +337,7 @@ async function saveMessage(event) {
     };
 
     try {
-        const response = await fetch(`${API_URL}/api/mensajes`, {
+        const response = await fetchWithTokenRenewal(`${API_URL}/api/mensajes`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(messageData)
@@ -289,7 +359,7 @@ async function saveMessage(event) {
 async function deleteMessage(id) {
     if (confirm('¿Estás seguro de que deseas eliminar este mensaje?')) {
         try {
-            const response = await fetch(`${API_URL}/api/mensajes/${id}`, {
+            const response = await fetchWithTokenRenewal(`${API_URL}/api/mensajes/${id}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders()
             });
@@ -308,8 +378,71 @@ async function deleteMessage(id) {
 }
 
 function editMessage(id) {
-    // Implementar edición de mensajes
-    showMessage('Función de edición en desarrollo', 'error');
+    fetch(`${API_URL}/api/mensajes`)
+        .then(response => response.json())
+        .then(messages => {
+            const message = messages.find(m => m.id === id);
+            if (message) {
+                document.getElementById('titulo').value = message.titulo;
+                document.getElementById('contenido').value = message.contenido;
+                document.getElementById('destacado').checked = message.destacado;
+                
+                // Cambiar el botón para indicar que estamos editando
+                const submitBtn = document.querySelector('#message-form button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-edit"></i> Actualizar Mensaje';
+                
+                // Remover el onsubmit del formulario y agregar el onclick al botón
+                const form = document.getElementById('message-form');
+                form.onsubmit = null;
+                submitBtn.onclick = (e) => {
+                    e.preventDefault();
+                    updateMessage(e, id);
+                };
+                
+                showMessage(`Editando mensaje: ${message.titulo}`, 'success');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('Error al cargar el mensaje para editar', 'error');
+        });
+}
+
+async function updateMessage(event, id) {
+    event.preventDefault();
+    const form = event.target.closest('form');
+    const formData = new FormData(form);
+    const messageData = {
+        titulo: formData.get('titulo'),
+        contenido: formData.get('contenido'),
+        destacado: formData.get('destacado') === 'on'
+    };
+
+    try {
+        const response = await fetchWithTokenRenewal(`${API_URL}/api/mensajes/${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(messageData)
+        });
+        if (response.ok) {
+            form.reset();
+            await loadMessages();
+            showMessage('Mensaje actualizado exitosamente', 'success');
+            
+            // Restaurar el botón original y el formulario
+            const submitBtn = document.querySelector('#message-form button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Guardar Mensaje';
+            submitBtn.onclick = null;
+            
+            form.onsubmit = saveMessage;
+        } else {
+            const error = await response.json();
+            showMessage(`Error al actualizar el mensaje: ${error.message}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error al actualizar el mensaje:', error);
+        showMessage('Error al actualizar el mensaje', 'error');
+    }
 }
 
 // Funciones para las imágenes
@@ -374,58 +507,59 @@ async function saveImage(event) {
     const url = formData.get('url');
     
     if (!file && !url) {
-        showMessage('Debe subir una imagen o proporcionar una URL', 'error');
+        showMessage('Debes subir una imagen o proporcionar una URL', 'error');
         return;
     }
     
     try {
-        let imageData;
+        let imageUrl = '';
         
         if (file && file.size > 0) {
-            // Subir archivo - usar el endpoint correcto
-            const uploadData = new FormData();
-            uploadData.append('title', formData.get('titulo'));
-            uploadData.append('image', file); // Cambiar 'imagen' por 'image' para que coincida con el backend
+            // Subir archivo
+            const uploadFormData = new FormData();
+            uploadFormData.append('image', file);
+            uploadFormData.append('title', formData.get('titulo'));
             
-            const response = await fetch(`${API_URL}/api/imagenes`, {
+            const uploadResponse = await fetchWithTokenRenewal(`${API_URL}/api/imagenes`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': getAuthHeaders().Authorization
                 },
-                body: uploadData
+                body: uploadFormData
             });
             
-            if (response.ok) {
-                form.reset();
-                document.getElementById('image-preview').style.display = 'none';
-                await loadImages();
-                showMessage('Imagen subida exitosamente', 'success');
+            if (uploadResponse.ok) {
+                const uploadData = await uploadResponse.json();
+                imageUrl = uploadData.url;
             } else {
-                const error = await response.json();
+                const error = await uploadResponse.json();
                 throw new Error(error.message || 'Error al subir la imagen');
             }
         } else {
-            // Usar URL
-            imageData = {
-                titulo: formData.get('titulo'),
-                url: url
-            };
-            
-            const response = await fetch(`${API_URL}/api/imagenes`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify(imageData)
-            });
-            
-            if (response.ok) {
-                form.reset();
-                document.getElementById('image-preview').style.display = 'none';
-                await loadImages();
-                showMessage('Imagen guardada exitosamente', 'success');
-            } else {
-                const error = await response.json();
-                throw new Error(error.message || 'Error al guardar la imagen');
-            }
+            // Usar URL proporcionada
+            imageUrl = url;
+        }
+        
+        // Guardar en la base de datos
+        const imageData = {
+            titulo: formData.get('titulo'),
+            url: imageUrl
+        };
+        
+        const response = await fetchWithTokenRenewal(`${API_URL}/api/imagenes`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(imageData)
+        });
+        
+        if (response.ok) {
+            showMessage('Imagen guardada exitosamente', 'success');
+            form.reset();
+            document.getElementById('image-preview').style.display = 'none';
+            loadImages();
+        } else {
+            const error = await response.json();
+            throw new Error(error.message || 'Error al guardar la imagen');
         }
     } catch (error) {
         console.error('Error al guardar la imagen:', error);
@@ -436,7 +570,7 @@ async function saveImage(event) {
 async function deleteImage(id) {
     if (confirm('¿Estás seguro de que deseas eliminar esta imagen?')) {
         try {
-            const response = await fetch(`${API_URL}/api/imagenes/${id}`, {
+            const response = await fetchWithTokenRenewal(`${API_URL}/api/imagenes/${id}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders()
             });
@@ -451,52 +585,6 @@ async function deleteImage(id) {
             console.error('Error al eliminar la imagen:', error);
             showMessage(error.message || 'Error al eliminar la imagen', 'error');
         }
-    }
-}
-
-// Funciones para la configuración
-async function loadConfig() {
-    try {
-        const response = await fetch(`${API_URL}/api/config`);
-        const config = await response.json();
-        
-        // Cargar el intervalo del carrusel (convertir de ms a segundos)
-        const intervaloMs = config.intervalo_carrusel || 5000;
-        const intervaloSegundos = Math.round(intervaloMs / 1000);
-        document.getElementById('intervalo-carrusel').value = intervaloSegundos;
-    } catch (error) {
-        console.error('Error al cargar la configuración:', error);
-        showMessage('Error al cargar la configuración', 'error');
-    }
-}
-
-async function saveConfig(event) {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-    const intervaloSegundos = parseInt(formData.get('intervalo'));
-    
-    if (intervaloSegundos < 1 || intervaloSegundos > 60) {
-        showMessage('El intervalo debe estar entre 1 y 60 segundos', 'error');
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${API_URL}/api/config/intervalo_carrusel`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ valor: intervaloSegundos * 1000 }) // Convertir a milisegundos
-        });
-        
-        if (response.ok) {
-            showMessage('Configuración guardada exitosamente', 'success');
-        } else {
-            const error = await response.json();
-            showMessage(`Error al guardar la configuración: ${error.message}`, 'error');
-        }
-    } catch (error) {
-        console.error('Error al guardar la configuración:', error);
-        showMessage('Error al guardar la configuración', 'error');
     }
 }
 
@@ -556,7 +644,7 @@ async function saveQR(event) {
     };
     
     try {
-        const response = await fetch(`${API_URL}/api/qr`, {
+        const response = await fetchWithTokenRenewal(`${API_URL}/api/qr`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(qrData)
@@ -613,7 +701,7 @@ async function updateQR(event, id) {
     };
     
     try {
-        const response = await fetch(`${API_URL}/api/qr/${id}`, {
+        const response = await fetchWithTokenRenewal(`${API_URL}/api/qr/${id}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify(qrData)
@@ -625,7 +713,7 @@ async function updateQR(event, id) {
             form.reset();
             document.getElementById('qr-activo').checked = true;
             
-            // Restaurar el formulario para crear nuevos
+            // Restaurar el formulario original
             form.onsubmit = saveQR;
             form.querySelector('button[type="submit"]').textContent = 'Guardar Código QR';
         } else {
@@ -641,7 +729,7 @@ async function updateQR(event, id) {
 async function deleteQR(id) {
     if (confirm('¿Estás seguro de que deseas eliminar este código QR?')) {
         try {
-            const response = await fetch(`${API_URL}/api/qr/${id}`, {
+            const response = await fetchWithTokenRenewal(`${API_URL}/api/qr/${id}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders()
             });
@@ -673,7 +761,6 @@ document.addEventListener('DOMContentLoaded', function() {
     loadMessages();
     loadImages();
     loadQR();
-    loadConfig(); // Cargar configuración
     
     // Agregar botón de logout al header
     const header = document.querySelector('h1');

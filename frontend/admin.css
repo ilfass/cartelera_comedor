@@ -108,8 +108,8 @@ body {
     position: absolute;
     top: 20px;
     right: 20px;
-    padding: 10px 20px;
-    background: #dc2626;
+    padding: 12px 20px;
+    background: rgba(220, 38, 38, 0.9);
     color: white;
     border: none;
     border-radius: 8px;
@@ -120,6 +120,9 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10;
 }
 
 .logout-btn:hover {

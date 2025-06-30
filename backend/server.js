@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const fs = require('fs');
+const axios = require('axios');
 
 const app = express();
 const port = 3000;
@@ -26,6 +27,132 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 // Configuración de JWT
 const JWT_SECRET = 'tu_clave_secreta_muy_segura'; // En producción, usar una variable de entorno
 const TOKEN_EXPIRATION = '24h'; // Cambiado a 24 horas para pruebas
+
+// Función para obtener el día de la semana en español
+function obtenerDiaSemana(fecha) {
+    const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    return dias[fecha.getDay()];
+}
+
+// Función para formatear fecha como YYYY-MM-DD
+function formatearFecha(fecha) {
+    return fecha.toISOString().split('T')[0];
+}
+
+// Función para consumir la API de UNICEN y actualizar menús
+async function actualizarMenuDesdeAPI(fecha) {
+    try {
+        const fechaFormateada = formatearFecha(fecha);
+        const diaSemana = obtenerDiaSemana(fecha);
+        
+        // Solo procesar días laborables
+        if (fecha.getDay() === 0 || fecha.getDay() === 6) {
+            console.log(`Saltando ${diaSemana} (${fechaFormateada}) - día no laborable`);
+            return 0;
+        }
+        
+        const url = `http://turnero-test.unicen.edu.ar/api/platos-del-dia/${fechaFormateada}`;
+        
+        console.log(`Consumiendo API de UNICEN para la fecha: ${fechaFormateada}`);
+        const response = await axios.get(url);
+        
+        if (response.data && response.data.data && response.data.data.length > 0) {
+            const platos = response.data.data;
+            let menuGeneral = '';
+            let menuVegetariano = '';
+            let menuCeliaco = '';
+            
+            // Procesar los platos según su característica
+            platos.forEach(plato => {
+                switch (plato.caracteristica) {
+                    case 'CLASICO':
+                        menuGeneral += (menuGeneral ? '\n' : '') + plato.plato;
+                        break;
+                    case 'VEGETARIANO':
+                        menuVegetariano += (menuVegetariano ? '\n' : '') + plato.plato;
+                        break;
+                    case 'CELIACO':
+                        menuCeliaco += (menuCeliaco ? '\n' : '') + plato.plato;
+                        break;
+                }
+            });
+            
+            const diaNormalizado = normalizarDia(diaSemana);
+            
+            // Actualizar o insertar en la base de datos
+            return new Promise((resolve, reject) => {
+                db.run('INSERT OR REPLACE INTO menu (dia, menu_general, menu_vegetariano, menu_celiaco) VALUES (?, ?, ?, ?)',
+                    [diaNormalizado, menuGeneral, menuVegetariano, menuCeliaco],
+                    function(err) {
+                        if (err) {
+                            console.error('Error al guardar menú desde API:', err);
+                            reject(err);
+                        } else {
+                            console.log(`Menú actualizado desde API para ${diaSemana} (${fechaFormateada})`);
+                            console.log(`  - Clásico: ${menuGeneral || 'Sin datos'}`);
+                            console.log(`  - Vegetariano: ${menuVegetariano || 'Sin datos'}`);
+                            console.log(`  - Celíaco: ${menuCeliaco || 'Sin datos'}`);
+                            resolve(this.changes);
+                        }
+                    });
+            });
+        } else {
+            console.log(`No se encontraron platos para la fecha: ${fechaFormateada} (${diaSemana})`);
+            return 0;
+        }
+    } catch (error) {
+        console.error('Error al consumir API de UNICEN:', error.message);
+        return 0;
+    }
+}
+
+// Función para actualizar menús de la semana actual
+async function actualizarMenusSemana() {
+    const hoy = new Date();
+    const diasSemana = [];
+    
+    // Obtener los próximos 5 días laborables (Lunes a Viernes)
+    for (let i = 0; i < 7; i++) {
+        const fecha = new Date(hoy);
+        fecha.setDate(hoy.getDate() + i);
+        
+        // Solo incluir días de lunes a viernes
+        if (fecha.getDay() >= 1 && fecha.getDay() <= 5) {
+            diasSemana.push(fecha);
+        }
+    }
+    
+    console.log('Actualizando menús para la semana...');
+    let actualizaciones = 0;
+    
+    // Primero, limpiar datos incorrectos (domingo, sábado)
+    const diasIncorrectos = ['domingo', 'sabado'];
+    for (const dia of diasIncorrectos) {
+        db.run('DELETE FROM menu WHERE dia = ?', [dia], (err) => {
+            if (err) {
+                console.error(`Error al limpiar menú de ${dia}:`, err);
+            } else {
+                console.log(`Menú de ${dia} eliminado (día no laborable)`);
+            }
+        });
+    }
+    
+    for (const fecha of diasSemana) {
+        try {
+            const cambios = await actualizarMenuDesdeAPI(fecha);
+            if (cambios > 0) {
+                actualizaciones++;
+            }
+            // Pequeña pausa entre peticiones para no sobrecargar la API
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error) {
+            console.error(`Error al actualizar menú para ${formatearFecha(fecha)}:`, error.message);
+        }
+    }
+    
+    console.log(`Actualización completada. ${actualizaciones} menús actualizados.`);
+    return actualizaciones;
+}
 
 // Middleware de autenticación
 const authenticateToken = (req, res, next) => {
@@ -428,6 +555,59 @@ app.put('/api/menu/:dia', authenticateToken, (req, res) => {
     });
 });
 
+// Nueva ruta para actualizar menús desde la API de UNICEN
+app.post('/api/menu/actualizar-desde-api', authenticateToken, async (req, res) => {
+    try {
+        console.log('Iniciando actualización de menús desde API de UNICEN...');
+        const actualizaciones = await actualizarMenusSemana();
+        
+        res.json({
+            code: 'SUCCESS',
+            message: 'Actualización de menús completada',
+            actualizaciones: actualizaciones
+        });
+    } catch (error) {
+        console.error('Error en actualización de menús:', error);
+        res.status(500).json({
+            code: 'API_ERROR',
+            message: 'Error al actualizar menús desde la API',
+            error: error.message
+        });
+    }
+});
+
+// Nueva ruta para actualizar menú de un día específico desde la API
+app.post('/api/menu/actualizar-dia/:fecha', authenticateToken, async (req, res) => {
+    try {
+        const fechaParam = req.params.fecha; // Formato: YYYY-MM-DD
+        const fecha = new Date(fechaParam);
+        
+        if (isNaN(fecha.getTime())) {
+            return res.status(400).json({
+                code: 'INVALID_DATE',
+                message: 'Formato de fecha inválido. Use YYYY-MM-DD'
+            });
+        }
+        
+        console.log(`Actualizando menú para la fecha: ${fechaParam}`);
+        const cambios = await actualizarMenuDesdeAPI(fecha);
+        
+        res.json({
+            code: 'SUCCESS',
+            message: 'Menú actualizado exitosamente',
+            fecha: fechaParam,
+            cambios: cambios
+        });
+    } catch (error) {
+        console.error('Error al actualizar menú específico:', error);
+        res.status(500).json({
+            code: 'API_ERROR',
+            message: 'Error al actualizar menú desde la API',
+            error: error.message
+        });
+    }
+});
+
 // Rutas para los mensajes
 app.get('/api/mensajes', (req, res) => {
     db.all('SELECT * FROM mensajes ORDER BY fecha DESC', [], (err, rows) => {
@@ -461,7 +641,7 @@ app.post('/api/mensajes', authenticateToken, (req, res) => {
         });
 });
 
-app.put('/api/mensajes', authenticateToken, (req, res) => {
+app.put('/api/mensajes/:id', authenticateToken, (req, res) => {
     const { titulo, contenido, destacado } = req.body;
     db.run('UPDATE mensajes SET titulo = ?, contenido = ?, destacado = ? WHERE id = ?',
         [titulo, contenido, destacado ? 1 : 0, req.params.id],
@@ -470,11 +650,15 @@ app.put('/api/mensajes', authenticateToken, (req, res) => {
                 res.status(500).json({ error: err.message });
                 return;
             }
-            res.json({ changes: this.changes });
+            if (this.changes === 0) {
+                res.status(404).json({ message: 'Mensaje no encontrado' });
+                return;
+            }
+            res.json({ message: 'Mensaje actualizado exitosamente' });
         });
 });
 
-app.delete('/api/mensajes', authenticateToken, (req, res) => {
+app.delete('/api/mensajes/:id', authenticateToken, (req, res) => {
     db.run('DELETE FROM mensajes WHERE id = ?', [req.params.id], function(err) {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -534,7 +718,7 @@ app.post('/api/imagenes', authenticateToken, upload.single('image'), (req, res) 
         });
 });
 
-app.delete('/api/imagenes', authenticateToken, (req, res) => {
+app.delete('/api/imagenes/:id', authenticateToken, (req, res) => {
     // Primero obtenemos la información de la imagen para eliminar el archivo
     db.get('SELECT url FROM imagenes WHERE id = ?', [req.params.id], (err, row) => {
         if (err) {
@@ -547,7 +731,7 @@ app.delete('/api/imagenes', authenticateToken, (req, res) => {
         }
 
         // Eliminamos el archivo físico
-        const filePath = path.join(__dirname, 'uploads', path.basename(row.url));
+        const filePath = path.join(__dirname, '../frontend/uploads', path.basename(row.url));
         fs.unlink(filePath, (err) => {
             if (err && err.code !== 'ENOENT') {
                 console.error('Error al eliminar el archivo:', err);
@@ -594,7 +778,7 @@ app.post('/api/qr', authenticateToken, (req, res) => {
         });
 });
 
-app.put('/api/qr', authenticateToken, (req, res) => {
+app.put('/api/qr/:id', authenticateToken, (req, res) => {
     const { titulo, url, descripcion, activo } = req.body;
     
     if (!titulo || !url) {
@@ -616,7 +800,7 @@ app.put('/api/qr', authenticateToken, (req, res) => {
         });
 });
 
-app.delete('/api/qr', authenticateToken, (req, res) => {
+app.delete('/api/qr/:id', authenticateToken, (req, res) => {
     db.run('DELETE FROM qr_codes WHERE id = ?', [req.params.id], function(err) {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -705,4 +889,14 @@ app.get('/favicon.ico', (req, res) => {
 // Iniciar el servidor
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
+    
+    // Actualizar menús desde la API al iniciar el servidor
+    setTimeout(async () => {
+        try {
+            console.log('Iniciando actualización automática de menús...');
+            await actualizarMenusSemana();
+        } catch (error) {
+            console.error('Error en actualización automática de menús:', error.message);
+        }
+    }, 5000); // Esperar 5 segundos después del inicio
 }); 

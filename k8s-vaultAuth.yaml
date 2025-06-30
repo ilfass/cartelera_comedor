@@ -1,0 +1,34 @@
+# Autenticación de Namespace
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: static-auth
+  namespace: web-comedor-apptv #Cambiar
+spec:
+  method: kubernetes
+  mount: kubernetes
+  kubernetes:
+    role: web #Cambiar
+    serviceAccount: default
+    audiences:
+      - vault
+---
+#solicitud de secreto
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: vault-mysql-pass #Cambiar
+spec:
+  type: kv-v2
+  mount: kubernetes
+
+  # path of the secret
+  path: web/internacionales-mapa/graduados-secrets #Cambiar
+
+  # dest k8s secret
+  destination:
+    name: graduados-secrets #Cambiar
+    create: true
+
+  refreshAfter: 300s
+  vaultAuthRef: static-auth

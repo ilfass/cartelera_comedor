@@ -254,7 +254,7 @@
                     <div class="menu-grid">
                         <div class="menu-day">
                             <h4>Lunes</h4>
-                            <label for="menu_general_lunes">Menú General</label>
+                            <label for="menu_general_lunes">Menú Clásico</label>
                             <textarea id="menu_general_lunes" name="menu_general_lunes" rows="3" required></textarea>
                             <label for="menu_vegetariano_lunes">Menú Vegetariano</label>
                             <textarea id="menu_vegetariano_lunes" name="menu_vegetariano_lunes" rows="3" required></textarea>
@@ -264,7 +264,7 @@
 
                         <div class="menu-day">
                             <h4>Martes</h4>
-                            <label for="menu_general_martes">Menú General</label>
+                            <label for="menu_general_martes">Menú Clásico</label>
                             <textarea id="menu_general_martes" name="menu_general_martes" rows="3" required></textarea>
                             <label for="menu_vegetariano_martes">Menú Vegetariano</label>
                             <textarea id="menu_vegetariano_martes" name="menu_vegetariano_martes" rows="3" required></textarea>
@@ -274,7 +274,7 @@
 
                         <div class="menu-day">
                             <h4>Miércoles</h4>
-                            <label for="menu_general_miercoles">Menú General</label>
+                            <label for="menu_general_miercoles">Menú Clásico</label>
                             <textarea id="menu_general_miercoles" name="menu_general_miercoles" rows="3" required></textarea>
                             <label for="menu_vegetariano_miercoles">Menú Vegetariano</label>
                             <textarea id="menu_vegetariano_miercoles" name="menu_vegetariano_miercoles" rows="3" required></textarea>
@@ -284,7 +284,7 @@
 
                         <div class="menu-day">
                             <h4>Jueves</h4>
-                            <label for="menu_general_jueves">Menú General</label>
+                            <label for="menu_general_jueves">Menú Clásico</label>
                             <textarea id="menu_general_jueves" name="menu_general_jueves" rows="3" required></textarea>
                             <label for="menu_vegetariano_jueves">Menú Vegetariano</label>
                             <textarea id="menu_vegetariano_jueves" name="menu_vegetariano_jueves" rows="3" required></textarea>
@@ -294,7 +294,7 @@
 
                         <div class="menu-day">
                             <h4>Viernes</h4>
-                            <label for="menu_general_viernes">Menú General</label>
+                            <label for="menu_general_viernes">Menú Clásico</label>
                             <textarea id="menu_general_viernes" name="menu_general_viernes" rows="3" required></textarea>
                             <label for="menu_vegetariano_viernes">Menú Vegetariano</label>
                             <textarea id="menu_vegetariano_viernes" name="menu_vegetariano_viernes" rows="3" required></textarea>
@@ -305,12 +305,33 @@
 
                     <button type="submit" class="submit-button">Guardar Menú Semanal</button>
                 </form>
+                
+                <!-- Botones para actualizar desde API -->
+                <div style="margin-top: 20px; padding: 20px; background-color: #e8f5e8; border-radius: 8px; border: 1px solid #4caf50;">
+                    <h4 style="color: #2e7d32; margin-bottom: 15px;">Actualizar desde API de UNICEN</h4>
+                    <p style="color: #388e3c; margin-bottom: 15px; font-size: 0.9em;">
+                        Estos botones permiten actualizar automáticamente los menús desde la API oficial de UNICEN.
+                    </p>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <button type="button" class="api-button" onclick="actualizarMenusSemana()" style="background-color: #4caf50; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1em;">
+                            🔄 Actualizar Semana Completa
+                        </button>
+                        <button type="button" class="api-button" onclick="actualizarMenuHoy()" style="background-color: #2196f3; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1em;">
+                            📅 Actualizar Solo Hoy
+                        </button>
+                        <button type="button" class="api-button" onclick="actualizarMenuManana()" style="background-color: #ff9800; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1em;">
+                            🌅 Actualizar Solo Mañana
+                        </button>
+                    </div>
+                    <div id="api-status" style="margin-top: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
+                </div>
+                
                 <div class="table-container">
                     <table id="menu-table">
                         <thead>
                             <tr>
                                 <th>Día</th>
-                                <th>Menú General</th>
+                                <th>Menú Clásico</th>
                                 <th>Menú Vegetariano</th>
                                 <th>Menú Celíaco</th>
                             </tr>
@@ -753,6 +774,124 @@
             loadMessages();
             loadImages();
         });
+
+        // Funciones para actualizar menús desde la API
+        async function actualizarMenusSemana() {
+            const statusDiv = document.getElementById('api-status');
+            statusDiv.style.display = 'block';
+            statusDiv.style.backgroundColor = '#fff3cd';
+            statusDiv.style.color = '#856404';
+            statusDiv.style.border = '1px solid #ffeaa7';
+            statusDiv.innerHTML = '🔄 Actualizando menús de la semana completa...';
+
+            try {
+                const token = await obtenerTokenValido();
+                const response = await fetch('http://localhost:3000/api/menu/actualizar-desde-api', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                statusDiv.style.backgroundColor = '#d4edda';
+                statusDiv.style.color = '#155724';
+                statusDiv.style.border = '1px solid #c3e6cb';
+                statusDiv.innerHTML = `✅ Actualización completada. ${data.actualizaciones} menús actualizados.`;
+
+                // Recargar el menú después de la actualización
+                setTimeout(() => {
+                    loadMenu();
+                    statusDiv.style.display = 'none';
+                }, 3000);
+
+            } catch (error) {
+                console.error('Error al actualizar menús:', error);
+                statusDiv.style.backgroundColor = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.style.border = '1px solid #f5c6cb';
+                statusDiv.innerHTML = `❌ Error al actualizar menús: ${error.message}`;
+                
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        async function actualizarMenuHoy() {
+            const hoy = new Date().toISOString().split('T')[0];
+            await actualizarMenuFecha(hoy, 'hoy');
+        }
+
+        async function actualizarMenuManana() {
+            const manana = new Date();
+            manana.setDate(manana.getDate() + 1);
+            const fechaManana = manana.toISOString().split('T')[0];
+            await actualizarMenuFecha(fechaManana, 'mañana');
+        }
+
+        async function actualizarMenuFecha(fecha, descripcion) {
+            const statusDiv = document.getElementById('api-status');
+            statusDiv.style.display = 'block';
+            statusDiv.style.backgroundColor = '#fff3cd';
+            statusDiv.style.color = '#856404';
+            statusDiv.style.border = '1px solid #ffeaa7';
+            statusDiv.innerHTML = `🔄 Actualizando menú para ${descripcion} (${fecha})...`;
+
+            try {
+                const token = await obtenerTokenValido();
+                const response = await fetch(`http://localhost:3000/api/menu/actualizar-dia/${fecha}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                statusDiv.style.backgroundColor = '#d4edda';
+                statusDiv.style.color = '#155724';
+                statusDiv.style.border = '1px solid #c3e6cb';
+                statusDiv.innerHTML = `✅ Menú de ${descripcion} actualizado exitosamente.`;
+
+                // Recargar el menú después de la actualización
+                setTimeout(() => {
+                    loadMenu();
+                    statusDiv.style.display = 'none';
+                }, 3000);
+
+            } catch (error) {
+                console.error(`Error al actualizar menú de ${descripcion}:`, error);
+                statusDiv.style.backgroundColor = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.style.border = '1px solid #f5c6cb';
+                statusDiv.innerHTML = `❌ Error al actualizar menú de ${descripcion}: ${error.message}`;
+                
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Función auxiliar para obtener token válido
+        async function obtenerTokenValido() {
+            let token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No hay token de autenticación');
+            }
+            return token;
+        }
     </script>
 </body>
 </html> 

@@ -1,16 +1,19 @@
 # 🍽️ Pizarra Digital - Comedor Universitario UNICEN
 
-Sistema de pizarra digital para el comedor universitario de la UNICEN, con panel de administración completo.
+Sistema de pizarra digital para el comedor universitario de la UNICEN, con panel de administración y despliegue listo para Docker y Kubernetes.
 
 ## 🚀 Características
 
 ### 📱 Frontend (Pizarra Digital)
-- **Menú semanal** con opciones general, vegetariano y celíaco
+- **Menú semanal** con opciones clásico, vegetariano y celíaco
 - **Mensajes importantes** con sistema de destacados
 - **Información del clima** en tiempo real
 - **Carrusel automático** entre páginas
 - **Diseño responsivo** para diferentes pantallas
 - **Reloj y fecha** en tiempo real
+- **Frontend desacoplado** (Nginx) y **backend Node.js**
+- **Despliegue listo para Docker y Kubernetes**
+- **URLs relativas en el frontend** (ver sección abajo)
 
 ### 🔧 Panel de Administración
 - **Sistema de login** seguro con JWT
@@ -174,4 +177,17 @@ Este proyecto está bajo la Licencia MIT.
 
 ---
 
-**Desarrollado para el Comedor Universitario UNICEN** 🏛️ 
+**Desarrollado para el Comedor Universitario UNICEN** 🏛️
+
+## 🔗 URLs relativas en el frontend
+
+Todas las llamadas a la API desde el frontend (`app.js`, `admin.js`, `login.html`) utilizan **rutas relativas** (por ejemplo, `/api/menu`, `/api/auth/login`).
+
+Esto significa que:
+- El frontend funcionará correctamente en cualquier entorno (local, Docker, Kubernetes, dominio real, etc.)
+- No es necesario modificar ninguna variable de entorno ni configuración de URL para el frontend.
+- El Ingress o proxy de Kubernetes se encarga de redirigir correctamente estas rutas al backend.
+
+## 🐳 Despliegue con Docker y Kubernetes
+
+(El resto del README continúa igual...)
