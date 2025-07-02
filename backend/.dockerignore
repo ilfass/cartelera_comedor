@@ -1,0 +1,4 @@
+database.sqlite
+database.sqlite.backup
+node_modules
+npm-debug.log 

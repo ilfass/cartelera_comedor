@@ -1,5 +1,5 @@
 # Usar Node.js 18 como imagen base
-FROM node:18-alpine
+FROM node:18-bullseye
 
 # Establecer directorio de trabajo
 WORKDIR /app

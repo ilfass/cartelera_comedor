@@ -1,7 +1,7 @@
-// Configuración
-const API_URL = 'http://localhost:3000';
-const WEATHER_API_KEY = '79bf01c7bef5ed9d9aeda331a0d552bf';
-const WEATHER_CITY = 'Tandil'; // Ciudad de UNICEN
+// Configuración - se carga desde config.js
+const API_URL = window.APP_CONFIG?.API_URL || '/api';
+const WEATHER_API_KEY = window.APP_CONFIG?.WEATHER_API_KEY || '79bf01c7bef5ed9d9aeda331a0d552bf';
+const WEATHER_CITY = window.APP_CONFIG?.WEATHER_CITY || 'Tandil'; // Ciudad de UNICEN
 
 // Intervalos de actualización (en milisegundos)
 const UPDATE_INTERVALS = {
@@ -176,7 +176,7 @@ function updateNextMenu(menuData, currentDay) {
 async function loadMenu() {
     try {
         console.log('🔄 Iniciando carga de menús...');
-        const response = await fetch(`${API_URL}/api/menu`);
+        const response = await fetch(`${API_URL}/menu`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -475,7 +475,7 @@ function showError(message) {
 async function loadMessages() {
     try {
         console.log('🔄 Cargando mensajes...');
-        const response = await fetch(`${API_URL}/api/mensajes`);
+        const response = await fetch(`${API_URL}/mensajes`);
         const messages = await response.json();
         console.log('📨 Mensajes recibidos:', messages);
         
@@ -609,7 +609,7 @@ const slideInterval = 5000; // 5 segundos
 
 async function loadCarousel() {
     try {
-        const response = await fetch(`${API_URL}/api/imagenes`);
+        const response = await fetch(`${API_URL}/imagenes`);
         const images = await response.json();
         
         const carouselContent = document.getElementById('carousel-content');
@@ -656,10 +656,10 @@ async function loadMixedCarousel() {
         }
         
         // Obtener mensajes
-        const messagesRes = await fetch(`${API_URL}/api/mensajes`);
+        const messagesRes = await fetch(`${API_URL}/mensajes`);
         const messages = await messagesRes.json();
         // Obtener imágenes
-        const imagesRes = await fetch(`${API_URL}/api/imagenes`);
+        const imagesRes = await fetch(`${API_URL}/imagenes`);
         const images = await imagesRes.json();
         // Mezclar ambos
         mixedSlides = [...messages.map(m => ({type: 'mensaje', ...m})), ...images.map(i => ({type: 'imagen', ...i}))];
@@ -727,7 +727,7 @@ function showMixedSlide() {
 // Mostrar menú de mañana en el bloque destacado
 async function loadMenuTomorrow() {
     try {
-        const response = await fetch(`${API_URL}/api/menu`);
+        const response = await fetch(`${API_URL}/menu`);
         if (!response.ok) {
             throw new Error('Error al cargar el menú');
         }
@@ -815,7 +815,7 @@ function initPageCarousel() {
 async function loadFeaturedImage() {
     try {
         console.log('🔄 Cargando imagen destacada...');
-        const response = await fetch(`${API_URL}/api/imagenes`);
+        const response = await fetch(`${API_URL}/imagenes`);
         const images = await response.json();
         console.log('🖼️ Imágenes recibidas:', images);
         
@@ -888,7 +888,7 @@ async function loadFeaturedImage() {
 async function loadQR() {
     try {
         console.log('🔄 Cargando código QR...');
-        const response = await fetch(`${API_URL}/api/qr`);
+        const response = await fetch(`${API_URL}/qr`);
         const qrCodes = await response.json();
         console.log('📱 Códigos QR recibidos:', qrCodes);
         
@@ -1090,7 +1090,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Función para verificar el estado del servidor
 async function checkServerStatus() {
     try {
-        const response = await fetch(`${API_URL}/api/health`);
+        const response = await fetch(`${API_URL}/health`);
         return response.ok;
     } catch (error) {
         return false;

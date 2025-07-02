@@ -1,3 +1,6 @@
+// Cargar variables de entorno
+require('dotenv').config();
+
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
@@ -11,11 +14,11 @@ const fs = require('fs');
 const axios = require('axios');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // Configuración de autenticación básica para el panel de administración
 const auth = basicAuth({
-    users: { 'admin': 'admin123' },
+    users: { [process.env.ADMIN_USERNAME || 'admcomedor']: process.env.ADMIN_PASSWORD || 'adm.comedor.2025' },
     challenge: true
 });
 
@@ -25,7 +28,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Configuración de JWT
-const JWT_SECRET = 'tu_clave_secreta_muy_segura'; // En producción, usar una variable de entorno
+const JWT_SECRET = process.env.JWT_SECRET || 'tu_clave_secreta_muy_segura';
 const TOKEN_EXPIRATION = '24h'; // Cambiado a 24 horas para pruebas
 
 // Función para obtener el día de la semana en español
@@ -202,7 +205,9 @@ const authenticateToken = (req, res, next) => {
 };
 
 // Conexión a la base de datos
-const db = new sqlite3.Database(path.join(__dirname, 'database.sqlite'), (err) => {
+const dbPath = process.env.DB_PATH || 'database.sqlite';
+const finalPath = path.isAbsolute(dbPath) ? dbPath : path.join(__dirname, dbPath);
+const db = new sqlite3.Database(finalPath, (err) => {
     if (err) {
         console.error('Error al conectar con la base de datos:', err);
     } else {
@@ -270,8 +275,8 @@ const db = new sqlite3.Database(path.join(__dirname, 'database.sqlite'), (err) =
 
             // Crear usuario administrador por defecto si no existe
             const defaultAdmin = {
-                username: 'admin',
-                password: 'admin123' // En producción, usar una contraseña más segura
+                username: process.env.ADMIN_USERNAME || 'admcomedor',
+                password: process.env.ADMIN_PASSWORD || 'adm.comedor.2025'
             };
 
             db.get('SELECT * FROM usuarios WHERE username = ?', [defaultAdmin.username], (err, row) => {
@@ -293,6 +298,8 @@ const db = new sqlite3.Database(path.join(__dirname, 'database.sqlite'), (err) =
                                 });
                         }
                     });
+                } else {
+                    console.log('Usuario administrador ya existe:', defaultAdmin.username);
                 }
             });
 

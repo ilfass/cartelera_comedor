@@ -1,5 +1,5 @@
-// Configuración
-const API_URL = 'http://localhost:3000';
+// Configuración - se carga desde config.js
+const API_URL = window.APP_CONFIG?.API_URL || '/api';
 
 // Verificar autenticación al cargar
 function checkAuth() {
@@ -10,7 +10,7 @@ function checkAuth() {
     }
     
     // Verificar si el token es válido
-    fetch(`${API_URL}/api/menu`, {
+    fetch(`${API_URL}/menu`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -72,14 +72,14 @@ function getAuthHeaders() {
 // Función para renovar el token automáticamente
 async function renovarToken() {
     try {
-        const response = await fetch(`${API_URL}/api/auth/login`, {
+        const response = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                username: 'admin',
-                password: 'admin123'
+                        username: 'admcomedor',
+        password: 'adm.comedor.2025'
             })
         });
 
@@ -132,7 +132,7 @@ async function fetchWithTokenRenewal(url, options = {}) {
 // Funciones para el menú
 async function loadMenu() {
     try {
-        const response = await fetch(`${API_URL}/api/menu`);
+        const response = await fetch(`${API_URL}/menu`);
         const menu = await response.json();
         const menuTable = document.getElementById('menu-table');
         menuTable.innerHTML = `
@@ -175,7 +175,7 @@ async function saveMenu(event) {
     };
     
     try {
-        const response = await fetchWithTokenRenewal(`${API_URL}/api/menu`, {
+        const response = await fetchWithTokenRenewal(`${API_URL}/menu`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(menuData)
@@ -196,7 +196,7 @@ async function saveMenu(event) {
 }
 
 function editMenu(dia) {
-    fetch(`${API_URL}/api/menu`)
+    fetch(`${API_URL}/menu`)
         .then(response => response.json())
         .then(menu => {
             const item = menu.find(m => m.dia === dia);
@@ -237,7 +237,7 @@ async function updateMenu(event, dia) {
     };
     
     try {
-        const response = await fetchWithTokenRenewal(`${API_URL}/api/menu/${encodeURIComponent(dia)}`, {
+        const response = await fetchWithTokenRenewal(`${API_URL}/menu/${encodeURIComponent(dia)}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify(menuData)
@@ -268,7 +268,7 @@ async function updateMenu(event, dia) {
 async function deleteMenu(dia) {
     if (confirm('¿Estás seguro de que deseas eliminar este menú?')) {
         try {
-            const response = await fetchWithTokenRenewal(`${API_URL}/api/menu/${encodeURIComponent(dia)}`, {
+            const response = await fetchWithTokenRenewal(`${API_URL}/menu/${encodeURIComponent(dia)}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders()
             });
@@ -289,7 +289,7 @@ async function deleteMenu(dia) {
 // Funciones para los mensajes
 async function loadMessages() {
     try {
-        const response = await fetch(`${API_URL}/api/mensajes`);
+        const response = await fetch(`${API_URL}/mensajes`);
         const messages = await response.json();
         const messagesTable = document.getElementById('messages-table');
         messagesTable.innerHTML = `
@@ -337,7 +337,7 @@ async function saveMessage(event) {
     };
 
     try {
-        const response = await fetchWithTokenRenewal(`${API_URL}/api/mensajes`, {
+        const response = await fetchWithTokenRenewal(`${API_URL}/mensajes`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(messageData)
@@ -359,7 +359,7 @@ async function saveMessage(event) {
 async function deleteMessage(id) {
     if (confirm('¿Estás seguro de que deseas eliminar este mensaje?')) {
         try {
-            const response = await fetchWithTokenRenewal(`${API_URL}/api/mensajes/${id}`, {
+            const response = await fetchWithTokenRenewal(`${API_URL}/mensajes/${id}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders()
             });
@@ -378,7 +378,7 @@ async function deleteMessage(id) {
 }
 
 function editMessage(id) {
-    fetch(`${API_URL}/api/mensajes`)
+    fetch(`${API_URL}/mensajes`)
         .then(response => response.json())
         .then(messages => {
             const message = messages.find(m => m.id === id);
@@ -419,7 +419,7 @@ async function updateMessage(event, id) {
     };
 
     try {
-        const response = await fetchWithTokenRenewal(`${API_URL}/api/mensajes/${id}`, {
+        const response = await fetchWithTokenRenewal(`${API_URL}/mensajes/${id}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify(messageData)
@@ -448,7 +448,7 @@ async function updateMessage(event, id) {
 // Funciones para las imágenes
 async function loadImages() {
     try {
-        const response = await fetch(`${API_URL}/api/imagenes`);
+        const response = await fetch(`${API_URL}/imagenes`);
         const images = await response.json();
         const imagesTable = document.getElementById('images-table');
         imagesTable.innerHTML = `
@@ -520,7 +520,7 @@ async function saveImage(event) {
             uploadFormData.append('image', file);
             uploadFormData.append('title', formData.get('titulo'));
             
-            const uploadResponse = await fetchWithTokenRenewal(`${API_URL}/api/imagenes`, {
+            const uploadResponse = await fetchWithTokenRenewal(`${API_URL}/imagenes`, {
                 method: 'POST',
                 headers: {
                     'Authorization': getAuthHeaders().Authorization
@@ -546,7 +546,7 @@ async function saveImage(event) {
             url: imageUrl
         };
         
-        const response = await fetchWithTokenRenewal(`${API_URL}/api/imagenes`, {
+        const response = await fetchWithTokenRenewal(`${API_URL}/imagenes`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(imageData)
@@ -570,7 +570,7 @@ async function saveImage(event) {
 async function deleteImage(id) {
     if (confirm('¿Estás seguro de que deseas eliminar esta imagen?')) {
         try {
-            const response = await fetchWithTokenRenewal(`${API_URL}/api/imagenes/${id}`, {
+            const response = await fetchWithTokenRenewal(`${API_URL}/imagenes/${id}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders()
             });
@@ -591,7 +591,7 @@ async function deleteImage(id) {
 // Funciones para los códigos QR
 async function loadQR() {
     try {
-        const response = await fetch(`${API_URL}/api/qr`);
+        const response = await fetch(`${API_URL}/qr`);
         const qrCodes = await response.json();
         const qrTable = document.getElementById('qr-table');
         qrTable.innerHTML = `
@@ -644,7 +644,7 @@ async function saveQR(event) {
     };
     
     try {
-        const response = await fetchWithTokenRenewal(`${API_URL}/api/qr`, {
+        const response = await fetchWithTokenRenewal(`${API_URL}/qr`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(qrData)
@@ -666,7 +666,7 @@ async function saveQR(event) {
 }
 
 function editQR(id) {
-    fetch(`${API_URL}/api/qr`)
+    fetch(`${API_URL}/qr`)
         .then(response => response.json())
         .then(qrCodes => {
             const qr = qrCodes.find(q => q.id === id);
@@ -701,7 +701,7 @@ async function updateQR(event, id) {
     };
     
     try {
-        const response = await fetchWithTokenRenewal(`${API_URL}/api/qr/${id}`, {
+        const response = await fetchWithTokenRenewal(`${API_URL}/qr/${id}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify(qrData)
@@ -729,7 +729,7 @@ async function updateQR(event, id) {
 async function deleteQR(id) {
     if (confirm('¿Estás seguro de que deseas eliminar este código QR?')) {
         try {
-            const response = await fetchWithTokenRenewal(`${API_URL}/api/qr/${id}`, {
+            const response = await fetchWithTokenRenewal(`${API_URL}/qr/${id}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders()
             });

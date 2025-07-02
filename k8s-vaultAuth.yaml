@@ -17,17 +17,17 @@ spec:
 apiVersion: secrets.hashicorp.com/v1beta1
 kind: VaultStaticSecret
 metadata:
-  name: vault-mysql-pass #Cambiar
+  name: vault-mysql-pass #Cambiarrets
 spec:
   type: kv-v2
   mount: kubernetes
 
   # path of the secret
-  path: web/internacionales-mapa/graduados-secrets #Cambiar
+  path: web/comedor-apptv/apptv-secrets #Cambiar
 
   # dest k8s secret
   destination:
-    name: graduados-secrets #Cambiar
+    name: apptv-secrets #Cambiar
     create: true
 
   refreshAfter: 300s

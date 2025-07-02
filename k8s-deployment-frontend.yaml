@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apptv-frontend
+  namespace: web-comedor-apptv
+  labels:
+    app: apptv-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apptv-frontend
+  template:
+    metadata:
+      labels:
+        app: apptv-frontend
+    spec:
+      imagePullSecrets:
+      - name: harbor.unicen.edu.ar
+      containers:
+      - name: frontend
+        image: harbor.unicen.edu.ar/web/apptv-frontend:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: ADMIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: apptv-backend-env
+              key: ADMIN_USERNAME
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: apptv-backend-env
+              key: ADMIN_PASSWORD
+        volumeMounts:
+        - name: uploads
+          mountPath: /usr/share/nginx/html/uploads
+      volumes:
+      - name: uploads
+        persistentVolumeClaim:
+          claimName: apptv-uploads-pvc 

@@ -7,11 +7,15 @@ COPY . /usr/share/nginx/html/
 # Copiar configuración personalizada de nginx
 COPY nginx.conf /etc/nginx/nginx.conf
 
+# Copiar script de entrada
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Crear directorio para uploads
 RUN mkdir -p /usr/share/nginx/html/uploads
 
 # Exponer puerto
 EXPOSE 80
 
-# Comando para ejecutar nginx
-CMD ["nginx", "-g", "daemon off;"] 
+# Usar script de entrada
+CMD ["/entrypoint.sh"] 

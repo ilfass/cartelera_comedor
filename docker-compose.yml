@@ -9,7 +9,7 @@ services:
     environment:
       - NODE_ENV=production
     volumes:
-      - ./backend/database.sqlite:/app/database.sqlite
+      - apptv-db:/app/database.sqlite
       - ./frontend/uploads:/app/uploads
     restart: unless-stopped
     networks:
@@ -33,4 +33,5 @@ networks:
     driver: bridge
 
 volumes:
-  uploads: 
+  uploads:
+  apptv-db: 

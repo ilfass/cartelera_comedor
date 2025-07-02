@@ -169,8 +169,9 @@
         <a href="/" class="back-link">← Volver al inicio</a>
     </div>
 
+    <script src="config.js"></script>
     <script>
-        const API_URL = '';
+        const API_URL = window.APP_CONFIG?.API_URL || '/api';
         
         function showMessage(message, type) {
             const errorDiv = document.getElementById('error-message');

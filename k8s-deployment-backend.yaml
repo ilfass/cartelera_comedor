@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apptv-backend
+  namespace: web-comedor-apptv
+  labels:
+    app: apptv-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apptv-backend
+  template:
+    metadata:
+      labels:
+        app: apptv-backend
+    spec:
+      imagePullSecrets:
+      - name: harbor.unicen.edu.ar
+      containers:
+      - name: backend
+        image: harbor.unicen.edu.ar/web/apptv-backend:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: apptv-backend-env
+              key: JWT_SECRET
+        - name: ADMIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: apptv-backend-env
+              key: ADMIN_USERNAME
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: apptv-backend-env
+              key: ADMIN_PASSWORD
+        - name: DB_PATH
+          value: "/tmp/database.sqlite"
+        volumeMounts:
+        - name: uploads-storage
+          mountPath: /app/uploads
+      volumes:
+      - name: uploads-storage
+        persistentVolumeClaim:
+          claimName: apptv-uploads-pvc 
