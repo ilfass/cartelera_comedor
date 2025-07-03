@@ -157,6 +157,15 @@ async function actualizarMenusSemana() {
     return actualizaciones;
 }
 
+// Función helper para verificar si la base de datos está disponible
+function checkDB(res) {
+    if (!db) {
+        res.status(503).json({ error: 'Base de datos no disponible' });
+        return false;
+    }
+    return true;
+}
+
 // Middleware de autenticación
 const authenticateToken = (req, res, next) => {
     console.log('Verificando token de autenticación');
@@ -207,11 +216,19 @@ const authenticateToken = (req, res, next) => {
 // Conexión a la base de datos
 const dbPath = process.env.DB_PATH || 'database.sqlite';
 const finalPath = path.isAbsolute(dbPath) ? dbPath : path.join(__dirname, dbPath);
-const db = new sqlite3.Database(finalPath, (err) => {
+console.log('Intentando conectar a la base de datos en:', finalPath);
+
+let db = null; // Inicializar como null
+
+const dbConnect = new sqlite3.Database(finalPath, (err) => {
     if (err) {
         console.error('Error al conectar con la base de datos:', err);
+        console.log('El servidor continuará sin base de datos. Las funcionalidades de administración no estarán disponibles.');
+        db = null;
+        return;
     } else {
         console.log('Conexión exitosa con la base de datos SQLite');
+        db = dbConnect;
         // Crear tablas si no existen
         db.serialize(() => {
             // Tabla de usuarios administradores
@@ -422,6 +439,8 @@ app.get('/login.html', (req, res) => {
 
 // Rutas para el menú
 app.get('/api/menu', (req, res) => {
+    if (!checkDB(res)) return;
+    
     db.all('SELECT * FROM menu ORDER BY CASE dia WHEN "Lunes" THEN 1 WHEN "Martes" THEN 2 WHEN "Miércoles" THEN 3 WHEN "Jueves" THEN 4 WHEN "Viernes" THEN 5 END', [], (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });

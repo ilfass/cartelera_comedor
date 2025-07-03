@@ -6,6 +6,8 @@ metadata:
   labels:
     app: apptv-backend
 spec:
+  strategy:
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:
@@ -45,9 +47,14 @@ spec:
         - name: DB_PATH
           value: "/tmp/database.sqlite"
         volumeMounts:
+        - name: database-storage
+          mountPath: /app/data
         - name: uploads-storage
           mountPath: /app/uploads
       volumes:
+      - name: database-storage
+        persistentVolumeClaim:
+          claimName: apptv-database-pvc
       - name: uploads-storage
         persistentVolumeClaim:
           claimName: apptv-uploads-pvc 

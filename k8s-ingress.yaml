@@ -5,6 +5,13 @@ metadata:
   namespace: web-comedor-apptv
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt"
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    nginx.ingress.kubernetes.io/modsecurity-snippet: |
+      SecRuleEngine On
+      SecRequestBodyAccess On
+      SecRule REQUEST_URI "@beginsWith /api/menu" "id:1003,phase:1,pass,nolog,ctl:ruleRemoveById=949110"
+      SecRule REQUEST_URI "@beginsWith /api/auth" "id:1004,phase:1,pass,nolog,ctl:ruleRemoveById=949110"
+      SecRule REQUEST_URI "@beginsWith /api/admin" "id:1005,phase:1,pass,nolog,ctl:ruleRemoveById=949110"
 spec:
   ingressClassName: nginx
   tls:
@@ -15,6 +22,13 @@ spec:
   - host: apptvcomedor.unicen.edu.ar
     http:
       paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: apptv-backend-service
+            port:
+              number: 3000
       - path: /
         pathType: Prefix
         backend:

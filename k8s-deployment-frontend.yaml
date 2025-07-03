@@ -20,6 +20,7 @@ spec:
       containers:
       - name: frontend
         image: harbor.unicen.edu.ar/web/apptv-frontend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         env:

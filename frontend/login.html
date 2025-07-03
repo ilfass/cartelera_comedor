@@ -212,7 +212,7 @@
             hideMessages();
             
             try {
-                const response = await fetch(`${API_URL}/api/auth/login`, {
+                const response = await fetch(`${API_URL}/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -251,7 +251,7 @@
             const token = localStorage.getItem('token');
             if (token) {
                 // Verificar si el token es válido
-                fetch(`${API_URL}/api/menu`, {
+                fetch(`${API_URL}/menu`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
