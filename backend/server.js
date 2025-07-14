@@ -26,6 +26,8 @@ const auth = basicAuth({
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
+// Servir archivos estáticos de uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Configuración de JWT
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_clave_secreta_muy_segura';
@@ -712,33 +714,52 @@ app.get('/api/imagenes', (req, res) => {
 // Configuración de multer para subida de imágenes
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadDir = path.join(__dirname, '../frontend/uploads');
+        console.log('📁 Configurando destino para archivo:', file.originalname);
+        const uploadDir = path.join(__dirname, 'uploads');
+        console.log('📂 Directorio de destino:', uploadDir);
         if (!fs.existsSync(uploadDir)) {
+            console.log('📂 Creando directorio:', uploadDir);
             fs.mkdirSync(uploadDir, { recursive: true });
         }
+        console.log('✅ Directorio listo:', uploadDir);
         cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
+        const filename = Date.now() + path.extname(file.originalname);
+        console.log('📝 Nombre de archivo generado:', filename);
+        cb(null, filename);
     }
 });
 
 const upload = multer({ storage: storage });
 
-app.post('/api/imagenes', authenticateToken, upload.single('image'), (req, res) => {
+app.post('/api/imagenes', authenticateToken, (req, res, next) => {
+    console.log('🔄 Petición POST /api/imagenes recibida después de autenticación');
+    next();
+}, upload.single('image'), (req, res) => {
+    console.log('🔄 Procesando subida de imagen...');
+    console.log('📁 Archivo recibido:', req.file);
+    console.log('📝 Título recibido:', req.body.title);
+    
     if (!req.file) {
+        console.log('❌ No se recibió ningún archivo');
         return res.status(400).json({ message: 'No se ha subido ninguna imagen' });
     }
 
     const { title } = req.body;
     const imageUrl = `/uploads/${req.file.filename}`;
+    
+    console.log('💾 Guardando en base de datos:', { title, imageUrl });
 
     db.run('INSERT INTO imagenes (titulo, url) VALUES (?, ?)',
         [title, imageUrl],
         function(err) {
             if (err) {
+                console.error('❌ Error al guardar en BD:', err);
                 res.status(500).json({ message: 'Error al guardar la imagen' });
             } else {
+                console.log('✅ Imagen guardada exitosamente en BD');
+                console.log('📂 Archivo físico en:', req.file.path);
                 res.json({ message: 'Imagen guardada exitosamente', url: imageUrl });
             }
         });
@@ -757,7 +778,8 @@ app.delete('/api/imagenes/:id', authenticateToken, (req, res) => {
         }
 
         // Eliminamos el archivo físico
-        const filePath = path.join(__dirname, '../frontend/uploads', path.basename(row.url));
+        //const filePath = path.join(__dirname, '../frontend/uploads', path.basename(row.url));
+        const filePath = path.join(__dirname, 'uploads', path.basename(row.url));
         fs.unlink(filePath, (err) => {
             if (err && err.code !== 'ENOENT') {
                 console.error('Error al eliminar el archivo:', err);
