@@ -45,7 +45,7 @@ spec:
               name: apptv-backend-env
               key: ADMIN_PASSWORD
         - name: DB_PATH
-          value: "/tmp/database.sqlite"
+          value: "/app/data/database.sqlite"
         volumeMounts:
         - name: database-storage
           mountPath: /app/data

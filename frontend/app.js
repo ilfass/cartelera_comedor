@@ -609,7 +609,7 @@ const slideInterval = 5000; // 5 segundos
 
 async function loadCarousel() {
     try {
-        const response = await fetch(`${API_URL}/api/imagenes`);
+        const response = await fetch(`${API_URL}/imagenes`);
         const images = await response.json();
         
         const carouselContent = document.getElementById('carousel-content');
@@ -659,7 +659,7 @@ async function loadMixedCarousel() {
         const messagesRes = await fetch(`${API_URL}/api/mensajes`);
         const messages = await messagesRes.json();
         // Obtener imágenes
-        const imagesRes = await fetch(`${API_URL}/api/imagenes`);
+        const imagesRes = await fetch(`${API_URL}/imagenes`);
         const images = await imagesRes.json();
         // Mezclar ambos
         mixedSlides = [...messages.map(m => ({type: 'mensaje', ...m})), ...images.map(i => ({type: 'imagen', ...i}))];
@@ -815,7 +815,7 @@ function initPageCarousel() {
 async function loadFeaturedImage() {
     try {
         console.log('🔄 Cargando imagen destacada...');
-        const response = await fetch(`${API_URL}/api/imagenes`);
+        const response = await fetch(`${API_URL}/imagenes`);
         const images = await response.json();
         console.log('🖼️ Imágenes recibidas:', images);
         
@@ -1048,9 +1048,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function showUpdateIndicator(message) {
         updateIndicator.textContent = message;
         updateIndicator.style.display = 'block';
-        setTimeout(() => {
-            updateIndicator.style.display = 'none';
-        }, 2000);
+        updateIndicator.style.backgroundColor = '#ff6b35';
+        updateIndicator.style.color = 'white';
+        updateIndicator.style.fontWeight = 'bold';
+        updateIndicator.style.zIndex = '9999';
+        
+        // Si es un mensaje de recarga, mantenerlo visible más tiempo
+        if (message.includes('Recargando')) {
+            updateIndicator.style.backgroundColor = '#dc3545';
+            updateIndicator.style.fontSize = '18px';
+            updateIndicator.style.padding = '15px';
+            updateIndicator.style.borderRadius = '8px';
+            updateIndicator.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+        } else {
+            setTimeout(() => {
+                updateIndicator.style.display = 'none';
+            }, 2000);
+        }
     }
     
     // Modificar las funciones de carga para mostrar el indicador
@@ -1123,6 +1137,30 @@ document.addEventListener('keypress', function() {
 
 // Verificar recarga cada 30 minutos
 setInterval(reloadIfNeeded, 30 * 60 * 1000);
+
+// Recarga automática cada 5 minutos para mantener la página actualizada
+setInterval(() => {
+    console.log('🔄 Recarga automática programada - recargando página...');
+    
+    // Mostrar contador regresivo
+    let countdown = 3;
+    const countdownInterval = setInterval(() => {
+        showUpdateIndicator(`Recargando página en ${countdown}...`);
+        countdown--;
+        
+        if (countdown < 0) {
+            clearInterval(countdownInterval);
+            try {
+                // Forzar recarga completa desde el servidor (como F5)
+                window.location.reload(true);
+            } catch (error) {
+                console.log('Método reload falló, usando location.href...');
+                // Método alternativo si reload falla
+                window.location.href = window.location.href;
+            }
+        }
+    }, 1000);
+}, 5 * 60 * 1000); // 5 minutos
 
 // NUEVA FUNCIÓN PARA ACTUALIZAR EL MENÚ SEMANAL
 function updateWeeklyMenu(menuData, currentDay) {
@@ -1243,7 +1281,6 @@ function updateWeeklyMenu(menuData, currentDay) {
                 <div class="menu-day other-day fade-out">
                     <div class="day-header">
                         <h3 class="day-title">ROTACIÓN</h3>
-                        <span class="rotation-indicator">COMPLETA</span>
                     </div>
                     <div class="day-menus" style="justify-content:center;align-items:center;min-height:120px;">
                         <div style="width:100%;text-align:center;color:#aaa;font-size:1.5em;opacity:0.7;">Todos los días mostrados</div>
@@ -1268,7 +1305,6 @@ function updateWeeklyMenu(menuData, currentDay) {
                 <div class="menu-day other-day fade-out">
                     <div class="day-header">
                         <h3 class="day-title">${rotationTitle}</h3>
-                        <span class="rotation-indicator">ROTACIÓN</span>
                     </div>
                     <div class="day-menus">
                         <div class="menu-item general">
@@ -1291,7 +1327,6 @@ function updateWeeklyMenu(menuData, currentDay) {
                 <div class="menu-day other-day fade-out">
                     <div class="day-header">
                         <h3 class="day-title">${rotationTitle}</h3>
-                        <span class="rotation-indicator">ROTACIÓN</span>
                     </div>
                     <div class="day-menus" style="justify-content:center;align-items:center;min-height:120px;">
                         <div style="width:100%;text-align:center;color:#aaa;font-size:1.5em;opacity:0.7;">Sin menú cargado</div>

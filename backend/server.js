@@ -528,6 +528,59 @@ app.delete('/api/menu/:dia', authenticateToken, (req, res) => {
     });
 });
 
+// Ruta para eliminar un menú por ID (para menús sin día asignado)
+app.delete('/api/menu/id/:id', authenticateToken, (req, res) => {
+    console.log('Intentando eliminar menú por ID:', req.params.id);
+    console.log('Usuario autenticado:', req.user);
+    
+    const id = parseInt(req.params.id);
+    
+    if (isNaN(id)) {
+        return res.status(400).json({ 
+            code: 'INVALID_ID',
+            message: 'ID de menú inválido'
+        });
+    }
+    
+    // Verificar si el menú existe
+    db.get('SELECT * FROM menu WHERE id = ?', [id], (err, row) => {
+        if (err) {
+            console.error('Error al verificar menú:', err);
+            return res.status(500).json({ 
+                code: 'DB_ERROR',
+                message: 'Error al verificar el menú',
+                error: err.message
+            });
+        }
+        
+        if (!row) {
+            return res.status(404).json({ 
+                code: 'MENU_NOT_FOUND',
+                message: 'No se encontró un menú con el ID especificado'
+            });
+        }
+
+        // Si existe, procedemos a eliminarlo
+        db.run('DELETE FROM menu WHERE id = ?', [id], function(err) {
+            if (err) {
+                console.error('Error al eliminar menú:', err);
+                return res.status(500).json({ 
+                    code: 'DB_ERROR',
+                    message: 'Error al eliminar el menú',
+                    error: err.message
+                });
+            }
+            
+            console.log('Menú eliminado exitosamente por ID:', id);
+            res.json({ 
+                code: 'SUCCESS',
+                message: 'Menú eliminado exitosamente',
+                changes: this.changes
+            });
+        });
+    });
+});
+
 // Ruta para actualizar un menú por día
 app.put('/api/menu/:dia', authenticateToken, (req, res) => {
     console.log('Intentando actualizar menú para el día:', req.params.dia);
@@ -926,6 +979,139 @@ app.put('/api/config', authenticateToken, (req, res) => {
             return res.status(500).json({ error: err.message });
         }
         res.json({ message: 'Intervalo actualizado correctamente', valor });
+    });
+});
+
+// Ruta para poblar datos de prueba (solo para desarrollo)
+app.post('/api/admin/seed-test-data', authenticateToken, (req, res) => {
+    console.log('Poblando datos de prueba...');
+    
+    const testData = [
+        { dia: '', menu_general: 'Menu sin dia', menu_vegetariano: 'Vegetariano sin dia', menu_celiaco: 'Celiaco sin dia' },
+        { dia: 'martes', menu_general: 'Menu martes', menu_vegetariano: 'Vegetariano martes', menu_celiaco: 'Celiaco martes' },
+        { dia: 'miercoles', menu_general: 'Menu miercoles', menu_vegetariano: 'Vegetariano miercoles', menu_celiaco: 'Celiaco miercoles' }
+    ];
+    
+    let insertCount = 0;
+    let insertErrors = [];
+    
+    const insertNext = (index) => {
+        if (index >= testData.length) {
+            res.json({ 
+                code: 'SUCCESS',
+                message: 'Datos de prueba insertados exitosamente',
+                insertedCount: insertCount,
+                errors: insertErrors
+            });
+            return;
+        }
+        
+        const item = testData[index];
+        db.run(
+            'INSERT INTO menu (dia, menu_general, menu_vegetariano, menu_celiaco) VALUES (?, ?, ?, ?)',
+            [item.dia, item.menu_general, item.menu_vegetariano, item.menu_celiaco],
+            function(err) {
+                if (err) {
+                    console.error(`Error al insertar dato de prueba ${index}:`, err);
+                    insertErrors.push({ index, error: err.message });
+                } else {
+                    console.log(`Dato de prueba ${index} insertado`);
+                    insertCount++;
+                }
+                insertNext(index + 1);
+            }
+        );
+    };
+    
+    insertNext(0);
+});
+
+// Ruta para limpiar y completar menús de la semana
+app.post('/api/admin/cleanup-menus', authenticateToken, (req, res) => {
+    console.log('Iniciando limpieza y completado de menús...');
+    
+    const diasSemana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+    const menuPorDefecto = {
+        menu_general: 'A confirmar',
+        menu_vegetariano: 'A confirmar',
+        menu_celiaco: 'A confirmar'
+    };
+    
+    // Paso 1: Eliminar menús sin día asignado
+    db.run('DELETE FROM menu WHERE dia IS NULL OR dia = ""', function(err) {
+        if (err) {
+            console.error('Error al eliminar menús sin día:', err);
+            return res.status(500).json({ 
+                code: 'DB_ERROR',
+                message: 'Error al eliminar menús sin día',
+                error: err.message
+            });
+        }
+        
+        console.log(`Eliminados ${this.changes} menús sin día asignado`);
+        
+        // Paso 2: Obtener menús existentes
+        db.all('SELECT dia FROM menu WHERE dia IS NOT NULL AND dia != ""', (err, existingMenus) => {
+            if (err) {
+                console.error('Error al obtener menús existentes:', err);
+                return res.status(500).json({ 
+                    code: 'DB_ERROR',
+                    message: 'Error al obtener menús existentes',
+                    error: err.message
+                });
+            }
+            
+            const diasExistentes = existingMenus.map(m => m.dia);
+            const diasFaltantes = diasSemana.filter(dia => !diasExistentes.includes(dia));
+            
+            console.log('Días existentes:', diasExistentes);
+            console.log('Días faltantes:', diasFaltantes);
+            
+            if (diasFaltantes.length === 0) {
+                return res.json({ 
+                    code: 'SUCCESS',
+                    message: 'Limpieza completada. Todos los días de la semana ya están cubiertos.',
+                    deletedMenus: this.changes,
+                    addedMenus: 0
+                });
+            }
+            
+            // Paso 3: Insertar menús faltantes
+            let insertCount = 0;
+            let insertErrors = [];
+            
+            const insertNext = (index) => {
+                if (index >= diasFaltantes.length) {
+                    // Completado
+                    res.json({ 
+                        code: 'SUCCESS',
+                        message: 'Limpieza y completado de menús exitoso',
+                        deletedMenus: this.changes,
+                        addedMenus: insertCount,
+                        addedDays: diasFaltantes.slice(0, insertCount)
+                    });
+                    return;
+                }
+                
+                const dia = diasFaltantes[index];
+                db.run(
+                    'INSERT INTO menu (dia, menu_general, menu_vegetariano, menu_celiaco) VALUES (?, ?, ?, ?)',
+                    [dia, menuPorDefecto.menu_general, menuPorDefecto.menu_vegetariano, menuPorDefecto.menu_celiaco],
+                    function(err) {
+                        if (err) {
+                            console.error(`Error al insertar menú para ${dia}:`, err);
+                            insertErrors.push({ dia, error: err.message });
+                        } else {
+                            console.log(`Menú agregado para ${dia}`);
+                            insertCount++;
+                        }
+                        insertNext(index + 1);
+                    }
+                );
+            };
+            
+            insertNext(0);
+        });
     });
 });
 

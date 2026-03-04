@@ -72,28 +72,36 @@ function getAuthHeaders() {
 // Función para renovar el token automáticamente
 async function renovarToken() {
     try {
+        // Obtener credenciales del localStorage o usar las por defecto
+        const username = localStorage.getItem('admin_username') || 'admcomedor';
+        const password = localStorage.getItem('admin_password') || 'adm.comedor.2025';
+        
         const response = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                        username: 'admcomedor',
-        password: 'adm.comedor.2025'
+                username: username,
+                password: password
             })
         });
 
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem('token', data.token);
+            console.log('Token renovado exitosamente');
             return data.token;
         } else {
-            throw new Error('Error al renovar el token');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al renovar el token');
         }
     } catch (error) {
         console.error('Error al renovar token:', error);
         // Si no se puede renovar, redirigir al login
         localStorage.removeItem('token');
+        localStorage.removeItem('admin_username');
+        localStorage.removeItem('admin_password');
         window.location.href = 'login.html';
         throw error;
     }
@@ -147,14 +155,17 @@ async function loadMenu() {
         
         menu.forEach(item => {
             const row = document.createElement('tr');
+            const dia = item.dia || 'Sin día asignado';
+            const hasValidDay = item.dia && item.dia.trim() !== '';
+            
             row.innerHTML = `
-                <td>${item.dia}</td>
+                <td>${dia}</td>
                 <td>${item.menu_general || 'No disponible'}</td>
                 <td>${item.menu_vegetariano || 'No disponible'}</td>
                 <td>${item.menu_celiaco || 'No disponible'}</td>
                 <td>
-                    <button onclick="editMenu('${item.dia}')" class="btn-edit">Editar</button>
-                    <button onclick="deleteMenu('${item.dia}')" class="btn-delete">Eliminar</button>
+                    ${hasValidDay ? `<button onclick="editMenu('${item.dia}')" class="btn-edit">Editar</button>` : '<span class="text-muted">No editable</span>'}
+                    ${hasValidDay ? `<button onclick="deleteMenu('${item.dia}')" class="btn-delete">Eliminar</button>` : `<button onclick="deleteMenuById(${item.id})" class="btn-delete">Eliminar</button>`}
                 </td>
             `;
             menuTable.appendChild(row);
@@ -173,6 +184,22 @@ async function saveMenu(event) {
         menu_vegetariano: document.getElementById('menu_vegetariano').value,
         menu_celiaco: document.getElementById('menu-celiaco').value
     };
+    
+    // Validación: No permitir guardar menús sin día asignado
+    if (!menuData.dia || menuData.dia.trim() === '') {
+        showMessage('Error: Debe seleccionar un día para el menú', 'error');
+        document.getElementById('dia').focus();
+        return;
+    }
+    
+    // Validación adicional: Verificar que el día sea válido
+    const diasValidos = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+    const diaNormalizado = menuData.dia.toLowerCase().trim();
+    if (!diasValidos.includes(diaNormalizado)) {
+        showMessage('Error: Debe seleccionar un día válido de la semana', 'error');
+        document.getElementById('dia').focus();
+        return;
+    }
     
     try {
         const response = await fetchWithTokenRenewal(`${API_URL}/menu`, {
@@ -236,6 +263,22 @@ async function updateMenu(event, dia) {
         menu_celiaco: document.getElementById('menu-celiaco').value
     };
     
+    // Validación: No permitir actualizar menús sin día asignado
+    if (!menuData.dia || menuData.dia.trim() === '') {
+        showMessage('Error: Debe seleccionar un día para el menú', 'error');
+        document.getElementById('dia').focus();
+        return;
+    }
+    
+    // Validación adicional: Verificar que el día sea válido
+    const diasValidos = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+    const diaNormalizado = menuData.dia.toLowerCase().trim();
+    if (!diasValidos.includes(diaNormalizado)) {
+        showMessage('Error: Debe seleccionar un día válido de la semana', 'error');
+        document.getElementById('dia').focus();
+        return;
+    }
+    
     try {
         const response = await fetchWithTokenRenewal(`${API_URL}/menu/${encodeURIComponent(dia)}`, {
             method: 'PUT',
@@ -283,6 +326,120 @@ async function deleteMenu(dia) {
             console.error('Error al eliminar el menú:', error);
             showMessage(error.message || 'Error al eliminar el menú', 'error');
         }
+    }
+}
+
+async function deleteMenuById(id) {
+    if (confirm('¿Estás seguro de que deseas eliminar este menú?')) {
+        try {
+            // Para menús sin día, usamos una estrategia diferente
+            // Primero obtenemos todos los menús para encontrar el que tiene el ID
+            const menuResponse = await fetch(`${API_URL}/menu`);
+            const menus = await menuResponse.json();
+            const menuToDelete = menus.find(m => m.id == id);
+            
+            if (!menuToDelete) {
+                throw new Error('Menú no encontrado');
+            }
+            
+            // Si el menú tiene un día válido, usamos el endpoint normal
+            if (menuToDelete.dia && menuToDelete.dia.trim() !== '') {
+                const response = await fetchWithTokenRenewal(`${API_URL}/menu/${encodeURIComponent(menuToDelete.dia)}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                if (response.ok) {
+                    showMessage('Menú eliminado exitosamente', 'success');
+                    loadMenu();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Error al eliminar el menú');
+                }
+            } else {
+                // Para menús sin día, mostramos un mensaje de que no se pueden eliminar
+                showMessage('Los menús sin día asignado no se pueden eliminar desde la interfaz. Contacte al administrador.', 'warning');
+            }
+        } catch (error) {
+            console.error('Error al eliminar el menú:', error);
+            showMessage(error.message || 'Error al eliminar el menú', 'error');
+        }
+    }
+}
+
+// Función para poblar datos de prueba
+async function seedTestData() {
+    if (!confirm('¿Estás seguro de que deseas crear datos de prueba?\n\nEsto agregará menús de ejemplo para probar la funcionalidad.')) {
+        return;
+    }
+    
+    try {
+        showMessage('Creando datos de prueba...', 'info');
+        
+        const response = await fetchWithTokenRenewal(`${API_URL}/admin/seed-test-data`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            
+            let message = `✅ Datos de prueba creados exitosamente!\n\n`;
+            message += `📋 Menús creados: ${result.insertedCount}\n`;
+            
+            if (result.errors && result.errors.length > 0) {
+                message += `⚠️ Errores: ${result.errors.length}\n`;
+            }
+            
+            showMessage(message, 'success');
+            
+            // Recargar la tabla de menús
+            loadMenu();
+        } else {
+            const error = await response.json();
+            throw new Error(error.message || 'Error al crear datos de prueba');
+        }
+    } catch (error) {
+        console.error('Error al crear datos de prueba:', error);
+        showMessage(error.message || 'Error al crear datos de prueba', 'error');
+    }
+}
+
+// Función para limpiar y completar menús
+async function cleanupMenus() {
+    if (!confirm('¿Estás seguro de que deseas limpiar los menús sin día asignado y completar los días faltantes de la semana?\n\nEsto eliminará permanentemente los menús sin día y agregará menús "A confirmar" para los días faltantes.')) {
+        return;
+    }
+    
+    try {
+        showMessage('Iniciando limpieza de menús...', 'info');
+        
+        const response = await fetchWithTokenRenewal(`${API_URL}/admin/cleanup-menus`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            
+            let message = `✅ Limpieza completada exitosamente!\n\n`;
+            message += `📋 Menús eliminados: ${result.deletedMenus}\n`;
+            message += `➕ Menús agregados: ${result.addedMenus}\n`;
+            
+            if (result.addedDays && result.addedDays.length > 0) {
+                message += `📅 Días agregados: ${result.addedDays.join(', ')}\n`;
+            }
+            
+            showMessage(message, 'success');
+            
+            // Recargar la tabla de menús
+            loadMenu();
+        } else {
+            const error = await response.json();
+            throw new Error(error.message || 'Error al limpiar los menús');
+        }
+    } catch (error) {
+        console.error('Error al limpiar menús:', error);
+        showMessage(error.message || 'Error al limpiar los menús', 'error');
     }
 }
 
@@ -512,8 +669,6 @@ async function saveImage(event) {
     }
     
     try {
-        let imageUrl = '';
-        
         if (file && file.size > 0) {
             // Subir archivo
             const uploadFormData = new FormData();
@@ -529,37 +684,18 @@ async function saveImage(event) {
             });
             
             if (uploadResponse.ok) {
-                const uploadData = await uploadResponse.json();
-                imageUrl = uploadData.url;
+                showMessage('Imagen guardada exitosamente', 'success');
+                form.reset();
+                document.getElementById('image-preview').style.display = 'none';
+                loadImages();
             } else {
                 const error = await uploadResponse.json();
                 throw new Error(error.message || 'Error al subir la imagen');
             }
         } else {
-            // Usar URL proporcionada
-            imageUrl = url;
-        }
-        
-        // Guardar en la base de datos
-        const imageData = {
-            titulo: formData.get('titulo'),
-            url: imageUrl
-        };
-        
-        const response = await fetchWithTokenRenewal(`${API_URL}/imagenes`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(imageData)
-        });
-        
-        if (response.ok) {
-            showMessage('Imagen guardada exitosamente', 'success');
-            form.reset();
-            document.getElementById('image-preview').style.display = 'none';
-            loadImages();
-        } else {
-            const error = await response.json();
-            throw new Error(error.message || 'Error al guardar la imagen');
+            // Para URLs, necesitamos crear un endpoint separado o modificar el backend
+            // Por ahora, mostraremos un mensaje de error
+            showMessage('La funcionalidad de URL directa no está implementada. Por favor, sube un archivo.', 'error');
         }
     } catch (error) {
         console.error('Error al guardar la imagen:', error);
@@ -751,6 +887,8 @@ async function deleteQR(id) {
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+    localStorage.removeItem('admin_username');
+    localStorage.removeItem('admin_password');
     window.location.href = '/login.html';
 }
 

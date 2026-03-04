@@ -226,6 +226,9 @@
                     // Guardar token
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('username', username);
+                    // Guardar credenciales para renovación automática de token
+                    localStorage.setItem('admin_username', username);
+                    localStorage.setItem('admin_password', password);
                     
                     showMessage('¡Inicio de sesión exitoso! Redirigiendo...', 'success');
                     

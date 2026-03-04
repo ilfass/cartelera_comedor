@@ -8,7 +8,8 @@ const UPDATE_INTERVALS = {
     MENU: 300000,       // 5 minutos
     MESSAGES: 300000,   // 5 minutos
     WEATHER: 900000,    // 15 minutos
-    DATETIME: 1000      // 1 segundo
+    DATETIME: 1000,     // 1 segundo
+    PAGE_RELOAD: 300000 // 5 minutos - recarga completa de la página
 };
 
 // Configuración del carrusel
@@ -811,7 +812,177 @@ function initPageCarousel() {
     console.log('✅ Carrusel automático desactivado - Página estática en menú');
 }
 
-// Cargar imagen destacada
+// Variables globales para el carrusel de información
+let carouselItems = [];
+let currentCarouselIndex = 0;
+let carouselInterval = null;
+
+// Cargar carrusel de información (mensajes e imágenes)
+async function loadInfoCarousel() {
+    try {
+        console.log('🔄 Cargando carrusel de información...');
+        
+        // Cargar mensajes e imágenes en paralelo
+        const [messagesResponse, imagesResponse] = await Promise.all([
+            fetch(`${API_URL}/mensajes`),
+            fetch(`${API_URL}/imagenes`)
+        ]);
+        
+        const messages = await messagesResponse.json();
+        const images = await imagesResponse.json();
+        
+        console.log('📢 Mensajes recibidos:', messages.length);
+        console.log('🖼️ Imágenes recibidas:', images.length);
+        
+        // Crear array de elementos del carrusel
+        carouselItems = [];
+        
+        // Agregar mensajes al carrusel
+        messages.forEach(message => {
+            carouselItems.push({
+                type: 'message',
+                data: message,
+                priority: message.destacado ? 1 : 2
+            });
+        });
+        
+        // Agregar imágenes al carrusel
+        images.forEach(image => {
+            carouselItems.push({
+                type: 'image',
+                data: image,
+                priority: 2
+            });
+        });
+        
+        // Ordenar por prioridad (destacados primero)
+        carouselItems.sort((a, b) => a.priority - b.priority);
+        
+        console.log('🎠 Elementos del carrusel preparados:', carouselItems.length);
+        
+        // Inicializar carrusel
+        initCarousel();
+        
+    } catch (error) {
+        console.error('❌ Error al cargar carrusel de información:', error);
+        showCarouselError();
+    }
+}
+
+// Inicializar carrusel
+function initCarousel() {
+    const carouselDisplay = document.getElementById('carousel-display');
+    if (!carouselDisplay) {
+        console.warn('⚠️ Elemento carousel-display no encontrado');
+        return;
+    }
+    
+    if (carouselItems.length === 0) {
+        showCarouselEmpty();
+        return;
+    }
+    
+    // Limpiar carrusel
+    carouselDisplay.innerHTML = '';
+    
+    // Crear elementos del carrusel
+    carouselItems.forEach((item, index) => {
+        const carouselItem = document.createElement('div');
+        carouselItem.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+        
+        if (item.type === 'message') {
+            carouselItem.innerHTML = `
+                <div class="carousel-message ${item.data.destacado ? 'destacado' : ''}">
+                    ${item.data.contenido}
+                </div>
+            `;
+        } else if (item.type === 'image') {
+            carouselItem.innerHTML = `
+                <div class="carousel-image">
+                    <img src="${item.data.url}" alt="${item.data.titulo || 'Imagen'}" />
+                    <div class="image-title">${item.data.titulo || 'Imagen'}</div>
+                </div>
+            `;
+        }
+        
+        carouselDisplay.appendChild(carouselItem);
+    });
+    
+    // Iniciar rotación automática
+    startCarouselRotation();
+    
+    console.log('✅ Carrusel inicializado con', carouselItems.length, 'elementos');
+}
+
+// Iniciar rotación automática del carrusel
+function startCarouselRotation() {
+    if (carouselItems.length <= 1) {
+        console.log('ℹ️ Solo hay un elemento en el carrusel, no se inicia rotación');
+        return;
+    }
+    
+    // Limpiar intervalo anterior si existe
+    if (carouselInterval) {
+        clearInterval(carouselInterval);
+    }
+    
+    // Configurar intervalo de rotación (8 segundos por elemento)
+    carouselInterval = setInterval(() => {
+        rotateCarousel();
+    }, 8000);
+    
+    console.log('🔄 Rotación automática del carrusel iniciada');
+}
+
+// Rotar carrusel
+function rotateCarousel() {
+    if (carouselItems.length <= 1) return;
+    
+    const carouselElements = document.querySelectorAll('.carousel-item');
+    const currentItem = document.querySelector('.carousel-item.active');
+    
+    if (currentItem) {
+        currentItem.classList.remove('active');
+    }
+    
+    currentCarouselIndex = (currentCarouselIndex + 1) % carouselElements.length;
+    
+    if (carouselElements[currentCarouselIndex]) {
+        carouselElements[currentCarouselIndex].classList.add('active');
+    }
+    
+    console.log('🔄 Carrusel rotado al elemento', currentCarouselIndex + 1);
+}
+
+// Mostrar error en el carrusel
+function showCarouselError() {
+    const carouselDisplay = document.getElementById('carousel-display');
+    if (carouselDisplay) {
+        carouselDisplay.innerHTML = `
+            <div class="carousel-item active">
+                <div class="carousel-message">
+                    ❌ Error al cargar información
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Mostrar carrusel vacío
+function showCarouselEmpty() {
+    const carouselDisplay = document.getElementById('carousel-display');
+    if (carouselDisplay) {
+        carouselDisplay.innerHTML = `
+            <div class="carousel-item active">
+                <div class="carousel-message">
+                    📢 No hay información disponible
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Cargar imagen destacada (mantener para compatibilidad)
 async function loadFeaturedImage() {
     try {
         console.log('🔄 Cargando imagen destacada...');
@@ -843,43 +1014,12 @@ async function loadFeaturedImage() {
                 console.log('⚠️ No hay imágenes disponibles para página principal');
             }
         }
-        
-        // Actualizar imagen destacada en la página secundaria
-        const featuredImageElement = document.getElementById('featured-image');
-        if (featuredImageElement) {
-            console.log('📝 Actualizando imagen en página secundaria');
-            if (images.length > 0) {
-                // Tomar la primera imagen como destacada
-                const featuredImage = images[0];
-                featuredImageElement.innerHTML = `
-                    <img src="${featuredImage.url}" alt="${featuredImage.titulo || 'Imagen destacada'}" 
-                         style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 0.5rem;">
-                    <div style="position: absolute; bottom: 0.5rem; left: 0.5rem; right: 0.5rem; 
-                               background: rgba(0,0,0,0.7); color: white; padding: 0.5rem; 
-                               border-radius: 0.25rem; font-size: 0.9rem; text-align: center;">
-                        ${featuredImage.titulo || 'Imagen destacada'}
-                    </div>
-                `;
-                featuredImageElement.style.position = 'relative';
-                console.log('✅ Imagen actualizada en página secundaria');
-            } else {
-                // Mostrar placeholder si no hay imágenes
-                featuredImageElement.innerHTML = '<div class="image-placeholder">📸</div>';
-                console.log('⚠️ No hay imágenes disponibles para página secundaria');
-            }
-        } else {
-            console.warn('⚠️ Elemento featured-image no encontrado');
-        }
     } catch (error) {
         console.error('❌ Error al cargar imagen destacada:', error);
         const imageContainer = document.querySelector('.featured-image-container');
-        const featuredImageElement = document.getElementById('featured-image');
         
         if (imageContainer) {
             imageContainer.innerHTML = '<div class="image-placeholder">📸</div>';
-        }
-        if (featuredImageElement) {
-            featuredImageElement.innerHTML = '<div class="image-placeholder">📸</div>';
         }
     }
 }
@@ -993,17 +1133,13 @@ document.addEventListener('DOMContentLoaded', () => {
         setInterval(loadMenu, UPDATE_INTERVALS.MENU);
     } else if (currentPath.includes('info.html')) {
         console.log('ℹ️ Página de información detectada');
-        // Cargar datos para la página de información
-        loadMixedCarousel();
-        loadMessages();
+        // Cargar datos para la página de información con nuevo carrusel
+        loadInfoCarousel();
         loadWeather();
-        loadFeaturedImage();
         loadQR();
         
-        setInterval(loadMixedCarousel, UPDATE_INTERVALS.MESSAGES);
-        setInterval(loadMessages, UPDATE_INTERVALS.MESSAGES);
+        setInterval(loadInfoCarousel, UPDATE_INTERVALS.MESSAGES);
         setInterval(loadWeather, UPDATE_INTERVALS.WEATHER);
-        setInterval(loadFeaturedImage, UPDATE_INTERVALS.MESSAGES);
         setInterval(loadQR, UPDATE_INTERVALS.MESSAGES);
     } else {
         console.log('🏠 Página principal detectada');
@@ -1048,9 +1184,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function showUpdateIndicator(message) {
         updateIndicator.textContent = message;
         updateIndicator.style.display = 'block';
-        setTimeout(() => {
-            updateIndicator.style.display = 'none';
-        }, 2000);
+        updateIndicator.style.backgroundColor = '#ff6b35';
+        updateIndicator.style.color = 'white';
+        updateIndicator.style.fontWeight = 'bold';
+        updateIndicator.style.zIndex = '9999';
+        
+        // Si es un mensaje de recarga, mantenerlo visible más tiempo
+        if (message.includes('Recargando')) {
+            updateIndicator.style.backgroundColor = '#dc3545';
+            updateIndicator.style.fontSize = '18px';
+            updateIndicator.style.padding = '15px';
+            updateIndicator.style.borderRadius = '8px';
+            updateIndicator.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+        } else {
+            setTimeout(() => {
+                updateIndicator.style.display = 'none';
+            }, 2000);
+        }
     }
     
     // Modificar las funciones de carga para mostrar el indicador
@@ -1121,8 +1271,32 @@ document.addEventListener('keypress', function() {
     localStorage.setItem('lastActivity', Date.now());
 });
 
-// Verificar recarga cada 30 minutos
-setInterval(reloadIfNeeded, 30 * 60 * 1000);
+    // Verificar recarga cada 30 minutos
+    setInterval(reloadIfNeeded, 30 * 60 * 1000);
+    
+    // Recarga automática cada 5 minutos para mantener la página actualizada
+    setInterval(() => {
+        console.log('🔄 Recarga automática programada - recargando página...');
+        
+        // Mostrar contador regresivo
+        let countdown = 3;
+        const countdownInterval = setInterval(() => {
+            showUpdateIndicator(`Recargando página en ${countdown}...`);
+            countdown--;
+            
+            if (countdown < 0) {
+                clearInterval(countdownInterval);
+                try {
+                    // Forzar recarga completa desde el servidor (como F5)
+                    window.location.reload(true);
+                } catch (error) {
+                    console.log('Método reload falló, usando location.href...');
+                    // Método alternativo si reload falla
+                    window.location.href = window.location.href;
+                }
+            }
+        }, 1000);
+    }, UPDATE_INTERVALS.PAGE_RELOAD);
 
 // NUEVA FUNCIÓN PARA ACTUALIZAR EL MENÚ SEMANAL
 function updateWeeklyMenu(menuData, currentDay) {
@@ -1243,7 +1417,6 @@ function updateWeeklyMenu(menuData, currentDay) {
                 <div class="menu-day other-day fade-out">
                     <div class="day-header">
                         <h3 class="day-title">ROTACIÓN</h3>
-                        <span class="rotation-indicator">COMPLETA</span>
                     </div>
                     <div class="day-menus" style="justify-content:center;align-items:center;min-height:120px;">
                         <div style="width:100%;text-align:center;color:#aaa;font-size:1.5em;opacity:0.7;">Todos los días mostrados</div>
@@ -1268,7 +1441,6 @@ function updateWeeklyMenu(menuData, currentDay) {
                 <div class="menu-day other-day fade-out">
                     <div class="day-header">
                         <h3 class="day-title">${rotationTitle}</h3>
-                        <span class="rotation-indicator">ROTACIÓN</span>
                     </div>
                     <div class="day-menus">
                         <div class="menu-item general">
@@ -1291,7 +1463,6 @@ function updateWeeklyMenu(menuData, currentDay) {
                 <div class="menu-day other-day fade-out">
                     <div class="day-header">
                         <h3 class="day-title">${rotationTitle}</h3>
-                        <span class="rotation-indicator">ROTACIÓN</span>
                     </div>
                     <div class="day-menus" style="justify-content:center;align-items:center;min-height:120px;">
                         <div style="width:100%;text-align:center;color:#aaa;font-size:1.5em;opacity:0.7;">Sin menú cargado</div>

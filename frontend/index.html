@@ -214,6 +214,73 @@
         document.addEventListener('mouseleave', () => {
             resetCarouselInterval();
         });
+
+        // ===== RECARGA AUTOMÁTICA CADA 5 MINUTOS =====
+        console.log('🔄 Iniciando sistema de recarga automática...');
+        
+        // Crear indicador visual de recarga
+        const reloadIndicator = document.createElement('div');
+        reloadIndicator.id = 'reload-indicator';
+        reloadIndicator.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #dc3545;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 9999;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            display: none;
+            text-align: center;
+        `;
+        document.body.appendChild(reloadIndicator);
+
+        // Función para mostrar el indicador de recarga
+        function showReloadIndicator(message) {
+            reloadIndicator.textContent = message;
+            reloadIndicator.style.display = 'block';
+        }
+
+        // Función para recargar la página
+        function reloadPage() {
+            console.log('🔄 Ejecutando recarga de página...');
+            try {
+                // Forzar recarga completa desde el servidor (como F5)
+                window.location.reload(true);
+            } catch (error) {
+                console.error('Error en reload, usando método alternativo:', error);
+                // Método alternativo si reload falla
+                window.location.href = window.location.href;
+            }
+        }
+
+        // Recarga automática cada 5 minutos (300,000 milisegundos)
+        setInterval(() => {
+            console.log('🔄 Recarga automática programada - iniciando...');
+            
+            // Mostrar contador regresivo
+            let countdown = 3;
+            showReloadIndicator(`Recargando página en ${countdown}...`);
+            
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    showReloadIndicator(`Recargando página en ${countdown}...`);
+                } else {
+                    clearInterval(countdownInterval);
+                    showReloadIndicator('Recargando página...');
+                    
+                    // Pequeño delay antes de recargar
+                    setTimeout(reloadPage, 500);
+                }
+            }, 1000);
+        }, 5 * 60 * 1000); // 5 minutos
+
+        console.log('✅ Sistema de recarga automática configurado - próxima recarga en 5 minutos');
     </script>
 </body>
 </html> 
